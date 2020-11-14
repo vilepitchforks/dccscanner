@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("client/build"));
 
 // Routes
-// app.use("/", require("./api/routes.js"));
+app.use("/api", require("./api/routes.js"));
 
 app.use((req, res, next) => {
   res.status(404);
