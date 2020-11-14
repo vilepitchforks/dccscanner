@@ -1,10 +1,10 @@
 const router = require("express").Router();
 
 // Controller imports
-const { homeController } = require("./src/controllers/home/homeController.js");
+const { scanner } = require("./src/controllers/scanner.controller.js");
 
-// @desc    Home route
+// @desc    Scanner route
 // @route   GET /
-router.get("/", homeController);
+router.get("/scan", scanner);
 
 module.exports = router;

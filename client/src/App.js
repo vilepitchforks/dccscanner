@@ -7,7 +7,7 @@ const App = () => {
       <h1>Ollo</h1>
       <button
         onClick={() =>
-          fetch("/api").then(raw =>
+          fetch("/api/scan").then(raw =>
             raw
               .text()
               .then(res => setResponse(res))
