@@ -10,16 +10,16 @@
     "client": "npm start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "npm run build --prefix client",
-    "vercelbuild": "npm install && npm run build --prefix client"
+    "herokupostbuild": "npm install --prefix client && npm run build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
   "devDependencies": {
     "concurrently": "^5.3.0",
     "nodemon": "^2.0.6"
-  },
-  "dependencies": {
-    "express": "^4.17.1"
   }
 }
