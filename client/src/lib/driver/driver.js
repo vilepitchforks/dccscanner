@@ -1,5 +1,11 @@
-const makeDriver = ({ method, endpoint }) => async ({ email, body }) => {
+const makeDriver = ({ method, endpoint, format }) => async ({
+  email,
+  query,
+  body
+}) => {
   try {
+    endpoint = query ? endpoint + "?" + query : endpoint;
+
     const options = {
       method,
       credentials:
@@ -14,7 +20,7 @@ const makeDriver = ({ method, endpoint }) => async ({ email, body }) => {
 
     const result = await fetch(endpoint, options).then(res => {
       status = res.status;
-      return res.text();
+      return res[format]();
     });
 
     if (status === 200 || status === 201) {
@@ -28,4 +34,14 @@ const makeDriver = ({ method, endpoint }) => async ({ email, body }) => {
   }
 };
 
-export const authDriver = makeDriver({ method: "POST", endpoint: "/api/auth" });
+export const authDriver = makeDriver({
+  method: "POST",
+  endpoint: "/api/auth",
+  format: "text"
+});
+
+export const scanDriver = makeDriver({
+  method: "GET",
+  endpoint: "/api/scan",
+  format: "json"
+});

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 
 import { useCustomContext } from "../../lib/context/context.js";
 import { authDriver } from "../../lib/driver/driver.js";
@@ -15,7 +15,7 @@ const Login = () => {
 
         const auth = await authDriver({ email });
 
-        if (auth) setAuth(true);
+        if (auth) setAuth("yes");
       }}
     >
       <label htmlFor="email">Email: </label>

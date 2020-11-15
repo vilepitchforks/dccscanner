@@ -1,22 +1,64 @@
 const puppeteer = require("puppeteer");
 
-// @desc    Home route
-// @route   GET /
+const { setup } = require("../helpers/setup.js");
+const { getSitemapUrls, chunkify } = require("../helpers/getSitemapUrls.js");
+const { extractDCCs } = require("../helpers/extractDCCs.js");
+const { urlRgx } = require("../helpers/regex.js");
+
+// @desc    Scanner route
+// @route   GET /api/scan
+// {url:"https://www.url.com",categories:"shop,first,second"}
 exports.scanner = async (req, res, next) => {
+  const start = new Date().getTime();
   try {
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
-    });
+    const rawURL = req.query.url;
+    if (!rawURL || !urlRgx.test(rawURL)) throw new Error("ERR_INVALID_URL");
 
-    const page = await browser.newPage();
+    // Get XML Sitemap URL, category and create report name
+    const { url, reportName } = setup(rawURL);
 
-    await page.goto("http://icanhazip.com/");
+    // Parse categories
+    const categories =
+      req.query.categories &&
+      req.query.categories.length &&
+      req.query.categories.length < 50 &&
+      req.query.categories.split(",");
+    if (!categories) throw new Error("ERR_CATEGORY_REQUIRED");
 
-    const result = await page.evaluate(() => document.body.innerText);
+    // Get product URLs
+    const urls = await getSitemapUrls(url, categories, start);
+    const urlChunks = chunkify(urls);
 
-    res.send(result);
+    // Create data for report
+    const spreadsheet = [];
+    for (let i = 0; i < urlChunks.length; i++) {
+      const isChunk = urlChunks[i].length === 10;
+      const startUrlNo = isChunk
+        ? urlChunks[i].length * i
+        : urls.length - urlChunks[urlChunks.length - 1].length;
+      const endUrlNo = isChunk
+        ? urlChunks[i].length * i + urlChunks[i].length
+        : urls.length;
+
+      console.log(
+        `Scanning URLs from ${startUrlNo} to ${endUrlNo} of ${urls.length} URLs total.`
+      );
+      const spreadsheetChunk = await extractDCCs(urlChunks[i], start);
+      spreadsheet.push(...spreadsheetChunk);
+    }
+
+    // // Create report file
+    // createXlsx(spreadsheet, reportName);
+
+    console.log(
+      "Report creation completed. Time elapsed: ",
+      (new Date().getTime() - start) / 1000,
+      "s"
+    );
+
+    res.json(spreadsheet);
   } catch (error) {
+    res.status(422);
     console.warn(error);
     next(error);
   }

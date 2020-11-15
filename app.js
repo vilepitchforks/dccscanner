@@ -14,6 +14,9 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("combined"));
 }
 
+// Middleware imports
+const { authUser } = require("./api//src/lib/checkUserInfo.js");
+
 // Handlers
 const { notFound, errorHandler } = require("./api/src/lib/errorHandlers.js");
 
@@ -21,7 +24,7 @@ const { notFound, errorHandler } = require("./api/src/lib/errorHandlers.js");
 app.use(express.static("client/build"));
 
 // Routes
-app.use("/api", require("./api/routes.js"));
+app.use("/api", authUser, require("./api/routes.js"));
 
 // Handlers
 app.use(notFound);
