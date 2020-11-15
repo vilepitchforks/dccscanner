@@ -4,6 +4,8 @@ import { scanDriver } from "../../lib/driver/driver.js";
 
 import { urlRgx } from "../../lib/helpers/regex.js";
 
+import Slug from "../Slug/Slug.js";
+
 const Scan = () => {
   const [url, setUrl] = useState("");
   const [category, setCategory] = useState("");
@@ -49,27 +51,25 @@ const Scan = () => {
     <>
       <h1>URL:</h1>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="url"
-          value={url}
-          onInput={e => setUrl(e.target.value)}
-        />
-        <input
-          type="text"
-          name="category"
-          value={category}
-          onInput={e => setCategory(e.target.value)}
+        <input type="text" name="url" onBlur={e => setUrl(e.target.value)} />
+        <Slug
+          url={url}
+          category={category}
+          setCategory={setCategory}
+          setErr={setErr}
         />
         <input
           type="button"
           name="add-category"
           value="Add Categories"
           onClick={() => {
-            setCategories(ctg => [...ctg, category]);
-            setCategory("");
+            if (category.length) {
+              setCategories(ctg => [...ctg, category]);
+              setCategory("");
+            }
           }}
         />
+
         <input type="submit" name="submit" value="Submit" />
       </form>
       {err && <p>{err}</p>}

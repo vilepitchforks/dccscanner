@@ -7,7 +7,7 @@ const { urlRgx } = require("../helpers/regex.js");
 
 // @desc    Scanner route
 // @route   GET /api/scan
-// {url:"https://www.url.com",categories:"shop,first,second"}
+// ?url=https://www.url.com&categories=shop,first,second
 exports.scanner = async (req, res, next) => {
   const start = new Date().getTime();
   try {

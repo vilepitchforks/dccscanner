@@ -4,6 +4,8 @@ const makeDriver = ({ method, endpoint, format }) => async ({
   body
 }) => {
   try {
+    // Reset repeated additions of query to endpoint
+    endpoint = endpoint.split("?")[0];
     endpoint = query ? endpoint + "?" + query : endpoint;
 
     const options = {
@@ -43,5 +45,11 @@ export const authDriver = makeDriver({
 export const scanDriver = makeDriver({
   method: "GET",
   endpoint: "/api/scan",
+  format: "json"
+});
+
+export const slugDriver = makeDriver({
+  method: "GET",
+  endpoint: "/api/slug",
   format: "json"
 });

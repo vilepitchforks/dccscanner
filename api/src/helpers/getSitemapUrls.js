@@ -1,6 +1,8 @@
 const axios = require("axios");
 const xmlParser = require("xml2js").parseStringPromise;
 
+const { setup } = require("./setup.js");
+
 exports.getSitemapUrls = async (url, categories, start) => {
   try {
     console.log("Fetching XML Sitemap...");
@@ -37,6 +39,44 @@ exports.getSitemapUrls = async (url, categories, start) => {
     console.warn("Error fetching URLs: ", error);
     return false;
   }
+};
+
+const getAllSitemapUrls = async rawUrl => {
+  try {
+    const { url } = setup(rawUrl);
+
+    const { data } = await axios(url);
+
+    // Parse XML to JSON, structure: urlset.url[0].loc[0] is https://herbalessences.com/en-us/
+    const { urlset } = await xmlParser(data);
+
+    const urls = urlset.url.map(url => url.loc[0]);
+
+    return urls;
+  } catch (error) {
+    console.warn("Error fetching URLs: ", error);
+    return false;
+  }
+};
+
+exports.getSlugs = async rawUrl => {
+  let { url } = setup(rawUrl);
+
+  url = url.replace("/sitemap.xml", "");
+
+  const urls = await getAllSitemapUrls(rawUrl);
+
+  if (!urls) return false;
+
+  const slugChunks = urls.map(link => {
+    link = link.replace(url, "");
+    return link.split("/");
+  });
+
+  const slugs = new Set(slugChunks.flat());
+  return Array.from(slugs)
+    .filter(slug => slug.length)
+    .sort((a, b) => a.length - b.length);
 };
 
 exports.chunkify = urls => {
