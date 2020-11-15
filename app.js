@@ -1,11 +1,21 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+require("dotenv").config();
 
 const app = express();
 
-// Middleware imports
+// Middlewares
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+if (process.env.NODE_ENV === "development") {
+  const morgan = require("morgan");
+  app.use(morgan("combined"));
+}
+
+// Handlers
+const { notFound, errorHandler } = require("./api/src/lib/errorHandlers.js");
 
 // Static folder
 app.use(express.static("client/build"));
@@ -13,23 +23,9 @@ app.use(express.static("client/build"));
 // Routes
 app.use("/api", require("./api/routes.js"));
 
-app.use((req, res, next) => {
-  res.status(404);
-  const error = {
-    message: "Not found: " + req.originalUrl
-  };
-  next(error);
-});
-
-app.use((error, req, res, next) => {
-  res.statusCode === 200 && res.status(500);
-  const payload = {
-    message: error.message,
-    status: res.statusCode
-  };
-  if (Object.keys(error).length) payload.error = error.errors;
-  res.json(payload);
-});
+// Handlers
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 

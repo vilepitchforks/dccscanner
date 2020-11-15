@@ -1,25 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
+
+import { useCustomContext } from "./lib/context/context.js";
+
+import Login from "./components/Login/Login.js";
+import Ollo from "./components/Ollo/Ollo.js";
 
 const App = () => {
-  const [response, setResponse] = useState("");
-  return (
-    <>
-      <h1>Ollo</h1>
-      <button
-        onClick={() =>
-          fetch("/api/scan").then(raw =>
-            raw
-              .text()
-              .then(res => setResponse(res))
-              .catch(err => setResponse(err))
-          )
-        }
-      >
-        say whaaat
-      </button>
-      <p>{response}</p>
-    </>
-  );
+  const { auth } = useCustomContext();
+
+  if (auth === "yes") {
+    return <Ollo />;
+  } else if (auth === "no") {
+    return <Login />;
+  } else {
+    return <p>Loading...</p>;
+  }
 };
 
 export default App;

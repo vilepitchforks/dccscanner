@@ -1,0 +1,23 @@
+import React, { useState } from "react";
+///aaa
+const Ollo = () => {
+  const [response, setResponse] = useState("");
+  return (
+    <>
+      <h1>Ollo</h1>
+      <button
+        onClick={() =>
+          fetch("/api/scan")
+            .then(raw => raw.text())
+            .then(res => setResponse(res))
+            .catch(err => setResponse(err))
+        }
+      >
+        say whaaat
+      </button>
+      <p>{response}</p>
+    </>
+  );
+};
+
+export default Ollo;
