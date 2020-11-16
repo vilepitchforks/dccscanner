@@ -63,3 +63,36 @@ exports.scanner = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Scan streamer route
+// @route   GET /api/stream
+// ?url=https://www.url.com&categories=shop,first,second
+exports.scanStreamer = async (req, res, next) => {
+  res.status(200).set({
+    "content-type": "text/event-stream",
+    "cache-control": "no-cache",
+    connection: "keep-alive"
+  });
+
+  res.write("data: Hello, world!");
+  res.write("\n\n");
+
+  setTimeout(() => {
+    res.write("data: Slow, world!");
+    res.write("\n\n");
+  }, 1000);
+
+  setTimeout(() => {
+    res.write("data: Sloooow, world!");
+    res.write("\n\n");
+  }, 2000);
+
+  res.write("event: customevent\n");
+  res.write(`data: ${JSON.stringify({ username: req.user })}`);
+  res.write("\n\n");
+  // res.end();
+  req.on("close", () => {
+    console.log("Connection to client closed.");
+    res.end();
+  });
+};

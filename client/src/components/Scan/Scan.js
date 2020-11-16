@@ -5,6 +5,7 @@ import { scanDriver } from "../../lib/driver/driver.js";
 import { urlRgx } from "../../lib/helpers/regex.js";
 
 import Slug from "../Slug/Slug.js";
+import Stream from "../Stream/Stream.js";
 
 const Scan = () => {
   const [url, setUrl] = useState("");
@@ -83,6 +84,7 @@ const Scan = () => {
           )
         )}
       </div>
+      <Stream />
       <table>
         <thead>
           <tr>

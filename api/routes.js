@@ -2,7 +2,10 @@ const router = require("express").Router();
 
 // Controller imports
 const { auth } = require("./src/controllers/auth.controller.js");
-const { scanner } = require("./src/controllers/scanner.controller.js");
+const {
+  scanner,
+  scanStreamer
+} = require("./src/controllers/scanner.controller.js");
 const { slug } = require("./src/controllers/slug.controller.js");
 
 // @desc    Auth user
@@ -12,6 +15,10 @@ router.post("/auth", auth);
 // @desc    Scanner route
 // @route   GET /api/scan
 router.get("/scan", scanner);
+
+// @desc    Scan streamer route
+// @route   GET /api/stream
+router.get("/stream", scanStreamer);
 
 // @desc    Get Slugs route
 // @route   GET /api/slug
