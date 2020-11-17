@@ -1,8 +1,12 @@
 const puppeteer = require("puppeteer");
 
+const { events } = require("../events/EventsLibrary");
+
 exports.extractDCCs = async (urls, start) => {
   try {
     console.log("Preparing browser session...");
+    events.emit("info", "info", "Preparing browser session...");
+
     const browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
@@ -17,6 +21,11 @@ exports.extractDCCs = async (urls, start) => {
       "Browser session prepared. Time elapsed: ",
       (new Date().getTime() - start) / 1000,
       "s"
+    );
+    events.emit(
+      "info",
+      "info",
+      "Browser session prepared.\nFetching product pages...\nNOTE: This might take up to 10 minutes"
     );
     console.log(
       "Fetching product pages...\nNOTE: This might take up to 10 minutes, depending on the weight of selected pages, connection speed and available resources."
@@ -36,6 +45,11 @@ exports.extractDCCs = async (urls, start) => {
       "s"
     );
     console.log("Extracting bvDCC objects...");
+    events.emit(
+      "info",
+      "info",
+      "Product pages fetched.\nExtracting bvDCC objects..."
+    );
 
     // Create window object handles for each product page
     const windowHandles = await Promise.all(
@@ -57,6 +71,7 @@ exports.extractDCCs = async (urls, start) => {
       (new Date().getTime() - start) / 1000,
       "s"
     );
+    events.emit("info", "info", "bvDCC objects extracted.");
 
     await browser.close();
 
@@ -80,12 +95,17 @@ exports.extractDCCs = async (urls, start) => {
           bvDCC.upcs = bvDCC.upcs.join();
         if (bvDCC.hasOwnProperty("eans") && Array.isArray(bvDCC.eans))
           bvDCC.eans = bvDCC.eans.join();
+
+        // Emit each bvDCC to client
+        events.emit("body", "body", bvDCC);
+
         return bvDCC;
       });
 
     return spreadsheet;
   } catch (error) {
     console.warn("bvScanner error occurred: ", error);
+    events.emit("servererror", "servererror", error.message);
     return false;
   }
 };

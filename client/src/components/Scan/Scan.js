@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
-import { scanDriver } from "../../lib/driver/driver.js";
+// import { scanDriver } from "../../lib/driver/driver.js";
 
-import { urlRgx } from "../../lib/helpers/regex.js";
+// import { urlRgx } from "../../lib/helpers/regex.js";
 
 import Slug from "../Slug/Slug.js";
 import Stream from "../Stream/Stream.js";
@@ -11,47 +11,47 @@ const Scan = () => {
   const [url, setUrl] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]);
-  const [response, setResponse] = useState([]);
+  // const [response, setResponse] = useState([]);
   const [err, setErr] = useState("");
 
-  let query = "";
+  // let query = `url=${url}&categories=${categories.join()}`;
 
   const clearInputs = () => {
     setUrl("");
     setCategory("");
     setCategories([]);
-    query = "";
+    // query = "";
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setErr("");
-    try {
-      query = `url=${url}&categories=${categories.join()}`;
+  // const handleSubmit = async e => {
+  //   e.preventDefault();
+  //   setErr("");
+  //   try {
+  //     if (!urlRgx.test(url)) throw new Error(`Invalid URL: ${url}`);
+  //     if (!categories.length) throw new Error("Add at least one category.");
 
-      if (!urlRgx.test(url)) throw new Error(`Invalid URL: ${url}`);
-      if (!categories.length) throw new Error("Add at least one category.");
+  //     query = `url=${url}&categories=${categories.join()}`;
 
-      const rs = await scanDriver({ query });
+  //     const rs = await scanDriver({ query });
 
-      if (typeof rs !== "undefined" && rs.length) {
-        setResponse(rs);
-        clearInputs();
-      } else {
-        clearInputs();
-        throw new Error("No results.");
-      }
-    } catch (error) {
-      console.warn(error);
-      setErr(error.message);
-      clearInputs();
-    }
-  };
+  //     if (typeof rs !== "undefined" && rs.length) {
+  //       setResponse(rs);
+  //       clearInputs();
+  //     } else {
+  //       clearInputs();
+  //       throw new Error("No results.");
+  //     }
+  //   } catch (error) {
+  //     console.warn(error);
+  //     setErr(error.message);
+  //     clearInputs();
+  //   }
+  // };
 
   return (
     <>
       <h1>URL:</h1>
-      <form onSubmit={handleSubmit}>
+      <form>
         <input type="text" name="url" onBlur={e => setUrl(e.target.value)} />
         <Slug
           url={url}
@@ -70,8 +70,6 @@ const Scan = () => {
             }
           }}
         />
-
-        <input type="submit" name="submit" value="Submit" />
       </form>
       {err && <p>{err}</p>}
       <h4>Categories:</h4>
@@ -84,32 +82,12 @@ const Scan = () => {
           )
         )}
       </div>
-      <Stream />
-      <table>
-        <thead>
-          <tr>
-            {response[0] &&
-              Object.keys(response[0]).map((res, i) => (
-                <th key={i} scope="col">
-                  {res}
-                </th>
-              ))}
-          </tr>
-        </thead>
-        <tbody>
-          {response.length
-            ? response.map((res, i) => {
-                return (
-                  <tr key={i}>
-                    {Object.values(res).map((val, i) => (
-                      <td key={i}>{`${val}`}</td>
-                    ))}
-                  </tr>
-                );
-              })
-            : undefined}
-        </tbody>
-      </table>
+      <Stream
+        url={url}
+        categories={categories}
+        setErr={setErr}
+        clearInputs={clearInputs}
+      />
     </>
   );
 };

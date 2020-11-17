@@ -3,9 +3,13 @@ const xmlParser = require("xml2js").parseStringPromise;
 
 const { setup } = require("./setup.js");
 
+const { events } = require("../events/EventsLibrary");
+
 exports.getSitemapUrls = async (url, categories, start) => {
   try {
-    console.log("Fetching XML Sitemap...");
+    console.log(`Fetching ${getRootUrl(url)} XML Sitemap...`);
+    events.emit("info", "info", `Fetching ${getRootUrl(url)} XML Sitemap...`);
+
     // Fetch XML Sitemap
     const { data } = await axios(url);
 
@@ -14,7 +18,11 @@ exports.getSitemapUrls = async (url, categories, start) => {
       (new Date().getTime() - start) / 1000,
       "s"
     );
+    events.emit("info", "info", "XML Sitemap fetched.");
+
     console.log("Parsing Product URLs...");
+    events.emit("info", "info", "Parsing Product URLs...");
+
     // Parse XML to JSON, structure: urlset.url[0].loc[0] is https://herbalessences.com/en-us/
     const { urlset } = await xmlParser(data);
 
@@ -32,6 +40,11 @@ exports.getSitemapUrls = async (url, categories, start) => {
       `Product URLs parsed. ${urls.length} related URLs found. Time elapsed: `,
       (new Date().getTime() - start) / 1000,
       "s"
+    );
+    events.emit(
+      "info",
+      "info",
+      `Product URLs parsed. ${urls.length} related URLs found.`
     );
 
     return urls;
@@ -85,3 +98,6 @@ exports.chunkify = urls => {
     return urls.slice(start, start + 10);
   });
 };
+
+const getRootUrl = url =>
+  url.replace(/http(|s)\:\/\//, "").replace(/\/sitemap.xml/, "");
