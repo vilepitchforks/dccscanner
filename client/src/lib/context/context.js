@@ -4,7 +4,7 @@ import { authDriver } from "../../lib/driver/driver.js";
 
 const Context = React.createContext();
 
-export const useCustomContext = () => useContext(Context);
+export const useAuthContext = () => useContext(Context);
 
 const ContextProvider = ({ children }) => {
   const [auth, setAuth] = useState("");

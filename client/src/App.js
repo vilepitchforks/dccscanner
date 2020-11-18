@@ -1,12 +1,12 @@
 import React from "react";
 
-import { useCustomContext } from "./lib/context/context.js";
+import { useAuthContext } from "./lib/context/context.js";
 
 import Login from "./components/Login/Login.js";
 import Scan from "./components/Scan/Scan.js";
 
 const App = () => {
-  const { auth } = useCustomContext();
+  const { auth } = useAuthContext();
 
   if (auth === "yes") {
     return <Scan />;

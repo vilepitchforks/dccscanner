@@ -10,7 +10,11 @@ exports.extractDCCs = async (urls, start) => {
     const browser = await puppeteer.launch({
       headless: true,
       devtools: false,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage"
+      ]
     });
 
     console.log(

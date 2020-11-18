@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 
-import { useCustomContext } from "../../lib/context/context.js";
+import { useAuthContext } from "../../lib/context/context.js";
 import { authDriver } from "../../lib/driver/driver.js";
 
 const Login = () => {
   const [email, setEmail] = useState("");
 
-  const { setAuth } = useCustomContext();
+  const { setAuth } = useAuthContext();
 
   return (
     <form
