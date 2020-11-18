@@ -19,7 +19,9 @@ exports.slug = async (req, res, next) => {
     res.json(slugs);
   } catch (error) {
     res.status(422);
-    console.warn(error);
+    error.isAxiosError
+      ? console.warn(error.toJSON())
+      : console.warn(error.message);
     next(error);
   }
 };

@@ -23,33 +23,33 @@ exports.getSitemapUrls = async (url, categories, start) => {
     console.log("Parsing Product URLs...");
     events.emit("info", "info", "Parsing Product URLs...");
 
-    // Parse XML to JSON, structure: urlset.url[0].loc[0] is https://herbalessences.com/en-us/
+    // Parse XML to JSON, structure: urlset.url[0].loc[0] is https://www.website.com/en-us/
     const { urlset } = await xmlParser(data);
 
     const urls = [];
     urlset.url.forEach(url => {
-      let categoryCheck;
       categories.forEach(ctg => {
         const ctgRgx = new RegExp(ctg);
-        if (ctgRgx.test(url.loc[0])) categoryCheck = true;
+        // Test for provided products categories keywords and extract category and product pages
+        if (ctgRgx.test(url.loc[0])) urls.push(url.loc[0]);
       });
-      // Test for provided products categories keywords and extract category and product pages
-      if (categoryCheck) urls.push(url.loc[0]);
     });
+
     console.log(
-      `Product URLs parsed. ${urls.length} related URLs found. Time elapsed: `,
+      `URLs parsed. ${urls.length} related URLs found. Time elapsed: `,
       (new Date().getTime() - start) / 1000,
       "s"
     );
     events.emit(
       "info",
       "info",
-      `Product URLs parsed. ${urls.length} related URLs found.`
+      `URLs parsed. ${urls.length} related URLs found.`
     );
 
     return urls;
   } catch (error) {
     console.warn("Error fetching URLs: ", error);
+    events.emit("servererror", "servererror", error.message);
     return false;
   }
 };

@@ -9,13 +9,9 @@ exports.extractDCCs = async (urls, start) => {
 
     const browser = await puppeteer.launch({
       headless: true,
+      devtools: false,
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
-
-    // Create a new tab for each product page in urls array
-    const pages = await Promise.all(
-      Array.from({ length: urls.length }, (_, i) => browser.newPage())
-    );
 
     console.log(
       "Browser session prepared. Time elapsed: ",
@@ -25,84 +21,97 @@ exports.extractDCCs = async (urls, start) => {
     events.emit(
       "info",
       "info",
-      "Browser session prepared.\nFetching product pages...\nNOTE: This might take up to 10 minutes"
+      "Browser session prepared.\nFetching product pages...\nNOTE: This might take some time."
     );
     console.log(
       "Fetching product pages...\nNOTE: This might take up to 10 minutes, depending on the weight of selected pages, connection speed and available resources."
     );
 
-    // Open each url from urls array in each new created tab
-    await Promise.all(
-      pages.map((page, i) => {
-        page.setDefaultNavigationTimeout(600000);
-        return page.goto(urls[i]);
-      })
-    );
+    // Create a new tab
+    const page = await browser.newPage();
 
-    console.log(
-      "Product pages fetched. Time elapsed: ",
-      (new Date().getTime() - start) / 1000,
-      "s"
-    );
-    console.log("Extracting bvDCC objects...");
-    events.emit(
-      "info",
-      "info",
-      "Product pages fetched.\nExtracting bvDCC objects..."
-    );
+    // Iterate over passed URLs and create bvDCC data
+    const bvDCCs = [];
+    for (let i = 0; i < urls.length; i++) {
+      console.log(`Scanning URL ${i + 1} of ${urls.length} URLs total.`);
+      events.emit(
+        "info",
+        "info",
+        `Scanning URL ${i + 1} of ${urls.length} URLs total.`
+      );
 
-    // Create window object handles for each product page
-    const windowHandles = await Promise.all(
-      pages.map(page => page.evaluateHandle(() => window))
-    );
+      // Open each url from urls array in a new created tab
+      // await page.setDefaultNavigationTimeout(600000);
+      await page.goto(urls[i], {
+        waitUntil: "networkidle2"
+      });
 
-    // Extract bvDCC object from each window handle
-    const rawBvDCCs = await Promise.all(
-      windowHandles.map(windowHandle => windowHandle.getProperty("bvDCC"))
-    );
+      console.log(
+        "Page fetched. Time elapsed: ",
+        (new Date().getTime() - start) / 1000,
+        "s"
+      );
+      console.log("Extracting bvDCC object...");
+      events.emit(
+        "info",
+        "info",
+        "Page fetched.\nAttempting to extract bvDCC object..."
+      );
 
-    // Transform raw bvDCC objects to JSON
-    const bvDCCs = await Promise.all(
-      rawBvDCCs.map(rawBvDCC => rawBvDCC.jsonValue())
-    );
+      // Create window object handle for page
+      const windowHandle = await page.evaluateHandle(() => window);
 
-    console.log(
-      "bvDCC objects extracted. Time elapsed: ",
-      (new Date().getTime() - start) / 1000,
-      "s"
-    );
-    events.emit("info", "info", "bvDCC objects extracted.");
+      // Extract bvDCC object from  window handle
+      const rawBvDCC = await windowHandle.getProperty("bvDCC");
+
+      // Transform raw bvDCC objects to JSON
+      let bvDCC = await rawBvDCC.jsonValue();
+
+      console.log(
+        `bvDCC object extract attempt: ${
+          bvDCC ? "SUCCESS" : "FAIL"
+        }. Time elapsed: `,
+        (new Date().getTime() - start) / 1000,
+        "s"
+      );
+
+      events.emit(
+        "info",
+        "info",
+        `bvDCC object extract attempt: ${bvDCC ? "SUCCESS" : "FAIL"}.`
+      );
+
+      // Initialize bvDCC to empty object if bvDCC is not found on the scanned page
+      bvDCC = bvDCC || {};
+
+      // Add scanned URL to bvDCC object placeholder
+      bvDCC.scannedUrl = urls[i];
+
+      // Flatten nested bvDCC object attributes
+      bvDCC = bvDCC.catalogData
+        ? {
+            scannedUrl: bvDCC.scannedUrl,
+            locale: bvDCC.catalogData.locale,
+            ...bvDCC.catalogData.catalogProducts[0]
+          }
+        : { ...bvDCC };
+
+      // Join upcs and eans arrays to string
+      if (bvDCC.hasOwnProperty("upcs") && Array.isArray(bvDCC.upcs))
+        bvDCC.upcs = bvDCC.upcs.join();
+      if (bvDCC.hasOwnProperty("eans") && Array.isArray(bvDCC.eans))
+        bvDCC.eans = bvDCC.eans.join();
+
+      // Emit each bvDCC to client
+      events.emit("body", "body", bvDCC);
+
+      // Store bvDCC JSON object for xlsx report
+      bvDCCs.push(bvDCC);
+    }
 
     await browser.close();
 
-    //   Create JSON object for xlsx
-    const spreadsheet = bvDCCs
-      .filter((bvDCC, i) => {
-        if (bvDCC) {
-          bvDCC.scannedUrl = urls[i];
-          return bvDCC;
-        }
-      })
-      .map(bvDCC => {
-        return {
-          scannedUrl: bvDCC.scannedUrl,
-          locale: bvDCC.catalogData.locale,
-          ...bvDCC.catalogData.catalogProducts[0]
-        };
-      })
-      .map(bvDCC => {
-        if (bvDCC.hasOwnProperty("upcs") && Array.isArray(bvDCC.upcs))
-          bvDCC.upcs = bvDCC.upcs.join();
-        if (bvDCC.hasOwnProperty("eans") && Array.isArray(bvDCC.eans))
-          bvDCC.eans = bvDCC.eans.join();
-
-        // Emit each bvDCC to client
-        events.emit("body", "body", bvDCC);
-
-        return bvDCC;
-      });
-
-    return spreadsheet;
+    return bvDCCs;
   } catch (error) {
     console.warn("bvScanner error occurred: ", error);
     events.emit("servererror", "servererror", error.message);

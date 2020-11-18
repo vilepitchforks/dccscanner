@@ -68,10 +68,6 @@ exports.scanner = async (req, res, next) => {
 // @route   GET /api/stream
 // ?url=https://www.url.com&categories=shop,first,second
 exports.scanStreamer = async (req, res, next) => {
-  // events.emit("body", "body", {
-  //   message: "Scan process started second note."
-  // });
-
   const start = new Date().getTime();
   events.emit("info", "info", "Scan process started.");
 
@@ -79,44 +75,24 @@ exports.scanStreamer = async (req, res, next) => {
     const rawURL = req.query.url;
     if (!rawURL || !urlRgx.test(rawURL)) throw new Error("ERR_INVALID_URL");
 
-    // Get XML Sitemap URL, category and create report name
+    // Get XML Sitemap URL and create report name
     const { url, reportName } = setup(rawURL);
 
     // Parse categories
-    const categories =
-      req.query.categories &&
-      req.query.categories.length &&
-      req.query.categories.length < 50 &&
-      req.query.categories.split(",");
-    if (!categories) throw new Error("ERR_CATEGORY_REQUIRED");
-
+    let { categories } = req.query;
+    categories =
+      categories &&
+      categories.length &&
+      categories.length < 50 &&
+      categories.split(",").map(ctg => ctg.trim());
+    if (!categories) throw new Error("ERR_CATEGORY_MISSING_OR_INVALID");
+    console.log("categories", categories);
     // Get product URLs
     const urls = await getSitemapUrls(url, categories, start);
-    const urlChunks = chunkify(urls);
+    // const urlChunks = chunkify(urls);
 
     // Create data for report
-    const spreadsheet = [];
-    for (let i = 0; i < urlChunks.length; i++) {
-      const isChunk = urlChunks[i].length === 10;
-      const startUrlNo = isChunk
-        ? urlChunks[i].length * i
-        : urls.length - urlChunks[urlChunks.length - 1].length;
-      const endUrlNo = isChunk
-        ? urlChunks[i].length * i + urlChunks[i].length
-        : urls.length;
-
-      console.log(
-        `Scanning URLs from ${startUrlNo} to ${endUrlNo} of ${urls.length} URLs total.`
-      );
-      events.emit(
-        "info",
-        "info",
-        `Scanning URLs from ${startUrlNo} to ${endUrlNo} of ${urls.length} URLs total.`
-      );
-
-      const spreadsheetChunk = await extractDCCs(urlChunks[i], start);
-      spreadsheet.push(...spreadsheetChunk);
-    }
+    const spreadsheet = await extractDCCs(urls, start);
 
     // // Create report file
     // createXlsx(spreadsheet, reportName);

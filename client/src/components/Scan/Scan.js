@@ -1,9 +1,5 @@
 import React, { useState } from "react";
 
-// import { scanDriver } from "../../lib/driver/driver.js";
-
-// import { urlRgx } from "../../lib/helpers/regex.js";
-
 import Slug from "../Slug/Slug.js";
 import Stream from "../Stream/Stream.js";
 
@@ -11,7 +7,6 @@ const Scan = () => {
   const [url, setUrl] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]);
-  // const [response, setResponse] = useState([]);
   const [err, setErr] = useState("");
 
   // let query = `url=${url}&categories=${categories.join()}`;
@@ -20,33 +15,7 @@ const Scan = () => {
     setUrl("");
     setCategory("");
     setCategories([]);
-    // query = "";
   };
-
-  // const handleSubmit = async e => {
-  //   e.preventDefault();
-  //   setErr("");
-  //   try {
-  //     if (!urlRgx.test(url)) throw new Error(`Invalid URL: ${url}`);
-  //     if (!categories.length) throw new Error("Add at least one category.");
-
-  //     query = `url=${url}&categories=${categories.join()}`;
-
-  //     const rs = await scanDriver({ query });
-
-  //     if (typeof rs !== "undefined" && rs.length) {
-  //       setResponse(rs);
-  //       clearInputs();
-  //     } else {
-  //       clearInputs();
-  //       throw new Error("No results.");
-  //     }
-  //   } catch (error) {
-  //     console.warn(error);
-  //     setErr(error.message);
-  //     clearInputs();
-  //   }
-  // };
 
   return (
     <>
