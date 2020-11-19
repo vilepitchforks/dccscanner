@@ -4,6 +4,7 @@ import { useAuthContext } from "./lib/context/context.js";
 
 import Login from "./components/Login/Login.js";
 import Scan from "./components/Scan/Scan.js";
+import Spnr from "./components/Spinner/Spinner.js";
 
 const App = () => {
   const { auth } = useAuthContext();
@@ -13,7 +14,7 @@ const App = () => {
   } else if (auth === "no") {
     return <Login />;
   } else {
-    return <p>Loading...</p>;
+    return <Spnr />;
   }
 };
 
