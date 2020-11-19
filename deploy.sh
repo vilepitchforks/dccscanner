@@ -1,13 +1,13 @@
 #! /bin/bash
 
-# npm run build-client
+npm run build-client
 
-echo "Add commit message in format \"Commit message\": " 
+echo -n "Add commit message: " 
 
 read commitmessage
-echo $commitmessage
+
 git add .
 git commit -m "$commitmessage"
-# git push -u github master
+git push -u github master
 
 
