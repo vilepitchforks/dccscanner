@@ -4,15 +4,15 @@ import ReactDOM from "react-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 
-import ContextProvider from "./lib/context/context.js";
+import AuthContextProvider from "./lib/context/authCcontext.js";
 
 import App from "./App";
 
 ReactDOM.render(
-  <ContextProvider>
+  <AuthContextProvider>
     <React.StrictMode>
       <App />
     </React.StrictMode>
-  </ContextProvider>,
+  </AuthContextProvider>,
   document.getElementById("root")
 );

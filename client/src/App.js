@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { useAuthContext } from "./lib/context/context.js";
+import { useAuthContext } from "./lib/context/authCcontext.js";
 
 import Routes from "./Router";
 

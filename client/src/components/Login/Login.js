@@ -7,7 +7,7 @@ import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
 import Button from "react-bootstrap/Button";
 
-import { useAuthContext } from "../../lib/context/context.js";
+import { useAuthContext } from "../../lib/context/authCcontext.js";
 import { authDriver } from "../../lib/driver/driver.js";
 
 const Login = () => {

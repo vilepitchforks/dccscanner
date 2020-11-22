@@ -9,7 +9,7 @@
 /coverage
 
 # production
-/build
+# /build - commented out since /build folder is used for deployment with Docker image
 
 # misc
 .DS_Store
