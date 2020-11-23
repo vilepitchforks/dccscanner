@@ -9,7 +9,8 @@ const app = express();
 if (process.env.NODE_ENV === "production")
   app.get("/", (req, res, next) => {
     if (req.protocol === "http") {
-      res.redirect("https://" + req.get("host") + req.originalUrl);
+      // res.redirect("https://" + req.get("host") + req.originalUrl);
+      console.log("req.protocol: ", req.protocol);
     } else {
       next();
     }
