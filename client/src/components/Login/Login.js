@@ -8,7 +8,7 @@ import FormControl from "react-bootstrap/FormControl";
 import Button from "react-bootstrap/Button";
 
 import { useAuthContext } from "../../lib/context/authCcontext.js";
-import { authDriver } from "../../lib/driver/driver.js";
+import { authDriver } from "../../lib/drivers/restDrivers.js";
 
 const Login = () => {
   const [email, setEmail] = useState("");

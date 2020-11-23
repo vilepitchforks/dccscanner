@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 
-import { slugDriver } from "../driver/driver.js";
+import { slugDriver } from "../drivers/restDrivers.js";
 
 import { urlRgx } from "../helpers/regex.js";
 
@@ -12,7 +12,7 @@ const ScanURLContextProvider = ({ children }) => {
   const [domain, setDomain] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]);
-  const [err, setErr] = useState(false);
+  const [err, setErr] = useState("");
 
   const [slugs, setSlugs] = useState([]);
   const [metadata, setMetadata] = useState({});
@@ -21,7 +21,7 @@ const ScanURLContextProvider = ({ children }) => {
   const query = `url=${domain}`;
 
   const getURLInfo = async () => {
-    setErr(false);
+    setErr("");
     setLoading(true);
     try {
       if (urlRgx.test(domain)) {
@@ -29,15 +29,15 @@ const ScanURLContextProvider = ({ children }) => {
         res.slugs && setSlugs(res.slugs);
         res.metadata && setMetadata(res.metadata);
         setLoading(false);
-        setDomain("");
       } else {
-        setErr(true);
+        setErr("Invalid URL.");
         setLoading(false);
         setDomain("");
       }
     } catch (error) {
+      console.log("error.message", error.message);
       console.warn(error);
-      setErr(true);
+      setErr(error.message);
       setLoading(false);
       setDomain("");
     }

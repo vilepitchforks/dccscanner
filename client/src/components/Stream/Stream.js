@@ -1,8 +1,18 @@
 import React, { useState } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
+import Button from "@material-ui/core/Button";
+
+import { useStyles } from "../../layouts/Default.js";
+
+import { useScanURLContext } from "../../lib/context/scanURLContext.js";
 
 import { urlRgx } from "../../lib/helpers/regex.js";
 
-const Stream = ({ url, categories, setErr, clearInputs }) => {
+const Stream = () => {
+  const { domain, setDomain, categories, setErr } = useScanURLContext();
+
   const [open, setOpen] = useState("");
   const [time, setTime] = useState(0);
   const [timePassed, setTimePassed] = useState(0);
@@ -55,16 +65,16 @@ const Stream = ({ url, categories, setErr, clearInputs }) => {
   const handleSubmit = async e => {
     setErr("");
     try {
-      if (!urlRgx.test(url)) throw new Error(`Invalid URL: ${url}`);
+      if (!urlRgx.test(domain)) throw new Error(`Invalid URL: ${domain}`);
       if (!categories.length) throw new Error("Add at least one category.");
 
-      query = `url=${url}&categories=${categories.join()}`;
+      query = `url=${domain}&categories=${categories.join()}`;
 
       startStream();
     } catch (error) {
       console.warn(error);
       setErr(error.message);
-      clearInputs();
+      setDomain("");
     }
   };
 
@@ -72,60 +82,70 @@ const Stream = ({ url, categories, setErr, clearInputs }) => {
     es && es.close();
   };
 
+  // Global classes
+  const classes = useStyles();
+
   return (
-    <>
-      <input type="button" value="Start" onClick={() => handleSubmit()} />
-      <input type="button" value="Abort" onClick={() => handleAbort()} />
-
-      <div>
-        {open && (
-          <p>
-            {open} | Time passed: {new Date().getTime() - time}
-          </p>
-        )}
-        {info.map((line, i) => (
-          <p key={i}>
-            {line} | Time passed: {timePassed}
-          </p>
-        ))}
-        {close && (
-          <p>
-            {close} | Time passed: {timePassed}
-          </p>
-        )}
-        {servererror && (
-          <p>
-            {servererror} | Time passed: {timePassed}
-          </p>
-        )}
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            {body[0] &&
-              Object.keys(body[0]).map((res, i) => (
-                <th key={i} scope="col">
-                  {res}
-                </th>
-              ))}
-          </tr>
-        </thead>
-        <tbody>
-          {body.length
-            ? body.map((res, i) => {
-                return (
-                  <tr key={i}>
-                    {Object.values(res).map((val, i) => (
-                      <td key={i}>{`${val}`}</td>
-                    ))}
-                  </tr>
-                );
-              })
-            : undefined}
-        </tbody>
-      </table>
-    </>
+    <Grid item xs={8}>
+      <Paper className={classes.paper}>
+        <div>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => handleSubmit()}
+          >
+            Start scan
+          </Button>
+        </div>
+        <div>
+          {open && (
+            <p>
+              {open} | Time passed: {new Date().getTime() - time}
+            </p>
+          )}
+          {info.map((line, i) => (
+            <p key={i}>
+              {line} | Time passed: {timePassed}
+            </p>
+          ))}
+          {close && (
+            <p>
+              {close} | Time passed: {timePassed}
+            </p>
+          )}
+          {servererror && (
+            <p>
+              {servererror} | Time passed: {timePassed}
+            </p>
+          )}
+        </div>
+        <table>
+          <thead>
+            <tr>
+              {body[0] &&
+                Object.keys(body[0]).map((res, i) => (
+                  <th key={i} scope="col">
+                    {res}
+                  </th>
+                ))}
+            </tr>
+          </thead>
+          <tbody>
+            {body.length
+              ? body.map((res, i) => {
+                  return (
+                    <tr key={i}>
+                      {Object.values(res).map((val, i) => (
+                        <td key={i}>{`${val}`}</td>
+                      ))}
+                    </tr>
+                  );
+                })
+              : undefined}
+          </tbody>
+        </table>
+      </Paper>
+    </Grid>
   );
 };
 

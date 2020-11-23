@@ -13,9 +13,6 @@ import { useStyles } from "../../layouts/Default.js";
 
 import { useScanURLContext } from "../../lib/context/scanURLContext.js";
 
-import Slug from "../../components/Slug/Slug.js";
-import Stream from "../../components/Stream/Stream.js";
-
 // Custom styles
 const useCustomStyles = makeStyles(theme => ({
   root: {
@@ -98,8 +95,12 @@ const ScanURL = () => {
             id="site-url"
             label="URL"
             variant="standard"
-            helperText={err && "Invalid URL."}
-            onInput={e => setDomain(e.target.value)}
+            helperText={err && err}
+            onInput={e => {
+              setDomain(e.target.value);
+              setSlgClicked([]);
+              setCategories([]);
+            }}
             onBlur={() => getURLInfo()}
           />
           <TextField
@@ -146,12 +147,11 @@ const ScanURL = () => {
                       : "secondary"
                   }
                   size="small"
-                  deleteIcon={<DoneIcon />}
+                  // deleteIcon={<DoneIcon />}
                   // onDelete={handleDelete}
                   onClick={() => {
                     setCategories(ctgs => [...ctgs, slugs[i]]);
                     setSlgClicked(slgIndx => [...slgIndx, i]);
-                    console.log(slgClicked.findIndex(slgIndx => slgIndx === i));
                   }}
                 />
               ))}
@@ -179,46 +179,6 @@ const ScanURL = () => {
         ) : (
           ""
         )}
-        <div className={customClasses.section3}>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() => getURLInfo()}
-          >
-            Start scan
-          </Button>
-        </div>
-        {/* <form>
-          <input type="text" name="url" onBlur={e => setUrl(e.target.value)} />
-          <Slug
-            url={url}
-            category={category}
-            setCategory={setCategory}
-            setErr={setErr}
-          />
-          <input
-            type="button"
-            name="add-category"
-            value="Add Categories"
-            onClick={() => {
-              if (category.length) {
-                setCategories(ctg => [...ctg, category]);
-                setCategory("");
-              }
-            }}
-          />
-        </form> */}
-        {/* {err && <p>{err}</p>} */}
-        {/* <h4>Categories:</h4> */}
-        {/* <div>
-          {categories.map((category, i) =>
-            i === categories.length - 1 ? (
-              <span key={i}>{category}</span>
-            ) : (
-              <span key={i}>{`${category}, `}</span>
-            )
-          )}
-        </div> */}
       </Paper>
     </Grid>
   );
