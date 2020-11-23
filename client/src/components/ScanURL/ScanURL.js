@@ -114,7 +114,7 @@ const ScanURL = () => {
             <Button
               onClick={e => {
                 e.preventDefault();
-                setCategories(ctgs => [...ctgs, category]);
+                category.length && setCategories(ctgs => [...ctgs, category]);
                 setCategory("");
               }}
             >

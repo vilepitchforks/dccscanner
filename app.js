@@ -5,18 +5,6 @@ if (process.env.NODE_ENV === "development") require("dotenv").config();
 
 const app = express();
 
-// Handle http -> https redirect in production
-if (process.env.NODE_ENV === "production")
-  app.get("/", (req, res, next) => {
-    console.log("req.protocol: ", req.protocol);
-    next();
-    // if (req.protocol === "http") {
-    //   // res.redirect("https://" + req.get("host") + req.originalUrl);
-    // } else {
-    //   next();
-    // }
-  });
-
 // Express middlewares
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -36,11 +24,14 @@ const EventsLibrary = require("./api/src/events/EventsLibrary.js");
 // Handlers
 const { notFound, errorHandler } = require("./api/src/lib/errorHandlers.js");
 
+// Custom middlewares
+app.use(authUser);
+
 // Events Library
 app.use("/api/stream", EventsLibrary());
 
 // Routes
-app.use("/api", authUser, require("./api/routes.js"));
+app.use("/api", require("./api/routes.js"));
 
 // Handlers
 app.use(notFound);

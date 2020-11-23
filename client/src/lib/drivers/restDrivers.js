@@ -28,17 +28,11 @@ const makeDriver = ({ method, endpoint, format }) => async ({
     if (status === 200 || status === 201) {
       return result;
     } else {
-      return {
-        status,
-        message: result.message
-      };
+      return false;
     }
   } catch (error) {
     console.warn("driver err", error);
-    return {
-      status,
-      message: result.message
-    };
+    return false;
   }
 };
 
