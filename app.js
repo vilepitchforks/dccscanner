@@ -8,12 +8,13 @@ const app = express();
 // Handle http -> https redirect in production
 if (process.env.NODE_ENV === "production")
   app.get("/", (req, res, next) => {
-    if (req.protocol === "http") {
-      // res.redirect("https://" + req.get("host") + req.originalUrl);
-      console.log("req.protocol: ", req.protocol);
-    } else {
-      next();
-    }
+    console.log("req.protocol: ", req.protocol);
+    next();
+    // if (req.protocol === "http") {
+    //   // res.redirect("https://" + req.get("host") + req.originalUrl);
+    // } else {
+    //   next();
+    // }
   });
 
 // Express middlewares
