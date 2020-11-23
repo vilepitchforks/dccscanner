@@ -89,10 +89,8 @@ const ScanURL = () => {
   // Custom classes
   const customClasses = useCustomStyles();
 
-  // let query = `url=${url}&categories=${categories.join()}`;
-
   return (
-    <Grid item xs={7}>
+    <Grid item xs={8}>
       <Paper className={classes.paper}>
         <form className={customClasses.root} noValidate autoComplete="on">
           <TextField

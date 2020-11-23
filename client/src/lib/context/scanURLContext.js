@@ -15,6 +15,7 @@ const ScanURLContextProvider = ({ children }) => {
   const [err, setErr] = useState(false);
 
   const [slugs, setSlugs] = useState([]);
+  const [metadata, setMetadata] = useState({});
   const [loading, setLoading] = useState(false);
 
   const query = `url=${domain}`;
@@ -25,7 +26,8 @@ const ScanURLContextProvider = ({ children }) => {
     try {
       if (urlRgx.test(domain)) {
         const res = domain.length ? await slugDriver({ query }) : "";
-        res.length && setSlugs(res);
+        res.slugs && setSlugs(res.slugs);
+        res.metadata && setMetadata(res.metadata);
         setLoading(false);
         setDomain("");
       } else {
@@ -54,7 +56,8 @@ const ScanURLContextProvider = ({ children }) => {
         loading,
         err,
         setErr,
-        getURLInfo
+        getURLInfo,
+        metadata
       }}
     >
       {children}

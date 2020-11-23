@@ -1,10 +1,13 @@
 const axios = require("axios");
 const xmlParser = require("xml2js").parseStringPromise;
+const { getMetadata } = require("page-metadata-parser");
+const domino = require("domino");
 
 const { setup } = require("./setup.js");
 
 const { events } = require("../events/EventsLibrary");
 
+// Function used for streaming DCC data
 exports.getSitemapUrls = async (url, categories, start) => {
   try {
     console.log(`Fetching ${getRootUrl(url)} XML Sitemap...`);
@@ -26,6 +29,7 @@ exports.getSitemapUrls = async (url, categories, start) => {
     // Parse XML to JSON, structure: urlset.url[0].loc[0] is https://www.website.com/en-us/
     const { urlset } = await xmlParser(data);
 
+    // TODO: change regular array to Set for filtering duplicates
     const urls = [];
     urlset.url.forEach(url => {
       categories.forEach(ctg => {
@@ -90,6 +94,20 @@ exports.getSlugs = async rawUrl => {
   return Array.from(slugs)
     .filter(slug => slug.length)
     .sort((a, b) => a.length - b.length);
+};
+
+exports.getMeta = async rawUrl => {
+  try {
+    const { data } = await axios(rawUrl);
+
+    const doc = domino.createWindow(data).document;
+    const metadata = getMetadata(doc, rawUrl);
+
+    return metadata;
+  } catch (error) {
+    console.warn("Error fetching URLs: ", error);
+    return false;
+  }
 };
 
 exports.chunkify = urls => {
