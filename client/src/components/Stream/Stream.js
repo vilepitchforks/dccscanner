@@ -64,6 +64,13 @@ const Stream = () => {
 
   const handleSubmit = async e => {
     setErr("");
+    setOpen("");
+    setTime(0);
+    setTimePassed(0);
+    setInfo([]);
+    setBody([]);
+    setClose("");
+    setServererror("");
     try {
       if (!urlRgx.test(domain)) throw new Error(`Invalid URL: ${domain}`);
       if (!categories.length) throw new Error("Add at least one category.");
