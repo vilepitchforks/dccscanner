@@ -1,158 +1,130 @@
 import React, { useState } from "react";
+import { useStoreActions, useStoreState } from "easy-peasy";
 import { makeStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
-
-import { useStyles } from "../../layouts/Default.js";
 
 import { useScanURLContext } from "../../lib/context/scanURLContext.js";
 
-import { urlRgx } from "../../lib/helpers/regex.js";
+// Custom styles
+const useCustomStyles = makeStyles(theme => ({
+  // root: {
+  //   "& .MuiTextField-root": {
+  //     margin: theme.spacing(1),
+  //     width: "30ch"
+  //   }
+  // },
+  buildView: {
+    display: "flex",
+    paddingTop: "16px",
+    boxOrient: "vertical",
+    boxDirection: "normal",
+    flexDirection: "column",
+    flexGrow: 1
+  },
+  pageBreadcrumb: {
+    color: "#62738D",
+    fontWeight: 700,
+    fontSize: "12px",
+    paddingBottom: "20px"
+  },
+  pullRight: {
+    float: "right!important"
+  },
+  buildStreamFull: {
+    display: "flex",
+    minHeight: "272px",
+    flexGrow: 1,
+    boxOrient: "vertical",
+    boxDirection: "normal",
+    flexDirection: "column",
+    position: "relative",
+    marginTop: 0,
+    height: "calc(100% - 80px)"
+  },
+  buildStream: {
+    margin: "11px 0 4px",
+    backgroundColor: "#F7F8FB",
+    border: "1px solid #E3E7EF",
+    borderRadius: "4px"
+  },
+  buildStreamOutput: {
+    height: "240px",
+    minHeight: "240px",
+    flexGrow: 1,
+    position: "relative",
+    height: "160px",
+    margin: "0 5px 0 9px",
+    padding: "9px 5px 9px 0",
+    overflow: "auto",
+    transition: "height ease .3s"
+  },
+  buildStreamLine: {
+    fontSize: "12px",
+    margin: 0,
+    padding: 0,
+    background: "0 0",
+    border: "none",
+    borderRadius: 0,
+    color: "#323B49",
+    fontSize: "11px",
+    lineHeight: "18px",
+    overflowWrap: "break-word"
+  },
+  buildStreamFooter: {
+    position: "relative",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: "30px",
+    padding: "6px 10px",
+    overflow: "hidden",
+    fontSize: "12px",
+    borderTop: "1px solid #E3E7EF",
+    backgroundColor: "#fff",
+    borderBottomLeftRadius: "4px",
+    borderBottomRightRadius: "4px"
+  },
+  gray: { color: "#62738d" },
+  red: { color: "red" }
+}));
 
 const Stream = () => {
-  const { domain, setDomain, categories, setErr } = useScanURLContext();
+  const { domain } = useScanURLContext();
 
-  const [open, setOpen] = useState("");
-  const [time, setTime] = useState(0);
-  const [timePassed, setTimePassed] = useState(0);
-  const [info, setInfo] = useState([]);
-  const [body, setBody] = useState([]);
-  const [close, setClose] = useState("");
-  const [servererror, setServererror] = useState("");
+  const { infoEvents, errorEvents } = useStoreState(state => state);
 
-  let es, query;
-  const startStream = () => {
-    setTime(new Date().getTime());
-
-    es = new EventSource("/api/stream?" + query, { withCredentials: true });
-
-    es.onopen = () => {
-      console.log("Connection open.", es.readyState);
-      setOpen("Connection established.");
-    };
-    es.addEventListener("info", ({ lastEventId, data }) => {
-      setTimePassed(lastEventId - time);
-      setInfo(currInfo => [...currInfo, data]);
-      console.log("data", data);
-    });
-    es.addEventListener("body", ({ lastEventId, data }) => {
-      setTimePassed(lastEventId - time);
-      setBody(currBody => [...currBody, JSON.parse(data)]);
-      console.log("data", data);
-    });
-    es.addEventListener("close", ({ lastEventId, data }) => {
-      es.close();
-      setTimePassed(lastEventId - time);
-      setClose("Connection closed.");
-      console.log("data", data);
-    });
-    es.addEventListener("servererror", ({ lastEventId, data }) => {
-      es.close();
-      setTimePassed(lastEventId - time);
-      setServererror(data);
-      console.log("data", data);
-    });
-
-    es.onerror = err => {
-      es.close();
-      setTimePassed(new Date().getTime() - time);
-      console.error("EventSource failed:", err.type);
-      setErr(err.message);
-    };
-  };
-
-  const handleSubmit = async e => {
-    setErr("");
-    setOpen("");
-    setTime(0);
-    setTimePassed(0);
-    setInfo([]);
-    setBody([]);
-    setClose("");
-    setServererror("");
-    try {
-      if (!urlRgx.test(domain)) throw new Error(`Invalid URL: ${domain}`);
-      if (!categories.length) throw new Error("Add at least one category.");
-
-      query = `url=${domain}&categories=${categories.join()}`;
-
-      startStream();
-    } catch (error) {
-      console.warn(error);
-      setErr(error.message);
-      setDomain("");
-    }
-  };
-
-  const handleAbort = () => {
-    es && es.close();
-  };
-
-  // Global classes
-  const classes = useStyles();
+  // Custom classes
+  const customClasses = useCustomStyles();
 
   return (
-    <Grid item xs={8}>
-      <Paper className={classes.paper}>
-        <div>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() => handleSubmit()}
-          >
-            Start scan
-          </Button>
+    <>
+      <div className={customClasses.buildView}>
+        <div className={customClasses.pageBreadcrumb}>
+          Scan Log
+          <div className={customClasses.pullRight}>URL: {domain}</div>
         </div>
-        <div>
-          {open && (
-            <p>
-              {open} | Time passed: {new Date().getTime() - time}
-            </p>
-          )}
-          {info.map((line, i) => (
-            <p key={i}>
-              {line} | Time passed: {timePassed}
-            </p>
-          ))}
-          {close && (
-            <p>
-              {close} | Time passed: {timePassed}
-            </p>
-          )}
-          {servererror && (
-            <p>
-              {servererror} | Time passed: {timePassed}
-            </p>
-          )}
+        <div
+          className={`${customClasses.buildStreamFull} ${customClasses.buildStream}`}
+        >
+          <div className={customClasses.buildStreamOutput}>
+            {infoEvents.map((event, i) => (
+              <pre key={i} className={customClasses.buildStreamLine}>
+                {event}
+              </pre>
+            ))}
+          </div>
+          <footer className={customClasses.buildStreamFooter}>
+            {/close/gi.test(infoEvents[infoEvents.length - 1]) && (
+              <label className={customClasses.gray}>Scan completed.</label>
+            )}
+            {errorEvents.length
+              ? errorEvents.map((event, i) => (
+                  <label className={customClasses.red}>{event}</label>
+                ))
+              : ""}
+          </footer>
         </div>
-        <table>
-          <thead>
-            <tr>
-              {body[0] &&
-                Object.keys(body[0]).map((res, i) => (
-                  <th key={i} scope="col">
-                    {res}
-                  </th>
-                ))}
-            </tr>
-          </thead>
-          <tbody>
-            {body.length
-              ? body.map((res, i) => {
-                  return (
-                    <tr key={i}>
-                      {Object.values(res).map((val, i) => (
-                        <td key={i}>{`${val}`}</td>
-                      ))}
-                    </tr>
-                  );
-                })
-              : undefined}
-          </tbody>
-        </table>
-      </Paper>
-    </Grid>
+      </div>
+    </>
   );
 };
 

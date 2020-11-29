@@ -10,11 +10,11 @@ const EventsMiddleware = () => (req, res, next) => {
     connection: "keep-alive"
   });
   try {
-    const eventLabels = ["info", "body", "servererror", "close"];
+    const eventLabels = ["info", "data", "servererror", "close"];
     //  msg format: "id: unqueID\nevent: customevent\ndata: string event payload\n\n"
     const msg = (event, body) =>
       res.write(
-        `id: ${new Date().getTime()}\nevent: ${event}\ndata: ${JSON.stringify(
+        `id: ${req.get("host")}\nevent: ${event}\ndata: ${JSON.stringify(
           body
         )}\n\n`
       );

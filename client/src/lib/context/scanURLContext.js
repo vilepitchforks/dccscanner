@@ -35,7 +35,6 @@ const ScanURLContextProvider = ({ children }) => {
         setDomain("");
       }
     } catch (error) {
-      console.log("error.message", error.message);
       console.warn(error);
       setErr(error.message);
       setLoading(false);

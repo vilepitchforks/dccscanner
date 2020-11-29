@@ -23,8 +23,6 @@ import {
   secondaryListItems
 } from "../components/SideBar/SideBar.js";
 
-import Terminal from "../components/Terminal/Terminal.js";
-
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -207,7 +205,6 @@ const DefaultLayout = ({ children }) => {
               </Paper>
             </Grid> */}
             {children}
-            <Terminal />
           </Grid>
           {/* <Box sx={{ pt: 4 }}>
             <Copyright />

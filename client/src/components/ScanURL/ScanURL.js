@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useStoreActions, useStoreState } from "easy-peasy";
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
@@ -9,9 +10,13 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import Chip from "@material-ui/core/Chip";
 import DoneIcon from "@material-ui/icons/Done";
 
+import Stream from "../Stream/Stream.js";
+
 import { useStyles } from "../../layouts/Default.js";
 
 import { useScanURLContext } from "../../lib/context/scanURLContext.js";
+
+import { urlRgx } from "../../lib/helpers/regex.js";
 
 // Custom styles
 const useCustomStyles = makeStyles(theme => ({
@@ -31,7 +36,7 @@ const useCustomStyles = makeStyles(theme => ({
     display: "flex",
     justifyContent: "start",
     flexWrap: "wrap",
-    maxHeight: "150px",
+    maxHeight: "75px",
     overflow: "auto",
     "& > *": {
       margin: theme.spacing(0.5)
@@ -69,6 +74,7 @@ const ScanURL = () => {
     domain,
     setDomain,
     err,
+    setErr,
     category,
     setCategory,
     categories,
@@ -78,6 +84,10 @@ const ScanURL = () => {
     getURLInfo
   } = useScanURLContext();
 
+  const { infoEvents, errorEvents } = useStoreState(state => state);
+
+  const { startStream } = useStoreActions(actions => actions);
+
   const [slgClicked, setSlgClicked] = useState([]);
 
   // Global classes
@@ -85,6 +95,22 @@ const ScanURL = () => {
 
   // Custom classes
   const customClasses = useCustomStyles();
+
+  // Handles URL scanning
+  const handleScan = async e => {
+    try {
+      if (!urlRgx.test(domain)) throw new Error(`Invalid URL: ${domain}`);
+      if (!categories.length) throw new Error("Add at least one category.");
+
+      const query = `url=${domain}&categories=${categories.join()}`;
+
+      startStream(query);
+    } catch (error) {
+      console.warn(error);
+      setErr(error.message);
+      setDomain("");
+    }
+  };
 
   return (
     <Grid item xs={8}>
@@ -179,6 +205,19 @@ const ScanURL = () => {
         ) : (
           ""
         )}
+        {categories.length ? (
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => handleScan()}
+          >
+            Start scan
+          </Button>
+        ) : (
+          ""
+        )}
+
+        <Stream />
       </Paper>
     </Grid>
   );

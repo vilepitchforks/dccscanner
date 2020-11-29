@@ -107,7 +107,7 @@ exports.extractDCCs = async (urls, start) => {
         bvDCC.eans = bvDCC.eans.join();
 
       // Emit each bvDCC to client
-      events.emit("body", "body", bvDCC);
+      events.emit("data", "data", bvDCC);
 
       // Store bvDCC JSON object for xlsx report
       bvDCCs.push(bvDCC);
