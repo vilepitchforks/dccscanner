@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useStoreActions, useStoreState } from "easy-peasy";
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
@@ -16,6 +16,7 @@ import { useStyles } from "../../layouts/Default.js";
 
 import { useScanURLContext } from "../../lib/context/scanURLContext.js";
 
+import { processDb } from "../../lib/helpers/processDb.js";
 import { urlRgx } from "../../lib/helpers/regex.js";
 
 // Custom styles
@@ -84,7 +85,11 @@ const ScanURL = () => {
     getURLInfo
   } = useScanURLContext();
 
-  const { infoEvents, errorEvents } = useStoreState(state => state);
+  const { dataEvents, scanCompleted } = useStoreState(state => state);
+
+  const { addInfoEvent, addErrorEvent, setScanCompleted } = useStoreActions(
+    actions => actions
+  );
 
   const { startStream } = useStoreActions(actions => actions);
 
@@ -111,6 +116,20 @@ const ScanURL = () => {
       setDomain("");
     }
   };
+
+  // Handle db processing post scan
+  useEffect(() => {
+    (async () => {
+      if (scanCompleted)
+        await processDb(
+          domain,
+          dataEvents,
+          addInfoEvent,
+          addErrorEvent,
+          setScanCompleted
+        );
+    })();
+  }, [scanCompleted]);
 
   return (
     <Grid item xs={8}>

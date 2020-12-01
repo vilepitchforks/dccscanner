@@ -10,14 +10,13 @@
     "bootstrap": "^4.5.3",
     "clsx": "^1.1.1",
     "easy-peasy": "^4.0.1",
-    "javascript-terminal": "^1.1.1",
     "react": "^16.14.0",
     "react-bootstrap": "^1.4.0",
     "react-dom": "^16.14.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "latest",
-    "react-terminal-component": "^1.4.1",
-    "styled-components": "latest"
+    "styled-components": "latest",
+    "zangodb": "^1.0.8"
   },
   "scripts": {
     "start": "react-app-rewired start",

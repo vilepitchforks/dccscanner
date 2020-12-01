@@ -113,7 +113,7 @@ const Stream = () => {
             ))}
           </div>
           <footer className={customClasses.buildStreamFooter}>
-            {/close/gi.test(infoEvents[infoEvents.length - 1]) && (
+            {/processed/gi.test(infoEvents[infoEvents.length - 1]) && (
               <label className={customClasses.gray}>Scan completed.</label>
             )}
             {errorEvents.length

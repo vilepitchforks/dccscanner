@@ -14,7 +14,7 @@ const EventsMiddleware = () => (req, res, next) => {
     //  msg format: "id: unqueID\nevent: customevent\ndata: string event payload\n\n"
     const msg = (event, body) =>
       res.write(
-        `id: ${req.get("host")}\nevent: ${event}\ndata: ${JSON.stringify(
+        `id: ${req.query.url}\nevent: ${event}\ndata: ${JSON.stringify(
           body
         )}\n\n`
       );

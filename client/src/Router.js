@@ -9,9 +9,10 @@ import { DefaultLayout } from "./layouts";
 
 // Route Views
 import Scan from "./views/Scan/Scan.js";
+import Reports from "./views/Reports/Reports.js";
 
 const routes = [
-  // Example home route that redirect to /blog-overview by default
+  // Example home route that redirects to /blog-overview by default
   // Rest of the routes are added as objects, without the "exact" attribute
   //   {
   //     path: "/",
@@ -24,6 +25,12 @@ const routes = [
     exact: true,
     layout: DefaultLayout,
     component: Scan
+  },
+  {
+    path: "/reports",
+    exact: true,
+    layout: DefaultLayout,
+    component: Reports
   }
 ];
 

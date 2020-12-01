@@ -1,6 +1,7 @@
-import { createStore, action, thunk } from "easy-peasy";
+import { createStore, action, computed, thunk } from "easy-peasy";
 
 import {
+  setScanCompleted,
   addInfoEvent,
   addErrorEvent,
   addDataEvent,
@@ -9,16 +10,20 @@ import {
 
 const store = createStore({
   infoEvents: [],
+  dataEvents: {},
   errorEvents: [],
-  dataEvents: [],
+  scanCompleted: false,
+  setScanCompleted: action((state, check) => {
+    setScanCompleted(state, check);
+  }),
   addInfoEvent: action((state, event) => {
     addInfoEvent(state, event);
   }),
+  addDataEvent: action((state, payload) => {
+    addDataEvent(state, payload);
+  }),
   addErrorEvent: action((state, event) => {
     addErrorEvent(state, event);
-  }),
-  addDataEvent: action((state, event) => {
-    addDataEvent(state, event);
   }),
   startStream: thunk((actions, query) => startStream(actions, query))
 });
