@@ -15,22 +15,25 @@ export const processDb = async (
 ) => {
   let v = 0;
   const collName = new Date().getTime().toString();
-  const { name, version } = await indexedDB
+  const dbCheck = await window.indexedDB
     .databases()
-    .then(dbs => dbs.find(db => db.name === url));
-  console.log("name, version", name, version);
-  console.log("v before:", v);
-  if (name === url && version > 0) v = version + 1;
-  console.log("v after:", v);
+    .then(dbs => Array.isArray(dbs) && dbs.find(db => db.name === url));
+
+  if (
+    typeof dbCheck != "undefined" &&
+    dbCheck.name === url &&
+    dbCheck.version > 0
+  )
+    v = dbCheck.version + 1;
 
   // Define collections without indexes.
   const db = new zango.Db(url, v, [collName]);
-  console.log("db from processDb", db);
   const collection = db.collection(collName);
-  console.log("collection from processDb", collection);
-  data = data[url].filter(item => Object.keys(item).length > 1);
+  data = data[url] && data[url].filter(item => Object.keys(item).length > 1);
 
-  console.log("data from processDb", data);
+  if (typeof data === "undefined" || !data.length)
+    return addInfoEvent("Scan data processed. No bvDCC data found.");
+
   collection
     .insert(data)
     .then(() => {

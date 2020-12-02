@@ -4,7 +4,6 @@ export const addInfoEvent = (state, event) => {
 
 export const addDataEvent = (state, { url, data }) => {
   const scanData = state.dataEvents[url] || [];
-  console.log("scanData from addDataEvent", scanData);
   state.dataEvents[url] = [...scanData, data];
 };
 
@@ -30,7 +29,7 @@ export const startStream = async (actions, query) => {
   es.addEventListener("data", ({ lastEventId: url, data }) => {
     actions.addDataEvent({ url, data: JSON.parse(data) });
   });
-  es.addEventListener("close", ({ lastEventId: url }) => {
+  es.addEventListener("close", e => {
     actions.addInfoEvent("Connection with server closed.");
     actions.addInfoEvent("Processing scan data...");
     actions.setScanCompleted(true);
@@ -44,8 +43,8 @@ export const startStream = async (actions, query) => {
     es.close();
   });
   es.onerror = err => {
-    console.log("Actual error event");
-    actions.addErrorEvent("An es.onerror occurred: " + err);
+    console.warn("Actual error event", err);
+    actions.addErrorEvent("An es.onerror occurred");
     actions.setScanCompleted(true);
     es.close();
   };

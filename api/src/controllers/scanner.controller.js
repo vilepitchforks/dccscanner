@@ -108,6 +108,6 @@ exports.scanStreamer = async (req, res, next) => {
   } catch (error) {
     res.status(422);
     console.warn(error);
-    next(error);
+    events.emit("servererror", "servererror", error.message);
   }
 };
