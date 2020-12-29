@@ -1,0 +1,37 @@
+:root {
+  --color01: #e5eeed;
+  --color02: #ccdedb;
+  --color03: #b3cec9;
+  --color04: #9abdb7;
+  --color05: #81ada5;
+  --color06: #689d93;
+  --color07: #4f8c81;
+  --color08: #367c6f;
+  --color09: #1d6c5d;
+  --color10: #045c4c;
+  --color11: #045c4c;
+  --color12: #035244;
+  --color13: #03493c;
+  --color14: #024035;
+}
+
+body {
+  background-color: var(--color01);
+}
+
+.container {
+  background-color: var(--color02);
+  box-shadow: 0px 0px 10px -2px rgba(0, 0, 0, 0.2);
+  min-height: calc(100vh - 50px);
+  position: inherit;
+}
+
+.flex {
+  display: flex;
+}
+
+.icon {
+  max-width: 25px;
+  max-height: 25px;
+  padding: 5px;
+}

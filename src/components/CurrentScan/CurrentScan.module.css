@@ -1,0 +1,11 @@
+.title {
+  margin-top: 2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.view-log {
+  margin: 0px 10px;
+  cursor: pointer;
+}

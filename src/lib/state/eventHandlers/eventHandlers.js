@@ -1,3 +1,24 @@
+export const setScanUrl = (state, scanUrl) => {
+  state.scanUrl = scanUrl;
+};
+
+export const setScanCtgs = (state, scanCtgs) => {
+  state.scanCtgs = scanCtgs;
+};
+
+export const setMetadata = (state, meta) => {
+  state.metadata = meta;
+};
+
+export const reSetScanUrl = state => {
+  state.scanUrl = "";
+  state.scanCtgs = "";
+  state.metadata = {};
+  state.infoEvents = [];
+  state.dataEvents = {};
+  state.errorEvents = [];
+};
+
 export const addInfoEvent = (state, event) => {
   state.infoEvents.push(event);
 };

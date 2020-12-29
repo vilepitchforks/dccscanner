@@ -1,0 +1,16 @@
+.modal {
+  background-color: var(--color01);
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.modal form {
+  margin-bottom: 0px;
+}
+
+/* Larger than mobile */
+@media (min-width: 550px) {
+  .modal {
+    margin: 50px 10%;
+  }
+}

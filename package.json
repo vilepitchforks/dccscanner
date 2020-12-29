@@ -18,14 +18,17 @@
     "axios": "^0.21.0",
     "cookie-parser": "^1.4.5",
     "domino": "^2.1.6",
+    "easy-peasy": "^4.0.1",
     "express": "^4.17.1",
     "next": "^10.0.4",
     "page-metadata-parser": "^1.1.4",
     "puppeteer": "^5.4.1",
     "react": "^17.0.1",
+    "react-datasheet": "^1.4.8",
     "react-dom": "^17.0.1",
     "xlsx": "^0.16.8",
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.4.23",
+    "zangodb": "^1.0.8"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",

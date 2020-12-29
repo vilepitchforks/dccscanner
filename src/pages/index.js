@@ -1,15 +1,20 @@
 import axios from "axios";
 import Head from "next/head";
 
-const Home = props => {
+import Navbar from "../components/Navbar/Navbar";
+import WebList from "../components/WebList/WebList";
+import NewScan from "../components/NewScan/NewScan";
+
+const Home = ({ user }) => {
   return (
     <>
       <Head>
         <title>DCC Scanner</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div>Homepage</div>
-      <pre>{JSON.stringify(props, null, 2)}</pre>
+      <Navbar user={user} />
+      <WebList />
+      <NewScan />
     </>
   );
 };
@@ -26,7 +31,7 @@ export const getServerSideProps = async ctx => {
       headers: ctx.req.headers
     });
 
-    return { props: { data } };
+    return { props: { user: data } };
   } catch (error) {
     console.warn("Error from Index.js: ", error.message);
     // If user is not authenticated, redirect to /login

@@ -88,168 +88,224 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 2:
+/***/ 0:
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__("B5Ud");
+module.exports = __webpack_require__("IlR1");
 
 
 /***/ }),
 
-/***/ "B5Ud":
-/***/ (function(module, exports, __webpack_require__) {
+/***/ "F5FC":
+/***/ (function(module, exports) {
+
+module.exports = require("react/jsx-runtime");
+
+/***/ }),
+
+/***/ "IlR1":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+// ESM COMPAT FLAG
+__webpack_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: external "react/jsx-runtime"
+var jsx_runtime_ = __webpack_require__("F5FC");
+
+// EXTERNAL MODULE: external "easy-peasy"
+var external_easy_peasy_ = __webpack_require__("SDXy");
+
+// EXTERNAL MODULE: ./src/styles/normalize.css
+var normalize = __webpack_require__("zlK1");
+
+// EXTERNAL MODULE: ./src/styles/skeleton.css
+var skeleton = __webpack_require__("xXxE");
+
+// EXTERNAL MODULE: ./src/styles/global.css
+var global = __webpack_require__("rMck");
+
+// EXTERNAL MODULE: ./node_modules/react-datasheet/lib/react-datasheet.css
+var react_datasheet = __webpack_require__("ZJU2");
+
+// CONCATENATED MODULE: ./src/lib/state/eventHandlers/eventHandlers.js
+const setScanUrl = (state, scanUrl) => {
+  state.scanUrl = scanUrl;
+};
+const setScanCtgs = (state, scanCtgs) => {
+  state.scanCtgs = scanCtgs;
+};
+const setMetadata = (state, meta) => {
+  state.metadata = meta;
+};
+const reSetScanUrl = state => {
+  state.scanUrl = "";
+  state.scanCtgs = "";
+  state.metadata = {};
+  state.infoEvents = [];
+  state.dataEvents = {};
+  state.errorEvents = [];
+};
+const addInfoEvent = (state, event) => {
+  state.infoEvents.push(event);
+};
+const addDataEvent = (state, {
+  url,
+  data
+}) => {
+  const scanData = state.dataEvents[url] || [];
+  state.dataEvents[url] = [...scanData, data];
+};
+const addErrorEvent = (state, event) => {
+  state.errorEvents.push(event);
+};
+const setScanCompleted = (state, check) => {
+  state.scanCompleted = check;
+};
+const startStream = async (actions, query) => {
+  const es = new EventSource("/api/stream?" + query, {
+    withCredentials: true
+  });
+
+  es.onopen = () => {
+    actions.addInfoEvent("Connection with server established.");
+  };
+
+  es.addEventListener("info", ({
+    data
+  }) => {
+    actions.addInfoEvent(JSON.parse(data));
+  });
+  es.addEventListener("data", ({
+    lastEventId: url,
+    data
+  }) => {
+    actions.addDataEvent({
+      url,
+      data: JSON.parse(data)
+    });
+  });
+  es.addEventListener("close", e => {
+    actions.addInfoEvent("Connection with server closed.");
+    actions.addInfoEvent("Processing scan data...");
+    actions.setScanCompleted(true);
+    es.close();
+  });
+  es.addEventListener("servererror", ({
+    lastEventId: url,
+    data
+  }) => {
+    console.log("Servererror event lastEventId", url);
+    console.log("Servererror event data", data);
+    actions.addErrorEvent("An error occurred: " + data);
+    actions.setScanCompleted(true);
+    es.close();
+  });
+
+  es.onerror = err => {
+    console.warn("Actual error event", err);
+    actions.addErrorEvent("An es.onerror occurred");
+    actions.setScanCompleted(true);
+    es.close();
+  };
+};
+// CONCATENATED MODULE: ./src/lib/state/store/Store.js
 
 
-var _interopRequireDefault = __webpack_require__("TqRt");
+const Store = Object(external_easy_peasy_["createStore"])({
+  scanUrl: "",
+  scanCtgs: "",
+  metadata: {},
+  infoEvents: [],
+  dataEvents: {},
+  errorEvents: [],
+  scanCompleted: false,
+  setScanUrl: Object(external_easy_peasy_["action"])((state, scanUrl) => setScanUrl(state, scanUrl)),
+  setScanCtgs: Object(external_easy_peasy_["action"])((state, scanCtgs) => setScanCtgs(state, scanCtgs)),
+  setMetadata: Object(external_easy_peasy_["action"])((state, meta) => setMetadata(state, meta)),
+  reSetScanUrl: Object(external_easy_peasy_["action"])(state => reSetScanUrl(state)),
+  setScanCompleted: Object(external_easy_peasy_["action"])((state, check) => {
+    setScanCompleted(state, check);
+  }),
+  addInfoEvent: Object(external_easy_peasy_["action"])((state, event) => {
+    addInfoEvent(state, event);
+  }),
+  addDataEvent: Object(external_easy_peasy_["action"])((state, payload) => {
+    addDataEvent(state, payload);
+  }),
+  addErrorEvent: Object(external_easy_peasy_["action"])((state, event) => {
+    addErrorEvent(state, event);
+  }),
+  startStream: Object(external_easy_peasy_["thunk"])((actions, query) => startStream(actions, query))
+});
+/* harmony default export */ var store_Store = (Store);
+// CONCATENATED MODULE: ./src/pages/_app.js
 
-exports.__esModule = true;
-exports.Container = Container;
-exports.createUrl = createUrl;
-exports.default = void 0;
 
-var _react = _interopRequireDefault(__webpack_require__("cDcd"));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-var _utils = __webpack_require__("kYf9");
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-exports.AppInitialProps = _utils.AppInitialProps;
-exports.NextWebVitalsMetric = _utils.NextWebVitalsMetric;
-/**
-* `App` component is used for initialize of pages. It allows for overwriting and full control of the `page` initialization.
-* This allows for keeping state between navigation, custom error handling, injecting additional data.
-*/
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-async function appGetInitialProps({
+
+
+
+
+
+
+
+function MyApp({
   Component,
-  ctx
+  pageProps
 }) {
-  const pageProps = await (0, _utils.loadGetInitialProps)(Component, ctx);
-  return {
-    pageProps
-  };
+  return /*#__PURE__*/Object(jsx_runtime_["jsx"])(external_easy_peasy_["StoreProvider"], {
+    store: store_Store,
+    children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(Component, _objectSpread({}, pageProps))
+  });
 }
 
-class App extends _react.default.Component {
-  // Kept here for backwards compatibility.
-  // When someone ended App they could call `super.componentDidCatch`.
-  // @deprecated This method is no longer needed. Errors are caught at the top level
-  componentDidCatch(error, _errorInfo) {
-    throw error;
-  }
-
-  render() {
-    const {
-      router,
-      Component,
-      pageProps,
-      __N_SSG,
-      __N_SSP
-    } = this.props;
-    return /*#__PURE__*/_react.default.createElement(Component, Object.assign({}, pageProps, // we don't add the legacy URL prop if it's using non-legacy
-    // methods like getStaticProps and getServerSideProps
-    !(__N_SSG || __N_SSP) ? {
-      url: createUrl(router)
-    } : {}));
-  }
-
-}
-
-exports.default = App;
-App.origGetInitialProps = appGetInitialProps;
-App.getInitialProps = appGetInitialProps;
-let warnContainer;
-let warnUrl;
-
-if (false) {} // @deprecated noop for now until removal
-
-
-function Container(p) {
-  if (false) {}
-  return p.children;
-}
-
-function createUrl(router) {
-  // This is to make sure we don't references the router object at call time
-  const {
-    pathname,
-    asPath,
-    query
-  } = router;
-  return {
-    get query() {
-      if (false) {}
-      return query;
-    },
-
-    get pathname() {
-      if (false) {}
-      return pathname;
-    },
-
-    get asPath() {
-      if (false) {}
-      return asPath;
-    },
-
-    back: () => {
-      if (false) {}
-      router.back();
-    },
-    push: (url, as) => {
-      if (false) {}
-      return router.push(url, as);
-    },
-    pushTo: (href, as) => {
-      if (false) {}
-      const pushRoute = as ? href : '';
-      const pushUrl = as || href;
-      return router.push(pushRoute, pushUrl);
-    },
-    replace: (url, as) => {
-      if (false) {}
-      return router.replace(url, as);
-    },
-    replaceTo: (href, as) => {
-      if (false) {}
-      const replaceRoute = as ? href : '';
-      const replaceUrl = as || href;
-      return router.replace(replaceRoute, replaceUrl);
-    }
-  };
-}
+/* harmony default export */ var _app = __webpack_exports__["default"] = (MyApp);
 
 /***/ }),
 
-/***/ "TqRt":
+/***/ "SDXy":
 /***/ (function(module, exports) {
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    "default": obj
-  };
-}
-
-module.exports = _interopRequireDefault;
+module.exports = require("easy-peasy");
 
 /***/ }),
 
-/***/ "cDcd":
+/***/ "ZJU2":
 /***/ (function(module, exports) {
 
-module.exports = require("react");
+
 
 /***/ }),
 
-/***/ "kYf9":
+/***/ "rMck":
 /***/ (function(module, exports) {
 
-module.exports = require("next/dist/next-server/lib/utils.js");
+
+
+/***/ }),
+
+/***/ "xXxE":
+/***/ (function(module, exports) {
+
+
+
+/***/ }),
+
+/***/ "zlK1":
+/***/ (function(module, exports) {
+
+
 
 /***/ })
 

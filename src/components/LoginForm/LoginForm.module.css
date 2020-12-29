@@ -1,0 +1,28 @@
+.formContainer {
+  height: 100vh;
+}
+
+.loginForm {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.formContainer .inputEmail {
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+  margin-right: -1px;
+}
+
+.inputButton {
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+.invalidCreds {
+  position: absolute;
+  top: 40px;
+  left: 10px;
+  color: darkred;
+}

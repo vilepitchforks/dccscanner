@@ -1,44 +1,21 @@
-import Router from "next/router";
-import { useState } from "react";
-import { authDriver } from "../lib/drivers/restDrivers";
+import Head from "next/head";
+
+import LoginForm from "../components/LoginForm/LoginForm";
 
 const login = () => {
-  const [email, setEmail] = useState("");
-  const [check, setCheck] = useState("");
-
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setCheck("");
-
-    const auth = await authDriver({ email });
-
-    if (auth) {
-      // Redirect to "/" after successfull login
-      Router.replace("/");
-    } else {
-      setCheck("Invalid credentials");
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <div>
-          <div>@</div>
+    <>
+      <Head>
+        <title>Login</title>
+      </Head>
+      <div className="container">
+        <div className="row">
+          <div className="column">
+            <LoginForm />
+          </div>
         </div>
-        <input
-          required
-          name="email"
-          type="email"
-          placeholder="Email"
-          onInput={e => setEmail(e.target.value)}
-        />
-        <div>
-          <button type="submit">Enter</button>
-        </div>
-        <div>{check}</div>
       </div>
-    </form>
+    </>
   );
 };
 

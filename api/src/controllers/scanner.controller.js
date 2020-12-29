@@ -67,7 +67,7 @@ exports.scanner = async (req, res, next) => {
 // @desc    Scan streamer route
 // @route   GET /api/stream
 // ?url=https://www.url.com&categories=shop,first,second
-exports.scanStreamer = async (req, res, next) => {
+exports.ScanLoger = async (req, res, next) => {
   const start = new Date().getTime();
   events.emit("info", "info", "Scan process started.");
 

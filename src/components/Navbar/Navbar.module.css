@@ -1,0 +1,31 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--color14);
+  box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  z-index: 1;
+  position: relative;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  padding: 5px;
+}
+
+.avatar {
+  background-color: var(--color04);
+  color: var(--color14);
+  width: 35px;
+  height: 35px;
+  display: flex;
+  margin: auto 10px;
+  font-size: 2rem;
+  align-items: center;
+  flex-shrink: 0;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  border-radius: 50%;
+  justify-content: center;
+  text-transform: capitalize;
+}

@@ -67,7 +67,7 @@ const getAllSitemapUrls = async rawUrl => {
     // Parse XML to JSON, structure: urlset.url[0].loc[0] is https://herbalessences.com/en-us/
     const { urlset } = await xmlParser(data);
 
-    const urls = urlset.url.map(url => url.loc[0]);
+    const urls = urlset ? urlset.url.map(url => url.loc[0]) : [];
 
     return urls;
   } catch (error) {
@@ -93,7 +93,7 @@ exports.getSlugs = async rawUrl => {
   const slugs = new Set(slugChunks.flat());
   return Array.from(slugs)
     .filter(slug => slug.length)
-    .sort((a, b) => a.length - b.length);
+    .sort();
 };
 
 exports.getMeta = async rawUrl => {
