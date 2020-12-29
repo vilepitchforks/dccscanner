@@ -18,16 +18,17 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Prepare working directory
-RUN mkdir -p mkdir dccscanner/client
+# RUN mkdir -p mkdir dccscanner/client
+RUN mkdir -p dccscanner
 WORKDIR /dccscanner
 
 # Copy api and client package.json files
 COPY package*.json /dccscanner/
 
-# Install api and client dependencies
+# Install api and next js dependencies
 RUN npm install --production
 
-# Copy api and client source files
+# Copy all files and .next, api and public folders
 COPY . /dccscanner
 
 ENTRYPOINT ["node", "app.js"]
