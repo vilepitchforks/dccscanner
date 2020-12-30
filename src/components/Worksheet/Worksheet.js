@@ -5,7 +5,7 @@ class Worksheet extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      grid: this.props.data
+      grid: []
       //   grid: [
       //     [{ value: 1 }, { value: 3 }],
       //     [{ value: 2 }, { value: 4 }]
@@ -13,12 +13,7 @@ class Worksheet extends React.Component {
     };
   }
 
-  //   componentDidMount() {
-  //     this.setState({ grid: this.props.data });
-  //   }
-
   render() {
-    console.log("this", this);
     return (
       <ReactDataSheet
         data={this.props.data}

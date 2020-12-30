@@ -8,7 +8,7 @@ import css from "./CurrentScan.module.css";
 import ScanLog from "../ScanLog/ScanLog";
 
 const CurrentScan = () => {
-  const [viewLog, setViewLog] = useState(false);
+  const [viewLog, setViewLog] = useState(true);
 
   const { scanUrl, metadata, dataEvents, scanCompleted } = useStoreState(
     state => state

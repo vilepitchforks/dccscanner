@@ -6,7 +6,7 @@ import css from "./Scans.module.css";
 import ScanThumb from "../ScanThumb/ScanThumb.js";
 import ModalBackground from "../ModalBackground/ModalBackground";
 
-import { getScannedMeta } from "../../lib/helpers/processDb";
+import { getAllMeta } from "../../lib/helpers/processDb";
 import { chunkify } from "../../lib/helpers/handleArr";
 import ScanData from "../ScanData/ScanData";
 
@@ -14,19 +14,20 @@ const Scans = () => {
   const [metaArray, setMetaArray] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [dbName, setDbName] = useState("");
+  const [deleteDb, setdeleteDb] = useState(false);
 
-  const { metadata } = useStoreState(state => state);
+  const { processInProgress } = useStoreState(state => state);
 
   const scanRows = chunkify(metaArray);
 
   useEffect(() => {
     (async () => {
       // Get metadata for all locally stored website scans
-      const m = await getScannedMeta();
+      const m = await getAllMeta();
       m.ok && setMetaArray(m.meta);
     })();
-    // Re-fetch meta from local db after each new website scan
-  }, [metadata]);
+    // Re-fetch meta from local db after each new website scan has completed and once a db has been deleted
+  }, [processInProgress, deleteDb]);
 
   return (
     <>
@@ -38,6 +39,7 @@ const Scans = () => {
               thumbnail={thumbnail}
               setShowModal={setShowModal}
               setDbName={setDbName}
+              setdeleteDb={setdeleteDb}
             />
           ))}
         </div>

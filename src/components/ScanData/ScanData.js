@@ -22,9 +22,7 @@ const ScanData = ({ dbName }) => {
   const handleGetStoreData = async (dbName, date) => {
     const d = await getStoreData(dbName, date);
     const formattedDdata = d.ok && createTableData(d.data);
-    console.log("formattedDdata", formattedDdata);
     setData(formattedDdata);
-    console.log("data", data);
   };
 
   return (

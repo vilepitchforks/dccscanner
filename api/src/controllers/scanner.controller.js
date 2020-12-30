@@ -21,7 +21,7 @@ exports.scanner = async (req, res, next) => {
     const categories =
       req.query.categories &&
       req.query.categories.length &&
-      req.query.categories.length < 50 &&
+      req.query.categories.length < 200 &&
       req.query.categories.split(",");
     if (!categories) throw new Error("ERR_CATEGORY_REQUIRED");
 
@@ -83,7 +83,7 @@ exports.ScanLoger = async (req, res, next) => {
     categories =
       categories &&
       categories.length &&
-      categories.length < 50 &&
+      categories.length < 200 &&
       categories.split(",").map(ctg => ctg.trim());
     if (!categories) throw new Error("ERR_CATEGORY_MISSING_OR_INVALID");
     console.log("categories", categories);

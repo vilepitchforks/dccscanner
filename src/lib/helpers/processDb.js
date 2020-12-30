@@ -27,8 +27,11 @@ export const makeStoreData = (url, actions, meta) => async data => {
   if (!meta) {
     // Get only results with valid DCC objects
     data = data[url] && data[url].filter(item => Object.keys(item).length > 1);
-    if (typeof data === "undefined" || !data.length)
-      return actions.addInfoEvent("Scan data processed. No bvDCC data found.");
+    if (typeof data === "undefined" || !data.length) {
+      actions.addInfoEvent("Scan data processed. No bvDCC data found.");
+      actions.setProcessInProgress(false);
+      return;
+    }
   }
 
   // Define collections without indexes.
@@ -36,29 +39,45 @@ export const makeStoreData = (url, actions, meta) => async data => {
 
   const collection = db.collection(collName);
 
+  const successMsg = meta
+    ? `Metadata for ${url} successfully stored.`
+    : `Scan data for ${url} successfully processed.`;
+
   collection
     .insert(data)
     .then(() => {
-      actions.addInfoEvent(
-        `${meta ? "Metadata" : "Scan data"} successfully processed.`
-      );
+      actions.addInfoEvent(successMsg);
+      // Completes the check switch for the entire process from starting scan to the storing of data in db:
+      !meta && actions.setProcessInProgress(false);
       db.close();
     })
     .catch(error => {
       actions.addErrorEvent("Error processing scanned data: " + error.message);
       console.error(error);
+      // Completes the check switch for the entire process from starting scan to the storing of data in db:
+      !meta && actions.setProcessInProgress(false);
       db.close();
     });
 
   db.on("blocked", () => {
-    console.warn("database version cannot be upgraded");
+    console.warn(
+      `Database blocked event fired with details: ${
+        meta ? "Metadata" : "Scan data"
+      } store attempt for url ${url}`
+    );
+    actions.addInfoEvent(
+      `We are experiencing some issues with ${
+        meta ? "Metadata" : "Scan data"
+      } processing for ${url}.\nPlease expect some delays or reload the page and try again.`
+    );
+    db.close();
   });
 };
 
 export const getDbNames = async () =>
   window.indexedDB.databases().then(res => res.map(db => db.name));
 
-export const getScannedMeta = async () => {
+export const getAllMeta = async () => {
   try {
     const dbNames = await getDbNames();
 
@@ -70,8 +89,22 @@ export const getScannedMeta = async () => {
             let col = db.collection("metadata");
             col
               .findOne()
-              .then(res => resolve({ dbName, ...res }))
-              .catch(err => reject(err));
+              .then(res =>
+                resolve(
+                  (() => {
+                    db.close();
+                    return { dbName, ...res };
+                  })()
+                )
+              )
+              .catch(err =>
+                reject(
+                  (() => {
+                    db.close();
+                    return err;
+                  })()
+                )
+              );
           })
       )
     );
@@ -83,6 +116,18 @@ export const getScannedMeta = async () => {
   } catch (error) {
     console.warn("Error occurred while fetching scanned Metadata: ", error);
     return { ok: false };
+  }
+};
+
+export const getSingleMeta = async dbName => {
+  try {
+    const db = new zango.Db(dbName, ["metadata"]);
+    let col = db.collection("metadata");
+    const data = await col.findOne();
+    return { ok: true, data };
+  } catch (error) {
+    console.warn("Error accessing data: ", error);
+    return { ok: false, data: error };
   }
 };
 
@@ -106,5 +151,16 @@ export const getStoreData = async (dbName, store) => {
   } catch (error) {
     console.warn("Error accessing data: ", error);
     return { ok: false, data: error };
+  }
+};
+
+export const dropDb = async dbName => {
+  try {
+    const db = new zango.Db(dbName);
+    db.drop();
+    return true;
+  } catch (error) {
+    console.warn("Error dropping db for: ", dbName, error);
+    return false;
   }
 };

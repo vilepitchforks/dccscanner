@@ -8,7 +8,7 @@ const NewScan = () => {
   const [isNew, setIsNew] = useState(true);
   const [newScan, setNewScan] = useState(false);
 
-  const { scanCompleted } = useStoreState(state => state);
+  const { processInProgress } = useStoreState(state => state);
 
   return (
     <>
@@ -19,7 +19,7 @@ const NewScan = () => {
           setNewScan={setNewScan}
         />
       )}
-      <NewScanIcon setNewScan={setNewScan} />
+      {!processInProgress && <NewScanIcon setNewScan={setNewScan} />}
     </>
   );
 };

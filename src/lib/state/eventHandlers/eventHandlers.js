@@ -35,6 +35,10 @@ export const addErrorEvent = (state, event) => {
 export const setScanCompleted = (state, check) => {
   state.scanCompleted = check;
 };
+// Check switch for the entire process from starting scan to the storing of data in db:
+export const setProcessInProgress = (state, check) => {
+  state.processInProgress = check;
+};
 
 export const startStream = async (actions, query) => {
   const es = new EventSource("/api/stream?" + query, {
@@ -61,12 +65,14 @@ export const startStream = async (actions, query) => {
     console.log("Servererror event data", data);
     actions.addErrorEvent("An error occurred: " + data);
     actions.setScanCompleted(true);
+    actions.setProcessInProgress(false); // In case of error, close the process
     es.close();
   });
   es.onerror = err => {
     console.warn("Actual error event", err);
     actions.addErrorEvent("An es.onerror occurred");
     actions.setScanCompleted(true);
+    actions.setProcessInProgress(false); // In case of error, close the process
     es.close();
   };
 };
