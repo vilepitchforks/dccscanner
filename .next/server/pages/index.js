@@ -206,7 +206,7 @@ var Navbar_module_default = /*#__PURE__*/__webpack_require__.n(Navbar_module);
 const Navbar = ({
   user
 }) => {
-  user = user.split("@")[0].split(".")[0][0];
+  user = user[0].toUpperCase();
   return /*#__PURE__*/Object(jsx_runtime_["jsxs"])("nav", {
     className: Navbar_module_default.a.navbar,
     children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])("img", {
@@ -220,12 +220,12 @@ const Navbar = ({
 };
 
 /* harmony default export */ var Navbar_Navbar = (Navbar);
-// EXTERNAL MODULE: external "easy-peasy"
-var external_easy_peasy_ = __webpack_require__("SDXy");
-
 // EXTERNAL MODULE: external "react"
 var external_react_ = __webpack_require__("cDcd");
 var external_react_default = /*#__PURE__*/__webpack_require__.n(external_react_);
+
+// EXTERNAL MODULE: external "easy-peasy"
+var external_easy_peasy_ = __webpack_require__("SDXy");
 
 // EXTERNAL MODULE: external "zangodb"
 var external_zangodb_ = __webpack_require__("iYlg");
@@ -383,13 +383,13 @@ var ScanLog_module_default = /*#__PURE__*/__webpack_require__.n(ScanLog_module);
 const ScanLog = () => {
   const scanLogRref = Object(external_react_["useRef"])();
   const {
-    processInProgress,
     infoEvents,
-    errorEvents
+    errorEvents,
+    scanInProgress
   } = Object(external_easy_peasy_["useStoreState"])(state => state);
   Object(external_react_["useEffect"])(() => {
-    const child = scanLogRref.current.lastElementChild; // Autoscroll
-    // !processInProgress && child && child.scrollIntoView(true);
+    const child = scanLogRref.current.lastElementChild;
+    child && child.scrollIntoViewIfNeeded && child.scrollIntoViewIfNeeded(true);
   }, [infoEvents]);
   return /*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
     className: ScanLog_module_default.a.buildView,
@@ -404,10 +404,10 @@ const ScanLog = () => {
         }, i))
       }), /*#__PURE__*/Object(jsx_runtime_["jsxs"])("footer", {
         className: ScanLog_module_default.a.buildStreamFooter,
-        children: [/processed/gi.test(infoEvents[infoEvents.length - 1]) && /*#__PURE__*/Object(jsx_runtime_["jsx"])("span", {
+        children: [!scanInProgress && infoEvents.length ? /*#__PURE__*/Object(jsx_runtime_["jsx"])("span", {
           className: ScanLog_module_default.a.gray,
           children: "Scan completed. "
-        }), errorEvents.length ? errorEvents.map((event, i) => /*#__PURE__*/Object(jsx_runtime_["jsx"])("span", {
+        }) : "", errorEvents.length ? errorEvents.map((event, i) => /*#__PURE__*/Object(jsx_runtime_["jsx"])("span", {
           className: ScanLog_module_default.a.red,
           children: event
         }, i)) : ""]
@@ -430,20 +430,30 @@ const CurrentScan = () => {
   const {
     0: viewLog,
     1: setViewLog
-  } = Object(external_react_["useState"])(true);
+  } = Object(external_react_["useState"])(false);
   const {
     scanUrl,
     metadata,
     dataEvents,
-    scanCompleted
+    db,
+    scanInProgress
   } = Object(external_easy_peasy_["useStoreState"])(state => state);
   const actions = Object(external_easy_peasy_["useStoreActions"])(actions => actions);
   Object(external_react_["useEffect"])(() => {
+    scanUrl && !scanInProgress && actions.addInfoEvent(`Scan data for ${scanUrl} successfully processed.`);
+    scanUrl && !scanInProgress && !dataEvents.length && actions.addInfoEvent(`No bvDCC data found for ${scanUrl}.`);
+  }, [scanInProgress, dataEvents]); // Process scan data
+
+  Object(external_react_["useEffect"])(() => {
     (async () => {
-      const storeScanData = makeStoreData(scanUrl, actions, false);
-      scanCompleted && (await storeScanData(dataEvents));
+      const dataItem = dataEvents[dataEvents.length - 1];
+      dataItem && (
+      /* dataItem.url === scanUrl && */
+      await db.collection("dccdata").insert(dataItem, () => {
+        actions.addInfoEvent(`Scan data for item ${dataItem.scannedUrl} successfully stored.`);
+      }));
     })();
-  }, [scanCompleted]); // Available items: description, icon, image, title, url
+  }, [dataEvents]); // Available items: description, icon, image, title, url
 
   const {
     icon,
@@ -460,7 +470,7 @@ const CurrentScan = () => {
           alt: "icon"
         }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("h5", {
           className: CurrentScan_module_default.a.title,
-          children: title
+          children: scanUrl && title.length ? title : "Click on the + icon in the lower right corner of the screen to start a new scan."
         })]
       }), /*#__PURE__*/Object(jsx_runtime_["jsxs"])("span", {
         className: CurrentScan_module_default.a["view-log"],
@@ -490,8 +500,8 @@ var ScanThumb_module_default = /*#__PURE__*/__webpack_require__.n(ScanThumb_modu
 const ScanThumb = ({
   thumbnail,
   setShowModal,
-  setDbName,
-  setdeleteDb
+  setsSlectedWeb,
+  setMetaArray
 }) => {
   const {
     url,
@@ -499,27 +509,26 @@ const ScanThumb = ({
     icon,
     title,
     description,
-    dbName
+    scannedUrl
   } = thumbnail;
   const {
-    scanUrl
+    scanUrl,
+    db
   } = Object(external_easy_peasy_["useStoreState"])(state => state);
+
+  const handleDelete = async () => {
+    await db.remove(scannedUrl); // Re-renders the website thumbnails list
+
+    setMetaArray(metaArray => metaArray.filter(item => item.scannedUrl !== scannedUrl));
+  };
+
   return /*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
     className: ScanThumb_module_default.a["thumbnail-plh"] + " columns three",
     children: [/*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
       className: ScanThumb_module_default.a["thumbnail-img-plh"],
-      children: [dbName !== scanUrl && /*#__PURE__*/Object(jsx_runtime_["jsx"])("svg", {
+      children: [scannedUrl !== scanUrl && /*#__PURE__*/Object(jsx_runtime_["jsx"])("svg", {
         className: ScanThumb_module_default.a["thumbnail-close-icon"],
-        onClick: async () => {
-          try {
-            console.log("Deletig db ", dbName);
-            const d = await dropDb(dbName);
-            setdeleteDb(d => !d);
-            console.log("db deleted?", d);
-          } catch (error) {
-            console.warn("Error while deleting the db for ", url, err);
-          }
-        },
+        onClick: () => handleDelete(),
         viewBox: "0 0 24 24",
         children: /*#__PURE__*/Object(jsx_runtime_["jsx"])("path", {
           d: "M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"
@@ -546,7 +555,7 @@ const ScanThumb = ({
         className: ScanThumb_module_default.a["thumbnail-link"],
         onClick: () => {
           setShowModal(true);
-          setDbName(dbName);
+          setsSlectedWeb(scannedUrl);
         },
         children: "View DCC data"
       })]
@@ -575,7 +584,7 @@ const ModalBackground = ({
 };
 
 /* harmony default export */ var ModalBackground_ModalBackground = (ModalBackground);
-// CONCATENATED MODULE: ./src/lib/helpers/handleArr.js
+// CONCATENATED MODULE: ./src/lib/helpers/arrayHelpers.js
 const chunkify = array => {
   return Array.from({
     length: Math.ceil(array.length / 4)
@@ -585,11 +594,27 @@ const chunkify = array => {
   });
 };
 const createTableData = dataRaw => {
+  // Creates 15X36 empty spreadsheet as a default placeholder
+  const numberOfColumns = dataRaw.length ? Object.keys(dataRaw[0]).length : 15;
+  const row = Array.from({
+    length: numberOfColumns
+  }, (_, i) => ({
+    value: " "
+  }));
+  const emptyTable = Array.from({
+    length: 36
+  }, (_, i) => row);
+  if (!dataRaw.length) return emptyTable; // dataRaw format:
+  // [
+  //   {url: "url", timestamp: "timestamp", scannedUrl: "scannedUrl", locale: "locale", productId: "productId", …},
+  //   {url: "url", timestamp: "timestamp", scannedUrl: "scannedUrl", locale: "locale", productId: "productId", …}
+  // ]
   // Format needed for react-datasheet:
   // [
   //   [{value:  1}, {value:  3}],
   //   [{value:  2}, {value:  4}]
   // ]
+
   const title = Object.keys(dataRaw[0]).map(titleKey => ({
     value: titleKey
   }));
@@ -597,7 +622,7 @@ const createTableData = dataRaw => {
   const body = bodyRaw.map(row => row.map(cell => ({
     value: Array.isArray(cell) ? JSON.stringify(cell) : cell
   })));
-  return [title, ...body];
+  return [title, ...body, ...emptyTable];
 };
 // EXTERNAL MODULE: external "styled-jsx/style"
 var style_ = __webpack_require__("HJQg");
@@ -623,17 +648,23 @@ class Worksheet_Worksheet extends external_react_default.a.Component {
   constructor(props) {
     super(props);
     this.state = {
-      grid: [] //   grid: [
-      //     [{ value: 1 }, { value: 3 }],
-      //     [{ value: 2 }, { value: 4 }]
-      //   ]
+      grid: [] // grid: [
+      //   [{ value: 1 }, { value: 3 }],
+      //   [{ value: 2 }, { value: 4 }]
+      // ]
 
+    };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    return {
+      grid: props.data
     };
   }
 
   render() {
     return /*#__PURE__*/Object(jsx_runtime_["jsx"])(external_react_datasheet_default.a, {
-      data: this.props.data,
+      data: this.state.grid,
       valueRenderer: cell => cell.value,
       onCellsChanged: changes => {
         const grid = this.props.data.map(row => [...row]);
@@ -667,79 +698,143 @@ class Worksheet_Worksheet extends external_react_default.a.Component {
 
 
 
+
 const ScanData = ({
-  dbName
+  selectedWeb
 }) => {
   const {
-    0: dates,
-    1: setDates
+    0: hasDccData,
+    1: setHasDccData
+  } = Object(external_react_["useState"])(true);
+  const {
+    0: timestamps,
+    1: setTimestamps
   } = Object(external_react_["useState"])([]);
   const {
-    0: data,
-    1: setData
+    0: selectedTs,
+    1: setSelectedTs
+  } = Object(external_react_["useState"])(null);
+  const {
+    0: allTsData,
+    1: setAllTsData
   } = Object(external_react_["useState"])([]);
+  const {
+    0: allTsGroupedData,
+    1: setAllTsGroupedData
+  } = Object(external_react_["useState"])([]);
+  const {
+    0: allSheetData,
+    1: setAllSheetData
+  } = Object(external_react_["useState"])([]);
+  const {
+    0: sheetData,
+    1: setSheetData
+  } = Object(external_react_["useState"])([]);
+  const {
+    db
+  } = Object(external_easy_peasy_["useStoreState"])(state => state); // Get all dcc data for one website
+
   Object(external_react_["useEffect"])(() => {
     (async () => {
-      const stores = await getStoresNames(dbName);
-      const rawDates = Object.values(stores).filter(store => store !== "metadata");
-      setDates(rawDates);
+      const websiteData = await db.col("dccdata").findAsArray({
+        url: selectedWeb
+      }, {
+        _id: 0,
+        url: 0
+      });
+      websiteData.length ? setAllTsData(websiteData) : setHasDccData(false);
     })();
-  }, []);
+  }, []); // Make timestamps
 
-  const handleGetStoreData = async (dbName, date) => {
-    const d = await getStoreData(dbName, date);
-    const formattedDdata = d.ok && createTableData(d.data);
-    setData(formattedDdata);
+  Object(external_react_["useEffect"])(() => {
+    const tsSet = new Set(allTsData.map(d => d.timestamp));
+    const ts = Array.from(tsSet);
+    ts.length && setTimestamps(ts.reverse());
+  }, [allTsData]); // Group all data into array of arrays for each timestamp [[ts1],[ts2],[ts3]]
+
+  Object(external_react_["useEffect"])(() => {
+    const tsGroupDataTmp = timestamps.length && timestamps.map(t => allTsData.filter(c => c.timestamp === t));
+    tsGroupDataTmp.length && setAllTsGroupedData(tsGroupDataTmp);
+  }, [timestamps]); // Prepare the arrays for the format required by react-datasheet
+
+  Object(external_react_["useEffect"])(() => {
+    const sheetAllDataTmp = allTsGroupedData.length ? allTsGroupedData.map(d => createTableData(d)) : [];
+    sheetAllDataTmp.length && setAllSheetData(sheetAllDataTmp);
+  }, [allTsGroupedData]); // Display the selected timestamp data
+
+  Object(external_react_["useEffect"])(() => {
+    // Find the index of selected timestamp dataset and send that data to react-datasheet
+    let index = allTsGroupedData.length && allTsGroupedData.findIndex(ds => ds[0].timestamp === selectedTs);
+    index = index === -1 ? 0 : index;
+    allSheetData.length && setSheetData(allSheetData[index] || []);
+  }, [allTsGroupedData, selectedTs, allSheetData]);
+
+  const formatTs = timestamp => {
+    const addZero = d => d = d > 9 ? d : "0" + d;
+
+    const year = new Date(timestamp).getFullYear();
+    const month = addZero(new Date(timestamp).getMonth() + 1);
+    const day = addZero(new Date(timestamp).getDate());
+    const hour = addZero(new Date(timestamp).getHours());
+    const minute = addZero(new Date(timestamp).getMinutes());
+    return `${year}-${month}-${day} ${hour}:${minute}`;
   };
 
   return /*#__PURE__*/Object(jsx_runtime_["jsxs"])(jsx_runtime_["Fragment"], {
     children: [/*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
-      className: "jsx-987697359" + " " + "data-container",
+      className: "jsx-3655797331" + " " + "data-container",
       children: [/*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
-        className: "jsx-987697359" + " " + "data-head",
+        className: "jsx-3655797331" + " " + "data-head",
         children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
-          className: "jsx-987697359" + " " + "data-head-url",
-          children: dbName
+          className: "jsx-3655797331" + " " + "data-head-url",
+          children: selectedWeb
         }), /*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
-          className: "jsx-987697359" + " " + "data-head-element",
+          className: "jsx-3655797331" + " " + "data-head-element",
           children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])("span", {
-            className: "jsx-987697359",
-            children: "Rest of the head section"
+            className: "jsx-3655797331",
+            children: !sheetData.length && hasDccData && "Loading..."
+          }), !hasDccData && /*#__PURE__*/Object(jsx_runtime_["jsxs"])("span", {
+            className: "jsx-3655797331",
+            children: ["DCC data unavailable for ", selectedWeb]
           }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("svg", {
             viewBox: "0 0 24 24",
-            className: "jsx-987697359" + " " + "data-close-icon",
+            className: "jsx-3655797331" + " " + "data-close-icon",
             children: /*#__PURE__*/Object(jsx_runtime_["jsx"])("path", {
               d: "M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z",
-              className: "jsx-987697359"
+              className: "jsx-3655797331"
             })
           })]
         })]
       }), /*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
-        className: "jsx-987697359" + " " + "data-body",
+        className: "jsx-3655797331" + " " + "data-body",
         children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
-          className: "jsx-987697359" + " " + "data-spreadsheet",
-          children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(components_Worksheet_Worksheet, {
-            data: data
+          className: "jsx-3655797331" + " " + "data-spreadsheet",
+          children: sheetData.length ? /*#__PURE__*/Object(jsx_runtime_["jsx"])(components_Worksheet_Worksheet, {
+            data: sheetData
+          }) : /*#__PURE__*/Object(jsx_runtime_["jsx"])(components_Worksheet_Worksheet, {
+            data: createTableData([])
           })
         }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
-          className: "jsx-987697359" + " " + "data-dates",
-          children: dates.map((date, i) => /*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
-            onClick: () => handleGetStoreData(dbName, date),
-            className: "jsx-987697359",
-            children: date
-          }, i))
+          className: "jsx-3655797331" + " " + "data-dates-placeholder",
+          children: /*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
+            className: "jsx-3655797331" + " " + "data-dates",
+            children: timestamps.map((timestamp, i) => /*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
+              onClick: () => setSelectedTs(timestamp),
+              className: "jsx-3655797331",
+              children: formatTs(timestamp)
+            }, i))
+          })
         })]
       })]
     }), /*#__PURE__*/Object(jsx_runtime_["jsx"])(style_default.a, {
-      id: "987697359",
-      children: [".data-container.jsx-987697359{background:red;margin:20px;height:calc(100vh - 40px);display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;}", ".data-head.jsx-987697359{background:green;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;}", ".data-head-url.jsx-987697359{background:darkmagenta;width:25rem;-webkit-flex:none;-ms-flex:none;flex:none;}", ".data-head-element.jsx-987697359{background:darkorange;-webkit-flex:1 1 0%;-ms-flex:1 1 0%;flex:1 1 0%;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:justify;-webkit-justify-content:space-between;-ms-flex-pack:justify;justify-content:space-between;}", ".data-body.jsx-987697359{background:blue;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;overflow-y:hidden;}", ".data-spreadsheet.jsx-987697359{background:coral;overflow-y:auto;}", ".data-dates.jsx-987697359{background:blueviolet;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;}", ".data-close-icon.jsx-987697359{width:15px;}"]
+      id: "3655797331",
+      children: [".data-container.jsx-3655797331{background:red;margin:20px;height:calc(100vh - 40px);display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;}", ".data-head.jsx-3655797331{background:green;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;}", ".data-head-url.jsx-3655797331{background:darkmagenta;width:25rem;-webkit-flex:none;-ms-flex:none;flex:none;}", ".data-head-element.jsx-3655797331{background:darkorange;-webkit-flex:1 1 0%;-ms-flex:1 1 0%;flex:1 1 0%;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:justify;-webkit-justify-content:space-between;-ms-flex-pack:justify;justify-content:space-between;}", ".data-body.jsx-3655797331{background:blue;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;overflow-y:hidden;height:100%;}", ".data-spreadsheet.jsx-3655797331{background:coral;overflow-y:auto;-webkit-flex:1 1 0%;-ms-flex:1 1 0%;flex:1 1 0%;}", "data-dates-placeholder.jsx-3655797331{overflow-x:hidden;}", ".data-dates.jsx-3655797331{background:blueviolet;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;overflow-x:auto;}", ".data-dates.jsx-3655797331 div.jsx-3655797331{border:1px solid;margin:5px;white-space:nowrap;}", ".data-close-icon.jsx-3655797331{width:15px;}"]
     })]
   });
 };
 
 /* harmony default export */ var ScanData_ScanData = (ScanData);
 // CONCATENATED MODULE: ./src/components/Scans/Scans.js
-
 
 
 
@@ -761,38 +856,35 @@ const Scans = () => {
     1: setShowModal
   } = Object(external_react_["useState"])(false);
   const {
-    0: dbName,
-    1: setDbName
+    0: selectedWeb,
+    1: setsSlectedWeb
   } = Object(external_react_["useState"])("");
   const {
-    0: deleteDb,
-    1: setdeleteDb
-  } = Object(external_react_["useState"])(false);
-  const {
-    processInProgress
+    scanUrl,
+    db
   } = Object(external_easy_peasy_["useStoreState"])(state => state);
   const scanRows = chunkify(metaArray);
   Object(external_react_["useEffect"])(() => {
     (async () => {
-      // Get metadata for all locally stored website scans
-      const m = await getAllMeta();
-      m.ok && setMetaArray(m.meta);
-    })(); // Re-fetch meta from local db after each new website scan has completed and once a db has been deleted
+      // Get metadata for all locally stored website scans for initial render
+      const websites = Object.keys(db).length ? await db.col("metadata").findAsArray() : [];
+      setMetaArray(websites);
+    })(); // Re-fetch meta from local db after each new website has beem added
 
-  }, [processInProgress, deleteDb]);
+  }, [scanUrl, db]);
   return /*#__PURE__*/Object(jsx_runtime_["jsxs"])(jsx_runtime_["Fragment"], {
     children: [scanRows.map((row, i) => /*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
       className: Scans_module_default.a["scans-row"] + " row",
       children: row.map((thumbnail, i) => /*#__PURE__*/Object(jsx_runtime_["jsx"])(ScanThumb_ScanThumb, {
         thumbnail: thumbnail,
         setShowModal: setShowModal,
-        setDbName: setDbName,
-        setdeleteDb: setdeleteDb
+        setsSlectedWeb: setsSlectedWeb,
+        setMetaArray: setMetaArray
       }, i))
     }, i)), showModal && /*#__PURE__*/Object(jsx_runtime_["jsx"])(ModalBackground_ModalBackground, {
       trigger: setShowModal,
       children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(ScanData_ScanData, {
-        dbName: dbName
+        selectedWeb: selectedWeb
       })
     })]
   });
@@ -807,13 +899,19 @@ const Scans = () => {
 
 
 
+
 const WebList = () => {
   const {
-    metadata
+    scanUrl
   } = Object(external_easy_peasy_["useStoreState"])(state => state);
+  const {
+    initDb
+  } = Object(external_easy_peasy_["useStoreActions"])(actions => actions); // Initialize the database
+
+  Object(external_react_["useEffect"])(() => initDb(), []);
   return /*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
     className: "container",
-    children: [Object.keys(metadata).length ? /*#__PURE__*/Object(jsx_runtime_["jsx"])(CurrentScan_CurrentScan, {}) : "", /*#__PURE__*/Object(jsx_runtime_["jsx"])(Scans_Scans, {})]
+    children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])(CurrentScan_CurrentScan, {}), /*#__PURE__*/Object(jsx_runtime_["jsx"])(Scans_Scans, {})]
   });
 };
 
@@ -849,6 +947,7 @@ const Category = ({
 });
 
 const NewScanForm = ({
+  loading,
   url,
   setUrl,
   slugs,
@@ -895,7 +994,7 @@ const NewScanForm = ({
       onInput: e => setCategories(ctgs => [...ctgs, e.target.value]),
       children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])("option", {
         value: "",
-        children: "--Select a slug--"
+        children: loading ? "--Fetching slugs...--" : "--Select a slug--"
       }), slugs.map((slug, i) => /*#__PURE__*/Object(jsx_runtime_["jsx"])("option", {
         value: slug,
         children: slug
@@ -1003,16 +1102,13 @@ const NewScanInit = ({
     scanCtgs
   } = Object(external_easy_peasy_["useStoreState"])(state => state);
   const {
-    startStream,
-    setProcessInProgress
+    startStream
   } = Object(external_easy_peasy_["useStoreActions"])(actions => actions);
 
   const handleInitScan = () => {
     startStream(`url=${scanUrl}&categories=${scanCtgs}`); // Removes the modal overlay
 
-    setNewScan(false); // Starts the check switch for the entire process from starting scan to the storing of data in db:
-
-    setProcessInProgress(true);
+    setNewScan(false);
   };
 
   return /*#__PURE__*/Object(jsx_runtime_["jsx"])("button", {
@@ -1053,7 +1149,6 @@ function NewScanModal_defineProperty(obj, key, value) { if (key in obj) { Object
 
 
 
-
 const NewScanModal = ({
   isNew,
   setIsNew,
@@ -1072,48 +1167,99 @@ const NewScanModal = ({
     1: setSlugs
   } = Object(external_react_["useState"])([]);
   const {
-    scanCtgs
+    scanCtgs,
+    db
   } = Object(external_easy_peasy_["useStoreState"])(state => state);
   const actions = Object(external_easy_peasy_["useStoreActions"])(actions => actions);
 
+  const getMetaFromDb = async () => {
+    setLoading(true); // Check if metadata exists in local db. typeof meta<{res}:Object || undefined>
+
+    const meta = await db.collection("metadata").findOne({
+      scannedUrl: url
+    }, actions.addInfoEvent(`Metadata for ${url} successfully fetched.`));
+
+    if (meta) {
+      setLoading(false);
+      return {
+        ok: true,
+        meta
+      };
+    } else {
+      setLoading(false);
+      return {
+        ok: false,
+        meta: {}
+      };
+    }
+  };
+
+  const getMetaFromWebsite = async () => {
+    setLoading(true);
+    let meta = {},
+        isMetaAvailable = false,
+        isMetaStored = false; // If website does not exist in local db, fetch metadata
+
+    const fetchedMeta = await Object(restDrivers["b" /* slugDriver */])({
+      query: "url=" + url
+    });
+    if (fetchedMeta && fetchedMeta.metadata) isMetaAvailable = true; // Website details are fetched and metadata exists
+
+    if (isMetaAvailable) {
+      meta = NewScanModal_objectSpread({
+        scannedUrl: url,
+        slugs: fetchedMeta.slugs
+      }, fetchedMeta.metadata);
+    }
+
+    if (isMetaAvailable) {
+      // Store website metadata and slugs to local db
+      await db.collection("metadata").insert(meta, () => {
+        actions.addInfoEvent(`Metadata for ${url} successfully stored.`);
+        isMetaStored = true;
+      });
+    }
+
+    if (isMetaStored) {
+      setLoading(false);
+      return {
+        ok: true,
+        meta
+      };
+    } else {
+      setLoading(false);
+      return {
+        ok: false,
+        meta
+      };
+    }
+  };
+
+  const getMeta = async () => {
+    let data = await getMetaFromDb();
+    if (data.ok) return data.meta;
+    data = await getMetaFromWebsite();
+    if (data.ok) return data.meta;
+    return false;
+  };
+
   const handleSlugs = async () => {
-    setUrl("");
-    if (!regex["urlRgx"].test(url)) return; // Remove "New DCC scan" title and set loading animation
+    if (!regex["urlRgx"].test(url)) return; // setIsNew(false) Removes the default "New DCC scan" text
 
     setIsNew(false);
-    setLoading(true);
-    let website; // Check if metadata exists in local db
+    const meta = await getMeta();
 
-    const {
-      ok,
-      data
-    } = await getSingleMeta(url);
-
-    if (ok && data) {
-      actions.addInfoEvent(`Metadata for ${url} successfully fetched.`);
-      actions.setMetadata(data);
-      setSlugs(data.slugs);
+    if (meta) {
+      actions.setMetadata(meta);
+      setSlugs(meta.slugs);
+      return actions.setScanUrl(url);
     } else {
-      // If website does not exist in local db, fetch metadata
-      website = await Object(restDrivers["b" /* slugDriver */])({
-        query: "url=" + url
-      }); // Store website metadata and slugs to local db
-
-      const storeMetaData = website && makeStoreData(url, actions, true);
-      website && (await storeMetaData(NewScanModal_objectSpread(NewScanModal_objectSpread({}, website.metadata), {}, {
-        slugs: website.slugs
-      })));
-      website && website.metadata && actions.setMetadata(website.metadata);
-      website && setSlugs(website.slugs);
-      website && setLoading(false);
-    }
-
-    actions.setScanUrl(url); // In case of errors while fetching metadata, reset the loading screen
-
-    if (!website) {
+      // If fetching metadata fails, reset the default "New DCC scan" details and remove url from state
       setIsNew(true);
-      setLoading(false);
+      setUrl("");
     }
+
+    return;
   }; // Cleanup function, resets all url data each tome Modal component unmounts
 
 
@@ -1127,6 +1273,7 @@ const NewScanModal = ({
         children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
           className: "three columns",
           children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(NewScanForm_NewScanForm, {
+            loading: loading,
             url: url,
             setUrl: setUrl,
             slugs: slugs,
@@ -1160,8 +1307,7 @@ const NewScanIcon = ({
   setNewScan
 }) => {
   const {
-    reSetScanUrl,
-    setScanCompleted
+    reSetScanUrl
   } = Object(external_easy_peasy_["useStoreActions"])(actions => actions);
   return /*#__PURE__*/Object(jsx_runtime_["jsx"])("button", {
     className: NewScanIcon_module_default.a.newScan,
@@ -1169,7 +1315,6 @@ const NewScanIcon = ({
     onClick: () => {
       // Reset all before initiating a new scan
       reSetScanUrl();
-      setScanCompleted(false);
       setNewScan(true);
     },
     children: /*#__PURE__*/Object(jsx_runtime_["jsx"])("span", {
@@ -1206,14 +1351,14 @@ const NewScan = () => {
     1: setNewScan
   } = Object(external_react_["useState"])(false);
   const {
-    processInProgress
+    scanInProgress
   } = Object(external_easy_peasy_["useStoreState"])(state => state);
   return /*#__PURE__*/Object(jsx_runtime_["jsxs"])(jsx_runtime_["Fragment"], {
     children: [newScan && /*#__PURE__*/Object(jsx_runtime_["jsx"])(NewScanModal_NewScanModal, {
       isNew: isNew,
       setIsNew: setIsNew,
       setNewScan: setNewScan
-    }), !processInProgress && /*#__PURE__*/Object(jsx_runtime_["jsx"])(NewScanIcon_NewScanIcon, {
+    }), !scanInProgress && /*#__PURE__*/Object(jsx_runtime_["jsx"])(NewScanIcon_NewScanIcon, {
       setNewScan: setNewScan
     })]
   });

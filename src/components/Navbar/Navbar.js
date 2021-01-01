@@ -1,7 +1,7 @@
 import css from "./Navbar.module.css";
 
 const Navbar = ({ user }) => {
-  user = user.split("@")[0].split(".")[0][0];
+  user = user[0].toUpperCase();
 
   return (
     <nav className={css.navbar}>

@@ -6,14 +6,14 @@ import css from "./ScanLog.module.css";
 const ScanLog = () => {
   const scanLogRref = useRef();
 
-  const { processInProgress, infoEvents, errorEvents } = useStoreState(
+  const { infoEvents, errorEvents, scanInProgress } = useStoreState(
     state => state
   );
 
   useEffect(() => {
     const child = scanLogRref.current.lastElementChild;
-    // Autoscroll
-    // !processInProgress && child && child.scrollIntoView(true);
+
+    child && child.scrollIntoViewIfNeeded && child.scrollIntoViewIfNeeded(true);
   }, [infoEvents]);
 
   return (
@@ -27,8 +27,10 @@ const ScanLog = () => {
           ))}
         </div>
         <footer className={css.buildStreamFooter}>
-          {/processed/gi.test(infoEvents[infoEvents.length - 1]) && (
+          {!scanInProgress && infoEvents.length ? (
             <span className={css.gray}>Scan completed. </span>
+          ) : (
+            ""
           )}
           {errorEvents.length
             ? errorEvents.map((event, i) => (

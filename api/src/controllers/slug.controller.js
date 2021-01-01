@@ -11,20 +11,16 @@ exports.slug = async (req, res, next) => {
     const rawURL = req.query.url;
     if (!rawURL || !urlRgx.test(rawURL)) throw new Error("ERR_INVALID_URL");
 
-    const slugs = await getSlugs(rawURL);
-
-    if (!slugs) throw new Error("ERR_FETCHING_DATA");
-
     const metadata = await getMeta(rawURL);
+
+    const slugs = await getSlugs(rawURL);
 
     if (!slugs) throw new Error("ERR_FETCHING_DATA");
 
     res.json({ metadata, slugs });
   } catch (error) {
-    res.status(422);
-    error.isAxiosError
-      ? console.warn(error.toJSON())
-      : console.warn(error.message);
+    // res.status(422);
+    console.warn(error);
     next(error);
   }
 };

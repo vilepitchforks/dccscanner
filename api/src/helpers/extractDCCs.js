@@ -37,11 +37,17 @@ exports.extractDCCs = async (urls, start) => {
     // Iterate over passed URLs and create bvDCC data
     const bvDCCs = [];
     for (let i = 0; i < urls.length; i++) {
-      console.log(`Scanning URL ${i + 1} of ${urls.length} URLs total.`);
+      console.log(
+        `Scanning URL ${i + 1} of ${urls.length} ${
+          urls.length > 1 ? "URLs" : "URL"
+        } total.`
+      );
       events.emit(
         "info",
         "info",
-        `Scanning URL ${i + 1} of ${urls.length} URLs total.`
+        `Scanning URL ${i + 1} of ${urls.length} ${
+          urls.length > 1 ? "URLs" : "URL"
+        } total.`
       );
 
       // Open each url from urls array in a new created tab

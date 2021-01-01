@@ -9,7 +9,6 @@ import ModalBackground from "../ModalBackground/ModalBackground.js";
 import css from "./NewScanModal.module.css";
 
 import { slugDriver } from "../../lib/drivers/restDrivers";
-import { getSingleMeta, makeStoreData } from "../../lib/helpers/processDb.js";
 import { urlRgx } from "../../lib/helpers/regex";
 
 const NewScanModal = ({ isNew, setIsNew, setNewScan }) => {
@@ -17,48 +16,105 @@ const NewScanModal = ({ isNew, setIsNew, setNewScan }) => {
   const [url, setUrl] = useState("");
   const [slugs, setSlugs] = useState([]);
 
-  const { scanCtgs } = useStoreState(state => state);
+  const { scanCtgs, db } = useStoreState(state => state);
   const actions = useStoreActions(actions => actions);
 
-  const handleSlugs = async () => {
-    setUrl("");
+  const getMetaFromDb = async () => {
+    setLoading(true);
+    // Check if metadata exists in local db. typeof meta<{res}:Object || undefined>
+    const meta = await db
+      .collection("metadata")
+      .findOne(
+        { scannedUrl: url },
+        actions.addInfoEvent(`Metadata for ${url} successfully fetched.`)
+      );
 
+    if (meta) {
+      setLoading(false);
+      return {
+        ok: true,
+        meta
+      };
+    } else {
+      setLoading(false);
+      return {
+        ok: false,
+        meta: {}
+      };
+    }
+  };
+
+  const getMetaFromWebsite = async () => {
+    setLoading(true);
+    let meta = {},
+      isMetaAvailable = false,
+      isMetaStored = false;
+
+    // If website does not exist in local db, fetch metadata
+    const fetchedMeta = await slugDriver({ query: "url=" + url });
+
+    if (fetchedMeta && fetchedMeta.metadata) isMetaAvailable = true;
+
+    // Website details are fetched and metadata exists
+    if (isMetaAvailable) {
+      meta = {
+        scannedUrl: url,
+        slugs: fetchedMeta.slugs,
+        ...fetchedMeta.metadata
+      };
+    }
+
+    if (isMetaAvailable) {
+      // Store website metadata and slugs to local db
+      await db.collection("metadata").insert(meta, () => {
+        actions.addInfoEvent(`Metadata for ${url} successfully stored.`);
+        isMetaStored = true;
+      });
+    }
+
+    if (isMetaStored) {
+      setLoading(false);
+      return {
+        ok: true,
+        meta
+      };
+    } else {
+      setLoading(false);
+      return {
+        ok: false,
+        meta
+      };
+    }
+  };
+
+  const getMeta = async () => {
+    let data = await getMetaFromDb();
+    if (data.ok) return data.meta;
+
+    data = await getMetaFromWebsite();
+    if (data.ok) return data.meta;
+
+    return false;
+  };
+
+  const handleSlugs = async () => {
     if (!urlRgx.test(url)) return;
 
-    // Remove "New DCC scan" title and set loading animation
+    // setIsNew(false) Removes the default "New DCC scan" text
     setIsNew(false);
-    setLoading(true);
 
-    let website;
+    const meta = await getMeta();
 
-    // Check if metadata exists in local db
-    const { ok, data } = await getSingleMeta(url);
-
-    if (ok && data) {
-      actions.addInfoEvent(`Metadata for ${url} successfully fetched.`);
-      actions.setMetadata(data);
-      setSlugs(data.slugs);
+    if (meta) {
+      actions.setMetadata(meta);
+      setSlugs(meta.slugs);
+      return actions.setScanUrl(url);
     } else {
-      // If website does not exist in local db, fetch metadata
-      website = await slugDriver({ query: "url=" + url });
-
-      // Store website metadata and slugs to local db
-      const storeMetaData = website && makeStoreData(url, actions, true);
-
-      website &&
-        (await storeMetaData({ ...website.metadata, slugs: website.slugs }));
-
-      website && website.metadata && actions.setMetadata(website.metadata);
-      website && setSlugs(website.slugs);
-      website && setLoading(false);
-    }
-
-    actions.setScanUrl(url);
-    // In case of errors while fetching metadata, reset the loading screen
-    if (!website) {
+      // If fetching metadata fails, reset the default "New DCC scan" details and remove url from state
       setIsNew(true);
-      setLoading(false);
+      setUrl("");
     }
+    return;
   };
 
   // Cleanup function, resets all url data each tome Modal component unmounts
@@ -70,6 +126,7 @@ const NewScanModal = ({ isNew, setIsNew, setNewScan }) => {
         <div className="row flex">
           <div className="three columns">
             <NewScanForm
+              loading={loading}
               url={url}
               setUrl={setUrl}
               slugs={slugs}

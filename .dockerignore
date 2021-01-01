@@ -4,6 +4,6 @@
 # Allow files and directories
 !/*.json
 !/*.js
-!/api/*
 !/.next/*
+!/api/*
 !/public/*

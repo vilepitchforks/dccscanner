@@ -5,5 +5,6 @@ exports.errorHandler = (error, req, res, next) => {
     status: res.statusCode
   };
   if (Object.keys(error).length) payload.error = error.errors;
+  if (error.isAxiosError) payload.error = { ...error.toJSON() };
   res.json(payload);
 };

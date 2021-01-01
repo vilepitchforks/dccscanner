@@ -16,7 +16,7 @@ const Category = ({ ctg, deleteCategory }) => (
   </div>
 );
 
-const NewScanForm = ({ url, setUrl, slugs, handleSlugs }) => {
+const NewScanForm = ({ loading, url, setUrl, slugs, handleSlugs }) => {
   const [categories, setCategories] = useState([]);
 
   const { setScanCtgs } = useStoreActions(actions => actions);
@@ -54,7 +54,9 @@ const NewScanForm = ({ url, setUrl, slugs, handleSlugs }) => {
         className="u-full-width"
         onInput={e => setCategories(ctgs => [...ctgs, e.target.value])}
       >
-        <option value="">--Select a slug--</option>
+        <option value="">
+          {loading ? "--Fetching slugs...--" : "--Select a slug--"}
+        </option>
         {slugs.map((slug, i) => (
           <option key={i} value={slug}>
             {slug}

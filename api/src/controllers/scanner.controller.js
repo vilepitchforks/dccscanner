@@ -86,7 +86,7 @@ exports.ScanLoger = async (req, res, next) => {
       categories.length < 200 &&
       categories.split(",").map(ctg => ctg.trim());
     if (!categories) throw new Error("ERR_CATEGORY_MISSING_OR_INVALID");
-    console.log("categories", categories);
+
     // Get product URLs
     const urls = await getSitemapUrls(url, categories, start);
     // const urlChunks = chunkify(urls);

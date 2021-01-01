@@ -3,9 +3,7 @@ import { useStoreActions } from "easy-peasy";
 import css from "./NewScanIcon.module.css";
 
 const NewScanIcon = ({ setNewScan }) => {
-  const { reSetScanUrl, setScanCompleted } = useStoreActions(
-    actions => actions
-  );
+  const { reSetScanUrl } = useStoreActions(actions => actions);
 
   return (
     <button
@@ -14,7 +12,6 @@ const NewScanIcon = ({ setNewScan }) => {
       onClick={() => {
         // Reset all before initiating a new scan
         reSetScanUrl();
-        setScanCompleted(false);
         setNewScan(true);
       }}
     >

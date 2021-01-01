@@ -133,12 +133,69 @@ var global = __webpack_require__("rMck");
 // EXTERNAL MODULE: ./node_modules/react-datasheet/lib/react-datasheet.css
 var react_datasheet = __webpack_require__("ZJU2");
 
+// EXTERNAL MODULE: external "zangodb"
+var external_zangodb_ = __webpack_require__("iYlg");
+var external_zangodb_default = /*#__PURE__*/__webpack_require__.n(external_zangodb_);
+
+// CONCATENATED MODULE: ./src/lib/helpers/processDb_new.js
+
+class processDb_new_Model {
+  constructor() {
+    const db = new external_zangodb_default.a.Db("dcc", {
+      // sets the schema, scannedUrl and url are the same url sent by the user
+      metadata: ["scannedUrl"],
+      dccdata: ["url", "timestamp"]
+    });
+    db.open(); // creates the db and collections
+
+    db.on("blocked", () => {
+      console.warn("database version cannot be upgraded");
+    });
+    this.db = db;
+    this.colLabel = "";
+  }
+
+  col(collection) {
+    // Used in conjuction with methods that return Cursor and need extra processing, for example db.find()
+    this.colLabel = collection;
+    return this;
+  }
+
+  collection(collection) {
+    // Returns Collection on Model.db instance
+    return this.db.collection(collection);
+  }
+
+  async findAsArray(query, options) {
+    // Used in conjuction with db.col()
+    return await this.db.collection(this.colLabel).find(query, options).toArray();
+  }
+
+  async remove(url) {
+    return await Promise.all([this.db.collection("metadata").remove({
+      scannedUrl: url
+    }), this.db.collection("dccdata").remove({
+      url
+    })]);
+  }
+
+}
 // CONCATENATED MODULE: ./src/lib/state/eventHandlers/eventHandlers.js
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
 const setScanUrl = (state, scanUrl) => {
   state.scanUrl = scanUrl;
 };
 const setScanCtgs = (state, scanCtgs) => {
   state.scanCtgs = scanCtgs;
+};
+const setScanInProgress = (state, check) => {
+  state.scanInProgress = check;
 };
 const setMetadata = (state, meta) => {
   state.metadata = meta;
@@ -148,7 +205,7 @@ const reSetScanUrl = state => {
   state.scanCtgs = "";
   state.metadata = {};
   state.infoEvents = [];
-  state.dataEvents = {};
+  state.dataEvents = [];
   state.errorEvents = [];
 };
 const addInfoEvent = (state, event) => {
@@ -156,28 +213,27 @@ const addInfoEvent = (state, event) => {
 };
 const addDataEvent = (state, {
   url,
-  data
+  data,
+  timestamp
 }) => {
-  const scanData = state.dataEvents[url] || [];
-  state.dataEvents[url] = [...scanData, data];
+  // Store valid DCC objects, with more than just url, scannedUrl and timestamp.
+  if (Object.keys(data).length > 3) state.dataEvents.push(_objectSpread({
+    url,
+    timestamp
+  }, data));
 };
 const addErrorEvent = (state, event) => {
   state.errorEvents.push(event);
-};
-const setScanCompleted = (state, check) => {
-  state.scanCompleted = check;
-}; // Check switch for the entire process from starting scan to the storing of data in db:
-
-const setProcessInProgress = (state, check) => {
-  state.processInProgress = check;
 };
 const startStream = async (actions, query) => {
   const es = new EventSource("/api/stream?" + query, {
     withCredentials: true
   });
+  const timestamp = new Date().getTime();
 
   es.onopen = () => {
     actions.addInfoEvent("Connection with server established.");
+    actions.setScanInProgress(true);
   };
 
   es.addEventListener("info", ({
@@ -191,13 +247,14 @@ const startStream = async (actions, query) => {
   }) => {
     actions.addDataEvent({
       url,
-      data: JSON.parse(data)
+      data: JSON.parse(data),
+      timestamp
     });
   });
   es.addEventListener("close", e => {
     actions.addInfoEvent("Connection with server closed.");
     actions.addInfoEvent("Processing scan data...");
-    actions.setScanCompleted(true);
+    actions.setScanInProgress(false);
     es.close();
   });
   es.addEventListener("servererror", ({
@@ -207,20 +264,23 @@ const startStream = async (actions, query) => {
     console.log("Servererror event lastEventId", url);
     console.log("Servererror event data", data);
     actions.addErrorEvent("An error occurred: " + data);
-    actions.setScanCompleted(true);
-    actions.setProcessInProgress(false); // In case of error, close the process
-
+    actions.setScanInProgress(false);
     es.close();
   });
 
   es.onerror = err => {
     console.warn("Actual error event", err);
     actions.addErrorEvent("An es.onerror occurred");
-    actions.setScanCompleted(true);
-    actions.setProcessInProgress(false); // In case of error, close the process
-
+    actions.setScanInProgress(false);
     es.close();
   };
+};
+const setDb = (state, db) => {
+  state.db = db;
+};
+const initDb = async actions => {
+  const db = new processDb_new_Model();
+  actions.setDb(db);
 };
 // CONCATENATED MODULE: ./src/lib/state/store/Store.js
 
@@ -228,23 +288,17 @@ const startStream = async (actions, query) => {
 const Store = Object(external_easy_peasy_["createStore"])({
   scanUrl: "",
   scanCtgs: "",
+  scanInProgress: false,
   metadata: {},
   infoEvents: [],
-  dataEvents: {},
+  dataEvents: [],
   errorEvents: [],
-  scanCompleted: false,
-  processInProgress: false,
+  db: {},
   setScanUrl: Object(external_easy_peasy_["action"])((state, scanUrl) => setScanUrl(state, scanUrl)),
   setScanCtgs: Object(external_easy_peasy_["action"])((state, scanCtgs) => setScanCtgs(state, scanCtgs)),
+  setScanInProgress: Object(external_easy_peasy_["action"])((state, check) => setScanInProgress(state, check)),
   setMetadata: Object(external_easy_peasy_["action"])((state, meta) => setMetadata(state, meta)),
   reSetScanUrl: Object(external_easy_peasy_["action"])(state => reSetScanUrl(state)),
-  setScanCompleted: Object(external_easy_peasy_["action"])((state, check) => {
-    setScanCompleted(state, check);
-  }),
-  // Check switch for the entire process from starting scan to the storing of data in db:
-  setProcessInProgress: Object(external_easy_peasy_["action"])((state, check) => {
-    setProcessInProgress(state, check);
-  }),
   addInfoEvent: Object(external_easy_peasy_["action"])((state, event) => {
     addInfoEvent(state, event);
   }),
@@ -254,17 +308,19 @@ const Store = Object(external_easy_peasy_["createStore"])({
   addErrorEvent: Object(external_easy_peasy_["action"])((state, event) => {
     addErrorEvent(state, event);
   }),
-  startStream: Object(external_easy_peasy_["thunk"])((actions, query) => startStream(actions, query))
+  startStream: Object(external_easy_peasy_["thunk"])((actions, query) => startStream(actions, query)),
+  setDb: Object(external_easy_peasy_["action"])((state, db) => setDb(state, db)),
+  initDb: Object(external_easy_peasy_["thunk"])(actions => initDb(actions))
 });
 /* harmony default export */ var store_Store = (Store);
 // CONCATENATED MODULE: ./src/pages/_app.js
 
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+function _app_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+function _app_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { _app_ownKeys(Object(source), true).forEach(function (key) { _app_defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { _app_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _app_defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 
 
@@ -279,7 +335,7 @@ function MyApp({
 }) {
   return /*#__PURE__*/Object(jsx_runtime_["jsx"])(external_easy_peasy_["StoreProvider"], {
     store: store_Store,
-    children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(Component, _objectSpread({}, pageProps))
+    children: /*#__PURE__*/Object(jsx_runtime_["jsx"])(Component, _app_objectSpread({}, pageProps))
   });
 }
 
@@ -298,6 +354,13 @@ module.exports = require("easy-peasy");
 /***/ (function(module, exports) {
 
 
+
+/***/ }),
+
+/***/ "iYlg":
+/***/ (function(module, exports) {
+
+module.exports = require("zangodb");
 
 /***/ }),
 

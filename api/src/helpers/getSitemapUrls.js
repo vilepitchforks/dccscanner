@@ -40,14 +40,18 @@ exports.getSitemapUrls = async (url, categories, start) => {
     });
 
     console.log(
-      `URLs parsed. ${urls.length} related URLs found. Time elapsed: `,
+      `URLs parsed. ${urls.length} related ${
+        urls.length > 1 ? "URLs" : "URL"
+      } found. Time elapsed: `,
       (new Date().getTime() - start) / 1000,
       "s"
     );
     events.emit(
       "info",
       "info",
-      `URLs parsed. ${urls.length} related URLs found.`
+      `URLs parsed. ${urls.length} related ${
+        urls.length > 1 ? "URLs" : "URL"
+      } found.`
     );
 
     return urls;
@@ -97,17 +101,12 @@ exports.getSlugs = async rawUrl => {
 };
 
 exports.getMeta = async rawUrl => {
-  try {
-    const { data } = await axios(rawUrl);
+  const { data } = await axios(rawUrl);
 
-    const doc = domino.createWindow(data).document;
-    const metadata = getMetadata(doc, rawUrl);
+  const doc = domino.createWindow(data).document;
+  const metadata = getMetadata(doc, rawUrl);
 
-    return metadata;
-  } catch (error) {
-    console.warn("Error fetching URLs: ", error);
-    return false;
-  }
+  return metadata;
 };
 
 exports.chunkify = urls => {

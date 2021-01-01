@@ -16,6 +16,7 @@
   font-family: "Roboto", "Helvetica", "Arial", sans-serif;
   border-radius: 16px;
   background-color: var(--color02);
+  overflow: auto;
 }
 
 .chip-label {

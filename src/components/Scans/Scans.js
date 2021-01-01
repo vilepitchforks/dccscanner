@@ -6,28 +6,29 @@ import css from "./Scans.module.css";
 import ScanThumb from "../ScanThumb/ScanThumb.js";
 import ModalBackground from "../ModalBackground/ModalBackground";
 
-import { getAllMeta } from "../../lib/helpers/processDb";
-import { chunkify } from "../../lib/helpers/handleArr";
+import { chunkify } from "../../lib/helpers/arrayHelpers";
 import ScanData from "../ScanData/ScanData";
 
 const Scans = () => {
   const [metaArray, setMetaArray] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [dbName, setDbName] = useState("");
-  const [deleteDb, setdeleteDb] = useState(false);
+  const [selectedWeb, setsSlectedWeb] = useState("");
 
-  const { processInProgress } = useStoreState(state => state);
+  const { scanUrl, db } = useStoreState(state => state);
 
   const scanRows = chunkify(metaArray);
 
   useEffect(() => {
     (async () => {
-      // Get metadata for all locally stored website scans
-      const m = await getAllMeta();
-      m.ok && setMetaArray(m.meta);
+      // Get metadata for all locally stored website scans for initial render
+      const websites = Object.keys(db).length
+        ? await db.col("metadata").findAsArray()
+        : [];
+
+      setMetaArray(websites);
     })();
-    // Re-fetch meta from local db after each new website scan has completed and once a db has been deleted
-  }, [processInProgress, deleteDb]);
+    // Re-fetch meta from local db after each new website has beem added
+  }, [scanUrl, db]);
 
   return (
     <>
@@ -38,15 +39,15 @@ const Scans = () => {
               key={i}
               thumbnail={thumbnail}
               setShowModal={setShowModal}
-              setDbName={setDbName}
-              setdeleteDb={setdeleteDb}
+              setsSlectedWeb={setsSlectedWeb}
+              setMetaArray={setMetaArray}
             />
           ))}
         </div>
       ))}
       {showModal && (
         <ModalBackground trigger={setShowModal}>
-          <ScanData dbName={dbName} />
+          <ScanData selectedWeb={selectedWeb} />
         </ModalBackground>
       )}
     </>

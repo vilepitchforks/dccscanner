@@ -3,36 +3,31 @@ import { createStore, action, computed, thunk } from "easy-peasy";
 import {
   setScanUrl,
   setScanCtgs,
+  setScanInProgress,
   setMetadata,
   reSetScanUrl,
-  setScanCompleted,
-  setProcessInProgress,
   addInfoEvent,
   addErrorEvent,
   addDataEvent,
-  startStream
+  startStream,
+  setDb,
+  initDb
 } from "../eventHandlers/eventHandlers.js";
 
 const Store = createStore({
   scanUrl: "",
   scanCtgs: "",
+  scanInProgress: false,
   metadata: {},
   infoEvents: [],
-  dataEvents: {},
+  dataEvents: [],
   errorEvents: [],
-  scanCompleted: false,
-  processInProgress: false,
+  db: {},
   setScanUrl: action((state, scanUrl) => setScanUrl(state, scanUrl)),
   setScanCtgs: action((state, scanCtgs) => setScanCtgs(state, scanCtgs)),
+  setScanInProgress: action((state, check) => setScanInProgress(state, check)),
   setMetadata: action((state, meta) => setMetadata(state, meta)),
   reSetScanUrl: action(state => reSetScanUrl(state)),
-  setScanCompleted: action((state, check) => {
-    setScanCompleted(state, check);
-  }),
-  // Check switch for the entire process from starting scan to the storing of data in db:
-  setProcessInProgress: action((state, check) => {
-    setProcessInProgress(state, check);
-  }),
   addInfoEvent: action((state, event) => {
     addInfoEvent(state, event);
   }),
@@ -42,7 +37,9 @@ const Store = createStore({
   addErrorEvent: action((state, event) => {
     addErrorEvent(state, event);
   }),
-  startStream: thunk((actions, query) => startStream(actions, query))
+  startStream: thunk((actions, query) => startStream(actions, query)),
+  setDb: action((state, db) => setDb(state, db)),
+  initDb: thunk(actions => initDb(actions))
 });
 
 export default Store;

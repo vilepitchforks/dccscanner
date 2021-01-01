@@ -1,4 +1,5 @@
-import { useStoreState } from "easy-peasy";
+import { useEffect } from "react";
+import { useStoreState, useStoreActions } from "easy-peasy";
 
 import CurrentScan from "../CurrentScan/CurrentScan";
 import Scans from "../Scans/Scans";
@@ -6,11 +7,15 @@ import Scans from "../Scans/Scans";
 import css from "./WebList.module.css";
 
 const WebList = () => {
-  const { metadata } = useStoreState(state => state);
+  const { scanUrl } = useStoreState(state => state);
+  const { initDb } = useStoreActions(actions => actions);
+
+  // Initialize the database
+  useEffect(() => initDb(), []);
 
   return (
     <div className="container">
-      {Object.keys(metadata).length ? <CurrentScan /> : ""}
+      <CurrentScan />
       <Scans />
     </div>
   );
