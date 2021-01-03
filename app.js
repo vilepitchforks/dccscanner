@@ -7,6 +7,9 @@ const dev = process.env.NODE_ENV !== "production";
 
 if (dev) require("dotenv").config();
 
+// Initiate Redis Client
+require("./api/config/redis.js");
+
 // Initiate Next js app
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -24,11 +27,15 @@ if (dev) {
 }
 
 // Middleware imports
-const { authUser, handleNextAuth } = require("./api/src/lib/checkUserInfo.js");
+const { authUser } = require("./api/src/lib/checkUserInfo.js");
+const { urlUtils } = require("./api/src/lib/urlUtils.js");
 const EventsLibrary = require("./api/src/events/EventsLibrary.js");
 
 // Handlers
 const { errorHandler } = require("./api/src/lib/errorHandlers.js");
+
+// Process input URL
+server.use("/api", urlUtils);
 
 // Events Library
 server.use("/api/stream", EventsLibrary());

@@ -5,7 +5,7 @@ const { events } = require("../events/EventsLibrary");
 exports.extractDCCs = async (urls, start) => {
   try {
     console.log("Preparing browser session...");
-    events.emit("info", "info", "Preparing browser session...");
+    events.emit("infoEvent", "info", "> Starting the engine...");
 
     const browser = await puppeteer.launch({
       headless: true,
@@ -23,9 +23,9 @@ exports.extractDCCs = async (urls, start) => {
       "s"
     );
     events.emit(
+      "infoEvent",
       "info",
-      "info",
-      "Browser session prepared.\nFetching product pages...\nNOTE: This might take some time."
+      "> Engine started.\n> Fetching product pages...\n> NOTE: This might take some time."
     );
     console.log(
       "Fetching product pages...\nNOTE: This might take up to 10 minutes, depending on the weight of selected pages, connection speed and available resources."
@@ -43,9 +43,9 @@ exports.extractDCCs = async (urls, start) => {
         } total.`
       );
       events.emit(
+        "infoEvent",
         "info",
-        "info",
-        `Scanning URL ${i + 1} of ${urls.length} ${
+        `> Scanning URL ${i + 1} of ${urls.length} ${
           urls.length > 1 ? "URLs" : "URL"
         } total.`
       );
@@ -63,9 +63,9 @@ exports.extractDCCs = async (urls, start) => {
       );
       console.log("Extracting bvDCC object...");
       events.emit(
+        "infoEvent",
         "info",
-        "info",
-        "Page fetched.\nAttempting to extract bvDCC object..."
+        "> Page fetched.\n> Attempting to extract bvDCC object..."
       );
 
       // Create window object handle for page
@@ -86,9 +86,9 @@ exports.extractDCCs = async (urls, start) => {
       );
 
       events.emit(
+        "infoEvent",
         "info",
-        "info",
-        `bvDCC object extract attempt: ${bvDCC ? "SUCCESS" : "FAIL"}.`
+        `> bvDCC object extract attempt: ${bvDCC ? "SUCCESS" : "FAIL"}.`
       );
 
       // Initialize bvDCC to empty object if bvDCC is not found on the scanned page
@@ -113,7 +113,7 @@ exports.extractDCCs = async (urls, start) => {
         bvDCC.eans = bvDCC.eans.join();
 
       // Emit each bvDCC to client
-      events.emit("data", "data", bvDCC);
+      events.emit("dataEvent", "data", bvDCC);
 
       // Store bvDCC JSON object for xlsx report
       bvDCCs.push(bvDCC);
@@ -124,7 +124,7 @@ exports.extractDCCs = async (urls, start) => {
     return bvDCCs;
   } catch (error) {
     console.warn("bvScanner error occurred: ", error);
-    events.emit("servererror", "servererror", error.message);
+    events.emit("servererrorEvent", "servererror", error.message);
     return false;
   }
 };

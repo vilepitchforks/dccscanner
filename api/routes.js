@@ -4,7 +4,7 @@ const router = require("express").Router();
 const { auth } = require("./src/controllers/auth.controller.js");
 const {
   scanner,
-  ScanLoger
+  scanStreamer
 } = require("./src/controllers/scanner.controller.js");
 const { slug } = require("./src/controllers/slug.controller.js");
 
@@ -18,7 +18,7 @@ router.get("/scan", scanner);
 
 // @desc    Scan streamer route
 // @route   GET /api/stream
-router.get("/stream", ScanLoger);
+router.get("/stream", scanStreamer);
 
 // @desc    Get Slugs route
 // @route   GET /api/slug

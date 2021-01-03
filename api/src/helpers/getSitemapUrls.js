@@ -11,7 +11,11 @@ const { events } = require("../events/EventsLibrary");
 exports.getSitemapUrls = async (url, categories, start) => {
   try {
     console.log(`Fetching ${getRootUrl(url)} XML Sitemap...`);
-    events.emit("info", "info", `Fetching ${getRootUrl(url)} XML Sitemap...`);
+    events.emit(
+      "infoEvent",
+      "info",
+      `> Fetching ${getRootUrl(url)} XML Sitemap...`
+    );
 
     // Fetch XML Sitemap
     const { data } = await axios(url);
@@ -21,10 +25,16 @@ exports.getSitemapUrls = async (url, categories, start) => {
       (new Date().getTime() - start) / 1000,
       "s"
     );
-    events.emit("info", "info", "XML Sitemap fetched.");
+    events.emit("infoEvent", "info", "> XML Sitemap fetched.");
 
     console.log("Parsing Product URLs...");
-    events.emit("info", "info", "Parsing Product URLs...");
+    events.emit(
+      "infoEvent",
+      "info",
+      `> Parsing URLs for ${
+        categories.length > 1 ? "slugs" : "slug"
+      }: >> ${categories.join()}...`
+    );
 
     // Parse XML to JSON, structure: urlset.url[0].loc[0] is https://www.website.com/en-us/
     const { urlset } = await xmlParser(data);
@@ -47,9 +57,9 @@ exports.getSitemapUrls = async (url, categories, start) => {
       "s"
     );
     events.emit(
+      "infoEvent",
       "info",
-      "info",
-      `URLs parsed. ${urls.length} related ${
+      `> URLs parsed. ${urls.length} related ${
         urls.length > 1 ? "URLs" : "URL"
       } found.`
     );
@@ -57,7 +67,7 @@ exports.getSitemapUrls = async (url, categories, start) => {
     return urls;
   } catch (error) {
     console.warn("Error fetching URLs: ", error);
-    events.emit("servererror", "servererror", error.message);
+    events.emit("servererrorEvent", "servererror", error.message);
     return false;
   }
 };

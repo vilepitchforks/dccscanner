@@ -2,6 +2,7 @@ const { setup } = require("../helpers/setup.js");
 const { getSitemapUrls, chunkify } = require("../helpers/getSitemapUrls.js");
 const { extractDCCs } = require("../helpers/extractDCCs.js");
 const { urlRgx } = require("../helpers/regex.js");
+const { getCache } = require("../helpers/cacheHandler.js");
 
 const { events } = require("../events/EventsLibrary");
 
@@ -67,9 +68,8 @@ exports.scanner = async (req, res, next) => {
 // @desc    Scan streamer route
 // @route   GET /api/stream
 // ?url=https://www.url.com&categories=shop,first,second
-exports.ScanLoger = async (req, res, next) => {
+exports.scanStreamer = async (req, res, next) => {
   const start = new Date().getTime();
-  events.emit("info", "info", "Scan process started.");
 
   try {
     const rawURL = req.query.url;
@@ -87,27 +87,40 @@ exports.ScanLoger = async (req, res, next) => {
       categories.split(",").map(ctg => ctg.trim());
     if (!categories) throw new Error("ERR_CATEGORY_MISSING_OR_INVALID");
 
-    // Get product URLs
-    const urls = await getSitemapUrls(url, categories, start);
-    // const urlChunks = chunkify(urls);
+    // Check if cache exists
+    const cache = await getCache(req.query);
 
-    // Create data for report
-    const spreadsheet = await extractDCCs(urls, start);
+    if (!cache.length) {
+      // If not, start the process
+      events.emit("infoEvent", "info", "> Scan process started.");
 
-    // // Create report file
-    // createXlsx(spreadsheet, reportName);
+      // Get product URLs
+      const urls = await getSitemapUrls(url, categories, start);
+      // const urlChunks = chunkify(urls);
 
-    console.log(
-      "Report creation completed. Time elapsed: ",
-      (new Date().getTime() - start) / 1000,
-      "s"
-    );
-    events.emit("info", "info", "Report creation completed.");
+      // Create data for report
+      const spreadsheet = await extractDCCs(urls, start);
 
-    events.emit("close", "close", "true");
+      // // Create report file
+      // createXlsx(spreadsheet, reportName);
+
+      console.log(
+        "Report creation completed. Time elapsed: ",
+        (new Date().getTime() - start) / 1000,
+        "s"
+      );
+      events.emit("infoEvent", "info", "> Report creation completed.");
+
+      events.emit("infoEvent", "info", "> Closing the connection...");
+      events.emit("closeEvent", "close", "true");
+    } else {
+      // If cache  exists, res,write each event to the client and res.end the connection
+      cache.forEach(event => res.write(event));
+      res.end();
+    }
   } catch (error) {
     res.status(422);
     console.warn(error);
-    events.emit("servererror", "servererror", error.message);
+    events.emit("servererrorEvent", "servererror", error.message);
   }
 };

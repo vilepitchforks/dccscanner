@@ -22,14 +22,10 @@ const NewScanModal = ({ isNew, setIsNew, setNewScan }) => {
   const getMetaFromDb = async () => {
     setLoading(true);
     // Check if metadata exists in local db. typeof meta<{res}:Object || undefined>
-    const meta = await db
-      .collection("metadata")
-      .findOne(
-        { scannedUrl: url },
-        actions.addInfoEvent(`Metadata for ${url} successfully fetched.`)
-      );
+    const meta = await db.collection("metadata").findOne({ scannedUrl: url });
 
     if (meta) {
+      actions.addInfoEvent(`Metadata for ${url} successfully fetched.`);
       setLoading(false);
       return {
         ok: true,

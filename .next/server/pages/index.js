@@ -1177,9 +1177,10 @@ const NewScanModal = ({
 
     const meta = await db.collection("metadata").findOne({
       scannedUrl: url
-    }, actions.addInfoEvent(`Metadata for ${url} successfully fetched.`));
+    });
 
     if (meta) {
+      actions.addInfoEvent(`Metadata for ${url} successfully fetched.`);
       setLoading(false);
       return {
         ok: true,
