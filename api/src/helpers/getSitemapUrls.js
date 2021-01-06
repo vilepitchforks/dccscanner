@@ -9,8 +9,8 @@ const { stream, cache } = require("../events/EventsLibrary");
 
 /**
  * Filters sitemap URLs for selected slugs and returns URLs for scanning.
- * @param {number} start
- * @param {{ url?: string;rootUrl: string; categories: string; scanId: string; urlXml: string; reportName: string; }} query
+ * @param {number} start Scan start time.
+ * @param {Object} query Object containing req.query.
  * @returns {Promise<string[]>}
  */
 exports.getURLsForScan = async (start, query) => {

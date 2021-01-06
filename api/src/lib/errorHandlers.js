@@ -2,9 +2,9 @@
 const { Request, Response, NextFunction } = require("express");
 
 /**
- * @param {{ message?: string; errors?: any; isAxiosError?: boolean; toJSON?: any;stack:any }} error
+ * @param {Object} error
  * @param {Request} req
- * @param {{ statusCode: number; status: (arg0: number) => any; json: (arg0: { message: any; status: any; }) => void; }} res
+ * @param {Response} res
  * @param {NextFunction} next
  */
 exports.errorHandler = (error, req, res, next) => {

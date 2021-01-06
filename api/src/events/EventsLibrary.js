@@ -115,10 +115,12 @@ const EventsMiddleware = () =>
       labels.forEach(eventLabel => stream.removeAllListeners(eventLabel));
     });
 
-    // res.on("finish", finish => console.log("Response on finish event: ", finish));
+    // res.on("finish", finish =>
+    //   console.log("Response on finish event: ", finish)
+    // );
     // req.on("end", end => console.log("Request on.end event: ", end));
     // res.on("end", end => console.log("Response on.end event: ", end));
-    // res.on("error", error => console.log("Response on.error event: ", end));
+    // res.on("error", error => console.log("Response on.error event: ", error));
     next();
   };
 

@@ -1,9 +1,9 @@
 //@ts-check
-const { Response, NextFunction } = require("express");
+const { Request, Response, NextFunction } = require("express");
 const { urlRgx, localeRgx } = require("../helpers/regex.js");
 
 /**
- * @param {{ query: { url: string;rootUrl: string; categories: string; scanId: string; urlXml: string; reportName: string; }; }} req
+ * @param {Request} req
  * @param {Response} res
  * @param {NextFunction} next
  */

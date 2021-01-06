@@ -12,7 +12,7 @@ const redis = require("../../config/redis.js");
 // ?url=https://www.url.com&categories=shop,first,second
 /**
  * Scan streamer route
- * @param {{ query: { url?: string; rootUrl: string; categories: string; scanId: string; urlXml: string; reportName: string; }; }} req
+ * @param {Object} req
  * @param {Response} res
  * @param {NextFunction} next
  */
@@ -21,11 +21,6 @@ exports.scanStreamer = async (req, res, next) => {
 
   // Check if cache exists
   const cachedEvents = await getCache(req.query);
-  redis
-    .GET("scan:" + req.query.scanId)
-    // @ts-ignore
-    .then(get => console.log("Redis.GET valid start: ", get))
-    .catch(console.error);
 
   if (cachedEvents.length) {
     console.log(
@@ -34,7 +29,8 @@ exports.scanStreamer = async (req, res, next) => {
     // If cached Events exist, res.write each event to the client and res.end the connection
     cachedEvents.forEach(event => res.write(event));
 
-    // Checks if the scan flag is set to "false" and closes the connection. If cache exists and scan flag is true, scan is in progress and needs to be resumed
+    // Checks if the scan flag is set to "false" and closes the connection.
+    // If cache exists and scan flag is true, scan is in progress and needs to be resumed
     // @ts-ignore
     (await redis.GET("scan:" + req.query.scanId)) === "false" && res.end();
   } else {

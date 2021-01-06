@@ -25,6 +25,7 @@ class Worksheet extends React.Component {
       <ReactDataSheet
         data={this.state.grid}
         valueRenderer={cell => cell.value}
+        overflow={"nowrap"}
         onCellsChanged={changes => {
           const grid = this.props.data.map(row => [...row]);
           changes.forEach(({ cell, row, col, value }) => {

@@ -5,13 +5,12 @@ const { extractDCCs } = require("./extractDCCs.js");
 const { stream, cache } = require("../events/EventsLibrary");
 
 /**
- * Performs the DCC scan
- * @param {number} start
- * @param {{ url?: string; rootUrl: string; categories: string; scanId: string; urlXml: string; reportName: string; }} query
+ * Performs the DCC scan and returns true when the scan is completed.
+ * @param {number} start Scan start time.
+ * @param {Object} query Object containing req.query.
  * @returns {Promise<boolean>}
  */
 exports.scanHandler = async (start, query) => {
-  // If not, start the process
   stream.emit("infoEvent", "info", "> Scan process started.", start);
   cache.emit("cacheEvent", "info", "> Scan process started.", query.scanId);
 

@@ -4,7 +4,7 @@ const redis = require("../../config/redis.js");
 
 /**
  * Checks if DCC scan exists in cache
- * @param {{ scanId: string; }} query
+ * @param {Object} query Query object from req.query
  * @returns {Promise<string[]>}
  */
 exports.getCache = async query => {

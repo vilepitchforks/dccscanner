@@ -1,12 +1,12 @@
 //@ts-check
-const { NextFunction } = require("express");
+const { Request, Response, NextFunction } = require("express");
 
 // Helpers
 const { unScramble } = require("../helpers/auth.js");
 
 /**
- * @param {{ get: (arg0: string) => any; cookies: { dcc?: any; }; user: string; }} req
- * @param {{ status: (arg0: number) => void; }} res
+ * @param {Request | Object} req
+ * @param {Response} res
  * @param {NextFunction} next
  */
 exports.authUser = (req, res, next) => {

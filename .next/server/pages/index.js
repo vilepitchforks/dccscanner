@@ -675,6 +675,7 @@ class Worksheet_Worksheet extends external_react_default.a.Component {
     return /*#__PURE__*/Object(jsx_runtime_["jsx"])(external_react_datasheet_default.a, {
       data: this.state.grid,
       valueRenderer: cell => cell.value,
+      overflow: "nowrap",
       onCellsChanged: changes => {
         const grid = this.props.data.map(row => [...row]);
         changes.forEach(({

@@ -5,10 +5,10 @@ const puppeteer = require("puppeteer");
 const { stream, cache } = require("../events/EventsLibrary.js");
 
 /**
- * Scans the selected Sitemap.xml URLs and extracts DCC data
- * @param {string[]} urls
- * @param {number} start
- * @param {object} query
+ * Scans the selected Sitemap.xml URLs and extracts DCC data.
+ * @param {string[]} urls Sitemap URLs that contain slugs sent by the user.
+ * @param {number} start Scan start time.
+ * @param {Object} query Object containing req.query.
  * @returns {Promise<object[]>}
  */
 exports.extractDCCs = async (urls, start, query) => {
