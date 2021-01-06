@@ -15,7 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "cookie-parser": "^1.4.5",
     "domino": "^2.1.6",
     "easy-peasy": "^4.0.1",
@@ -32,6 +32,8 @@
     "zangodb": "^1.0.8"
   },
   "devDependencies": {
+    "@types/express": "^4.17.9",
+    "@types/node": "^14.14.20",
     "dotenv": "^8.2.0",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.6"

@@ -1,5 +1,12 @@
+//@ts-check
+const { Response, NextFunction } = require("express");
 const { urlRgx, localeRgx } = require("../helpers/regex.js");
 
+/**
+ * @param {{ query: { url: string;rootUrl: string; categories: string; scanId: string; urlXml: string; reportName: string; }; }} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ */
 exports.urlUtils = (req, res, next) => {
   const inputURL = req.query.url;
 
@@ -8,6 +15,23 @@ exports.urlUtils = (req, res, next) => {
 
   // Throw if URL is not valid
   if (!urlRgx.test(inputURL)) next(new Error("ERR_INVALID_URL"));
+
+  // Throw if categories query param is present but not valid
+  const hasCategories = req.query.hasOwnProperty("categories");
+  const categories = hasCategories && req.query.categories;
+
+  hasCategories &&
+    (!categories.length || categories.length > 200) &&
+    next(new Error("ERR_CATEGORY_MISSING_OR_INVALID"));
+
+  // Make Root URL
+  req.query.rootUrl = inputURL
+    .replace(/http(|s)\:\/\//, "")
+    .split(localeRgx)[0];
+
+  // Make scanId
+  if (categories)
+    req.query.scanId = inputURL + ":" + categories.split(",").sort().join();
 
   // Make xml url (https://www.website.com/sitemap.xml)
   const sitemap = "sitemap.xml";

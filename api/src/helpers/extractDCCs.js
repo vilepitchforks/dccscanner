@@ -1,11 +1,20 @@
+//@ts-check
+
 const puppeteer = require("puppeteer");
 
-const { events } = require("../events/EventsLibrary");
+const { stream, cache } = require("../events/EventsLibrary.js");
 
-exports.extractDCCs = async (urls, start) => {
+/**
+ * Scans the selected Sitemap.xml URLs and extracts DCC data
+ * @param {string[]} urls
+ * @param {number} start
+ * @param {object} query
+ * @returns {Promise<object[]>}
+ */
+exports.extractDCCs = async (urls, start, query) => {
   try {
-    console.log("Preparing browser session...");
-    events.emit("infoEvent", "info", "> Starting the engine...");
+    stream.emit("infoEvent", "info", "> Starting the engine...", start);
+    cache.emit("cacheEvent", "info", "> Starting the engine...", query.scanId);
 
     const browser = await puppeteer.launch({
       headless: true,
@@ -17,19 +26,10 @@ exports.extractDCCs = async (urls, start) => {
       ]
     });
 
-    console.log(
-      "Browser session prepared. Time elapsed: ",
-      (new Date().getTime() - start) / 1000,
-      "s"
-    );
-    events.emit(
-      "infoEvent",
-      "info",
-      "> Engine started.\n> Fetching product pages...\n> NOTE: This might take some time."
-    );
-    console.log(
-      "Fetching product pages...\nNOTE: This might take up to 10 minutes, depending on the weight of selected pages, connection speed and available resources."
-    );
+    const eventString =
+      "> Engine started.\n> Fetching product pages...\n> NOTE: This might take some time.";
+    stream.emit("infoEvent", "info", eventString, start);
+    cache.emit("cacheEvent", "info", eventString, query.scanId);
 
     // Create a new tab
     const page = await browser.newPage();
@@ -37,18 +37,11 @@ exports.extractDCCs = async (urls, start) => {
     // Iterate over passed URLs and create bvDCC data
     const bvDCCs = [];
     for (let i = 0; i < urls.length; i++) {
-      console.log(
-        `Scanning URL ${i + 1} of ${urls.length} ${
-          urls.length > 1 ? "URLs" : "URL"
-        } total.`
-      );
-      events.emit(
-        "infoEvent",
-        "info",
-        `> Scanning URL ${i + 1} of ${urls.length} ${
-          urls.length > 1 ? "URLs" : "URL"
-        } total.`
-      );
+      const eventString1 = `> Scanning URL ${i + 1} of ${urls.length} ${
+        urls.length > 1 ? "URLs" : "URL"
+      } total.`;
+      stream.emit("infoEvent", "info", eventString1, start);
+      cache.emit("cacheEvent", "info", eventString1, query.scanId);
 
       // Open each url from urls array in a new created tab
       // await page.setDefaultNavigationTimeout(600000);
@@ -56,17 +49,10 @@ exports.extractDCCs = async (urls, start) => {
         waitUntil: "networkidle2"
       });
 
-      console.log(
-        "Page fetched. Time elapsed: ",
-        (new Date().getTime() - start) / 1000,
-        "s"
-      );
-      console.log("Extracting bvDCC object...");
-      events.emit(
-        "infoEvent",
-        "info",
-        "> Page fetched.\n> Attempting to extract bvDCC object..."
-      );
+      const eventString2 =
+        "> Page fetched.\n> Attempting to extract bvDCC object...";
+      stream.emit("infoEvent", "info", eventString2, start);
+      cache.emit("cacheEvent", "info", eventString2, query.scanId);
 
       // Create window object handle for page
       const windowHandle = await page.evaluateHandle(() => window);
@@ -74,22 +60,27 @@ exports.extractDCCs = async (urls, start) => {
       // Extract bvDCC object from  window handle
       const rawBvDCC = await windowHandle.getProperty("bvDCC");
 
-      // Transform raw bvDCC objects to JSON
+      /**
+       * Transforms raw bvDCC objects to JSON
+       * @typedef {Object} DCC
+       * @property {string} [scannedUrl]
+       * @property {object} [catalogData]
+       * @property {string} [catalogData.locale]
+       * @property {array} [catalogData.catalogProducts]
+       * @property {string} [upcs]
+       * @property {string} [eans]
+       */
+
+      /**
+       * @type {DCC}
+       */
       let bvDCC = await rawBvDCC.jsonValue();
 
-      console.log(
-        `bvDCC object extract attempt: ${
-          bvDCC ? "SUCCESS" : "FAIL"
-        }. Time elapsed: `,
-        (new Date().getTime() - start) / 1000,
-        "s"
-      );
-
-      events.emit(
-        "infoEvent",
-        "info",
-        `> bvDCC object extract attempt: ${bvDCC ? "SUCCESS" : "FAIL"}.`
-      );
+      const eventString3 = `> bvDCC object extract attempt: ${
+        bvDCC ? "SUCCESS" : "FAIL"
+      }.`;
+      stream.emit("infoEvent", "info", eventString3, start);
+      cache.emit("cacheEvent", "info", eventString3, query.scanId);
 
       // Initialize bvDCC to empty object if bvDCC is not found on the scanned page
       bvDCC = bvDCC || {};
@@ -113,7 +104,9 @@ exports.extractDCCs = async (urls, start) => {
         bvDCC.eans = bvDCC.eans.join();
 
       // Emit each bvDCC to client
-      events.emit("dataEvent", "data", bvDCC);
+      stream.emit("dataEvent", "data", bvDCC);
+      cache.emit("cacheEvent", "data", bvDCC, query.scanId);
+      console.log("bvDCC fetched for: ", urls[i]);
 
       // Store bvDCC JSON object for xlsx report
       bvDCCs.push(bvDCC);
@@ -124,7 +117,8 @@ exports.extractDCCs = async (urls, start) => {
     return bvDCCs;
   } catch (error) {
     console.warn("bvScanner error occurred: ", error);
-    events.emit("servererrorEvent", "servererror", error.message);
-    return false;
+    stream.emit("servererrorEvent", "servererror", error.message, start);
+    cache.emit("cacheEvent", "servererror", error.message, query.scanId);
+    return [];
   }
 };

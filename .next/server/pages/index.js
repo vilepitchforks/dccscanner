@@ -383,6 +383,7 @@ var ScanLog_module_default = /*#__PURE__*/__webpack_require__.n(ScanLog_module);
 const ScanLog = () => {
   const scanLogRref = Object(external_react_["useRef"])();
   const {
+    scanUrl,
     infoEvents,
     errorEvents,
     scanInProgress
@@ -391,6 +392,14 @@ const ScanLog = () => {
     const child = scanLogRref.current.lastElementChild;
     child && child.scrollIntoViewIfNeeded && child.scrollIntoViewIfNeeded(true);
   }, [infoEvents]);
+
+  const setScanStatusText = () => {
+    // if (!scanInProgress && scanUrl.length) return "Scan starting...";
+    if (scanInProgress) return "Scan in progress...";
+    if (!scanInProgress && scanUrl.length && infoEvents.length) return "Scan completed.";
+    return "";
+  };
+
   return /*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
     className: ScanLog_module_default.a.buildView,
     children: /*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
@@ -404,10 +413,10 @@ const ScanLog = () => {
         }, i))
       }), /*#__PURE__*/Object(jsx_runtime_["jsxs"])("footer", {
         className: ScanLog_module_default.a.buildStreamFooter,
-        children: [!scanInProgress && infoEvents.length ? /*#__PURE__*/Object(jsx_runtime_["jsx"])("span", {
+        children: [/*#__PURE__*/Object(jsx_runtime_["jsxs"])("span", {
           className: ScanLog_module_default.a.gray,
-          children: "Scan completed. "
-        }) : "", errorEvents.length ? errorEvents.map((event, i) => /*#__PURE__*/Object(jsx_runtime_["jsx"])("span", {
+          children: [setScanStatusText(), " "]
+        }), errorEvents.length ? errorEvents.map((event, i) => /*#__PURE__*/Object(jsx_runtime_["jsx"])("span", {
           className: ScanLog_module_default.a.red,
           children: event
         }, i)) : ""]
@@ -1092,21 +1101,33 @@ var NewScanInit_module_default = /*#__PURE__*/__webpack_require__.n(NewScanInit_
 // CONCATENATED MODULE: ./src/components/NewScanInit/NewScanInit.js
 
 
-
+ // const NewScanInit = ({ setNewScan }) => {
 
 const NewScanInit = ({
+  url,
+  setUrl,
   setNewScan
 }) => {
   const {
     scanUrl,
     scanCtgs
-  } = Object(external_easy_peasy_["useStoreState"])(state => state);
+  } = Object(external_easy_peasy_["useStoreState"])(state => state); // const { startStream } = useStoreActions(actions => actions);
+
   const {
+    setScanUrl,
     startStream
-  } = Object(external_easy_peasy_["useStoreActions"])(actions => actions);
+  } = Object(external_easy_peasy_["useStoreActions"])(actions => actions); // const handleInitScan = () => {
+  //   startStream(`url=${scanUrl}&categories=${scanCtgs}`);
+  //   // Removes the modal overlay
+  //   setNewScan(false);
+  // };
 
   const handleInitScan = () => {
-    startStream(`url=${scanUrl}&categories=${scanCtgs}`); // Removes the modal overlay
+    startStream(`url=${url}&categories=${scanCtgs}`); // Sets scanUrl in Redux store
+
+    setScanUrl(url); // Removes url value from local state
+
+    setUrl(""); // Removes the modal overlay
 
     setNewScan(false);
   };
@@ -1251,9 +1272,10 @@ const NewScanModal = ({
     const meta = await getMeta();
 
     if (meta) {
-      actions.setMetadata(meta);
-      setSlugs(meta.slugs);
-      return actions.setScanUrl(url);
+      actions.setMetadata(meta); // setSlugs(meta.slugs);
+      // return actions.setScanUrl(url);
+
+      return setSlugs(meta.slugs); // return actions.setScanUrl(url);
     } else {
       // If fetching metadata fails, reset the default "New DCC scan" details and remove url from state
       setIsNew(true);
@@ -1287,6 +1309,8 @@ const NewScanModal = ({
       }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
         className: "row",
         children: scanCtgs && /*#__PURE__*/Object(jsx_runtime_["jsx"])(NewScanInit_NewScanInit, {
+          url: url,
+          setUrl: setUrl,
           setNewScan: setNewScan
         })
       })]

@@ -1,40 +1,37 @@
-const axios = require("axios");
+//@ts-check
+
+const axios = require("axios").default;
 const xmlParser = require("xml2js").parseStringPromise;
 const { getMetadata } = require("page-metadata-parser");
 const domino = require("domino");
 
-const { setup } = require("./setup.js");
+const { stream, cache } = require("../events/EventsLibrary");
 
-const { events } = require("../events/EventsLibrary");
-
-// Function used for streaming DCC data
-exports.getSitemapUrls = async (url, categories, start) => {
+/**
+ * Filters sitemap URLs for selected slugs and returns URLs for scanning.
+ * @param {number} start
+ * @param {{ url?: string;rootUrl: string; categories: string; scanId: string; urlXml: string; reportName: string; }} query
+ * @returns {Promise<string[]>}
+ */
+exports.getURLsForScan = async (start, query) => {
   try {
-    console.log(`Fetching ${getRootUrl(url)} XML Sitemap...`);
-    events.emit(
-      "infoEvent",
-      "info",
-      `> Fetching ${getRootUrl(url)} XML Sitemap...`
-    );
+    const ctgArr = query.categories.split(",");
 
-    // Fetch XML Sitemap
-    const { data } = await axios(url);
+    const eventString = `> Fetching ${query.rootUrl} XML Sitemap...`;
+    stream.emit("infoEvent", "info", eventString, start);
+    cache.emit("cacheEvent", "info", eventString, query.scanId);
 
-    console.log(
-      "XML Sitemap fetched. Time elapsed: ",
-      (new Date().getTime() - start) / 1000,
-      "s"
-    );
-    events.emit("infoEvent", "info", "> XML Sitemap fetched.");
+    // Fetch XML Sitemap, type <?xml version="1.0" encoding="UTF-8"?>
+    const { data } = await axios(query.urlXml);
 
-    console.log("Parsing Product URLs...");
-    events.emit(
-      "infoEvent",
-      "info",
-      `> Parsing URLs for ${
-        categories.length > 1 ? "slugs" : "slug"
-      }: >> ${categories.join()}...`
-    );
+    stream.emit("infoEvent", "info", "> XML Sitemap fetched.", start);
+    cache.emit("cacheEvent", "info", "> XML Sitemap fetched.", query.scanId);
+
+    const eventString1 = `> Parsing URLs for ${
+      ctgArr.length > 1 ? "slugs" : "slug"
+    }: >> ${query.categories}...`;
+    stream.emit("infoEvent", "info", eventString1, start);
+    cache.emit("cacheEvent", "info", eventString1, query.scanId);
 
     // Parse XML to JSON, structure: urlset.url[0].loc[0] is https://www.website.com/en-us/
     const { urlset } = await xmlParser(data);
@@ -42,41 +39,42 @@ exports.getSitemapUrls = async (url, categories, start) => {
     // TODO: change regular array to Set for filtering duplicates
     const urls = [];
     urlset.url.forEach(url => {
-      categories.forEach(ctg => {
+      /**
+       * @param {string} ctg
+       */
+      ctgArr.forEach(ctg => {
         const ctgRgx = new RegExp(ctg);
         // Test for provided products categories keywords and extract category and product pages
         if (ctgRgx.test(url.loc[0])) urls.push(url.loc[0]);
       });
     });
 
-    console.log(
-      `URLs parsed. ${urls.length} related ${
-        urls.length > 1 ? "URLs" : "URL"
-      } found. Time elapsed: `,
-      (new Date().getTime() - start) / 1000,
-      "s"
-    );
-    events.emit(
-      "infoEvent",
-      "info",
-      `> URLs parsed. ${urls.length} related ${
-        urls.length > 1 ? "URLs" : "URL"
-      } found.`
-    );
+    const eventString2 = `> URLs parsed. ${urls.length} related ${
+      urls.length > 1 ? "URLs" : "URL"
+    } found.`;
+    stream.emit("infoEvent", "info", eventString2, start);
+    cache.emit("cacheEvent", "info", eventString2, query.scanId);
 
     return urls;
   } catch (error) {
-    console.warn("Error fetching URLs: ", error);
-    events.emit("servererrorEvent", "servererror", error.message);
-    return false;
+    console.warn(
+      "Error fetching URLs: ",
+      error.isAxiosError ? error.toJSON() : error.message
+    );
+    stream.emit("servererrorEvent", "servererror", error.message, start);
+    cache.emit("cacheEvent", "servererror", error.message, query.scanId);
+    return [];
   }
 };
 
-const getAllSitemapUrls = async rawUrl => {
+/**
+ * Fetches all Sitemap URLs for /slugs enpoint
+ * @param {string} xmlUrl
+ * @returns {Promise<string[]>}
+ */
+const getAllSitemapUrls = async xmlUrl => {
   try {
-    const { url } = setup(rawUrl);
-
-    const { data } = await axios(url);
+    const { data } = await axios(xmlUrl);
 
     // Parse XML to JSON, structure: urlset.url[0].loc[0] is https://herbalessences.com/en-us/
     const { urlset } = await xmlParser(data);
@@ -86,45 +84,54 @@ const getAllSitemapUrls = async rawUrl => {
     return urls;
   } catch (error) {
     console.warn("Error fetching URLs: ", error);
-    return false;
+    return [];
   }
 };
 
-exports.getSlugs = async rawUrl => {
-  let { url } = setup(rawUrl);
+/**
+ * Creates slugs for /slugs endpoint
+ * @param {string} xmlUrl
+ * @returns {Promise<string[]>}
+ */
+exports.getSlugs = async xmlUrl => {
+  const urls = await getAllSitemapUrls(xmlUrl);
 
-  url = url.replace("/sitemap.xml", "");
+  if (!urls.length) return [];
 
-  const urls = await getAllSitemapUrls(rawUrl);
-
-  if (!urls) return false;
-
-  const slugChunks = urls.map(link => {
-    link = link.replace(url, "");
-    return link.split("/");
+  const slugChunks = urls.map(url => {
+    let link = xmlUrl.replace("/sitemap.xml", "");
+    url = url.replace(link, "");
+    return url.split("/");
   });
 
+  // @ts-ignore
   const slugs = new Set(slugChunks.flat());
   return Array.from(slugs)
     .filter(slug => slug.length)
     .sort();
 };
 
-exports.getMeta = async rawUrl => {
-  const { data } = await axios(rawUrl);
+/**
+ * Fetches metadata from the website
+ * @param {string} url
+ * @returns {Promise<Object>}
+ */
+exports.getMeta = async url => {
+  const { data } = await axios(url);
 
   const doc = domino.createWindow(data).document;
-  const metadata = getMetadata(doc, rawUrl);
+  const metadata = getMetadata(doc, url);
 
   return metadata;
 };
 
+/**
+ * @param {string[]} urls
+ * @returns {string[][]}
+ */
 exports.chunkify = urls => {
   return Array.from({ length: Math.ceil(urls.length / 10) }, (_, i) => {
     const start = i * 10;
     return urls.slice(start, start + 10);
   });
 };
-
-const getRootUrl = url =>
-  url.replace(/http(|s)\:\/\//, "").replace(/\/sitemap.xml/, "");

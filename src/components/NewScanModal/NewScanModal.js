@@ -103,8 +103,10 @@ const NewScanModal = ({ isNew, setIsNew, setNewScan }) => {
 
     if (meta) {
       actions.setMetadata(meta);
-      setSlugs(meta.slugs);
-      return actions.setScanUrl(url);
+      // setSlugs(meta.slugs);
+      // return actions.setScanUrl(url);
+      return setSlugs(meta.slugs);
+      // return actions.setScanUrl(url);
     } else {
       // If fetching metadata fails, reset the default "New DCC scan" details and remove url from state
       setIsNew(true);
@@ -133,7 +135,10 @@ const NewScanModal = ({ isNew, setIsNew, setNewScan }) => {
         </div>
         <div className="row">
           {/* Do not display START SCAN button until URL and categories are prepared */}
-          {scanCtgs && <NewScanInit setNewScan={setNewScan} />}
+          {/* {scanCtgs && <NewScanInit setNewScan={setNewScan} />} */}
+          {scanCtgs && (
+            <NewScanInit url={url} setUrl={setUrl} setNewScan={setNewScan} />
+          )}
         </div>
       </div>
     </ModalBackground>

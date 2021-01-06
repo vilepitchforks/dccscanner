@@ -32,7 +32,6 @@
   position: relative;
   height: 160px;
   margin: 0 5px 09px;
-  padding: 9px 5px 9px0;
   overflow: auto;
   transition: height ease 3;
 }

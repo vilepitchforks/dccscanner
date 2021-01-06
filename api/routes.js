@@ -14,7 +14,7 @@ router.post("/auth", auth);
 
 // @desc    Scanner route
 // @route   GET /api/scan
-router.get("/scan", scanner);
+// router.get("/scan", scanner);
 
 // @desc    Scan streamer route
 // @route   GET /api/stream
