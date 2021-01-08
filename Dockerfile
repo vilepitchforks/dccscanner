@@ -18,7 +18,6 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Prepare working directory
-# RUN mkdir -p mkdir dccscanner/client
 RUN mkdir -p dccscanner
 WORKDIR /dccscanner
 

@@ -1419,8 +1419,22 @@ const Home = ({
 };
 
 const getServerSideProps = async ctx => {
-  // Construct App URL for server side fetching
-  const url = ctx.req.protocol + "://" + ctx.req.get("host");
+  const dev = false; // Construct App URL for server side fetching
+
+  const protocol = dev ? "http" : "https";
+  const url = protocol + "://" + ctx.req.get("host"); // http -> https redirect for production
+
+  if (!dev && ctx.req && ctx.req.protocol === "http") {
+    ctx.res.writeHead(302, {
+      Location: url
+    });
+    ctx.res.end();
+    return {
+      props: {
+        data: {}
+      }
+    };
+  }
 
   try {
     // Check if user is authenticated
