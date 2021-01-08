@@ -1422,19 +1422,17 @@ const getServerSideProps = async ctx => {
   const dev = false; // Construct App URL for server side fetching
 
   const protocol = dev ? "http" : "https";
-  const url = protocol + "://" + ctx.req.get("host"); // http -> https redirect for production
-
-  if (!dev && ctx.req && ctx.req.protocol === "http") {
-    ctx.res.writeHead(302, {
-      Location: url
-    });
-    ctx.res.end();
-    return {
-      props: {
-        data: {}
-      }
-    };
-  }
+  const url = protocol + "://" + ctx.req.get("host");
+  console.log("protocol: ", protocol);
+  console.log('ctx.req.protocol === "http": ', ctx.req.protocol === "http");
+  console.log("url: ", url); // http -> https redirect for production
+  // if (!dev && ctx.req && ctx.req.protocol === "http") {
+  //   ctx.res.writeHead(302, {
+  //     Location: url
+  //   });
+  //   ctx.res.end();
+  //   return { props: { data: {} } };
+  // }
 
   try {
     // Check if user is authenticated
