@@ -137,9 +137,9 @@ var react_datasheet = __webpack_require__("ZJU2");
 var external_zangodb_ = __webpack_require__("iYlg");
 var external_zangodb_default = /*#__PURE__*/__webpack_require__.n(external_zangodb_);
 
-// CONCATENATED MODULE: ./src/lib/helpers/processDb_new.js
+// CONCATENATED MODULE: ./src/lib/helpers/processDb.js
 
-class processDb_new_Model {
+class processDb_Model {
   constructor() {
     const db = new external_zangodb_default.a.Db("dcc", {
       // sets the schema, scannedUrl and url are the same url sent by the user
@@ -279,7 +279,7 @@ const setDb = (state, db) => {
   state.db = db;
 };
 const initDb = async actions => {
-  const db = new processDb_new_Model();
+  const db = new processDb_Model();
   actions.setDb(db);
 };
 // CONCATENATED MODULE: ./src/lib/state/store/Store.js

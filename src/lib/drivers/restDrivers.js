@@ -15,7 +15,10 @@ const makeDriver = ({ method, endpoint, format }) => async ({
     };
 
     if (email) options.headers.Authorization = "Basic " + btoa(email);
-    if (body) options.body = JSON.stringify(body);
+    if (body) {
+      options.headers["Content-Type"] = "application/json";
+      options.body = JSON.stringify(body);
+    }
 
     let status;
 
@@ -39,12 +42,6 @@ export const authDriver = makeDriver({
   method: "POST",
   endpoint: "/api/auth",
   format: "text"
-});
-
-export const scanDriver = makeDriver({
-  method: "GET",
-  endpoint: "/api/scan",
-  format: "json"
 });
 
 export const slugDriver = makeDriver({

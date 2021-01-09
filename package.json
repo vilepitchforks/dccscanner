@@ -8,7 +8,7 @@
     "dev": "next dev",
     "build": "next build",
     "export": "next export",
-    "local": "NODE_ENV=development nodemon app.js",
+    "local": "NODE_ENV=development node app.js",
     "start": "NODE_ENV=production node app.js"
   },
   "keywords": [],

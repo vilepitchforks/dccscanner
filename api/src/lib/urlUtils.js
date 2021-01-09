@@ -3,7 +3,7 @@ const { Request, Response, NextFunction } = require("express");
 const { urlRgx, localeRgx } = require("../helpers/regex.js");
 
 /**
- * @param {Request} req
+ * @param {Request | object} req
  * @param {Response} res
  * @param {NextFunction} next
  */
@@ -40,17 +40,23 @@ exports.urlUtils = (req, res, next) => {
 
   if (localeRgx.test(inputURL)) {
     // Replace country code with sitemap
-    urlXml = inputURL.replace(localeRgx, sitemap);
+    urlXml = inputURL.split(localeRgx)[0];
+
+    urlXml = urlXml + "/" + sitemap;
+    // urlXml = inputURL.replace(localeRgx, sitemap);
+    console.log("urlXml 1: ", urlXml);
   } else if (inputURL.slice(-1) === "/") {
     // Handle trailing slash
     urlXml = inputURL + sitemap;
+    console.log("urlXml 2: ", urlXml);
   } else {
     urlXml = inputURL + "/" + sitemap;
+    console.log("urlXml 3: ", urlXml);
   }
   req.query.urlXml = urlXml;
-
+  console.log("req.query.urlXml", req.query.urlXml);
   // Make report name
-  let urlRN = inputURL.replace(/http(|s)\:\/\//, "").replace(localeRgx, "");
+  let urlRN = inputURL.replace(/http(|s)\:\/\//, "").split(localeRgx)[0];
   if (urlRN.slice(-1) === "/") urlRN = urlRN.slice(0, urlRN.length - 1);
   req.query.reportName = `bvDCC_extract_${urlRN}_${new Date().getTime()}.xlsx`;
 

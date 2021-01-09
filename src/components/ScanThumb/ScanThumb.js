@@ -1,6 +1,6 @@
 import { useStoreState } from "easy-peasy";
 
-import { dropDb } from "../../lib/helpers/processDb";
+import { DownloadXlsAll } from "../DownloadIcons/DownloadIcons.js";
 
 import css from "./ScanThumb.module.css";
 
@@ -60,6 +60,7 @@ const ScanThumb = ({
         >
           View DCC data
         </a>
+        <DownloadXlsAll scannedUrl={scannedUrl} />
       </div>
     </div>
   );

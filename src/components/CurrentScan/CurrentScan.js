@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStoreActions, useStoreState } from "easy-peasy";
 
-import { makeStoreData } from "../../lib/helpers/processDb.js";
-
 import css from "./CurrentScan.module.css";
 
 import ScanLog from "../ScanLog/ScanLog";

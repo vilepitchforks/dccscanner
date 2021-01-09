@@ -83,7 +83,7 @@ const getAllSitemapUrls = async xmlUrl => {
 
     return urls;
   } catch (error) {
-    console.warn("Error fetching URLs: ", error);
+    console.warn("Error fetching URLs: ", error.config);
     return [];
   }
 };

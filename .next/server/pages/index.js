@@ -114,6 +114,22 @@ module.exports = __webpack_require__("RXBc");
 
 /***/ }),
 
+/***/ "1Qhm":
+/***/ (function(module, exports) {
+
+exports.formatTs = timestamp => {
+  const addZero = d => d = d > 9 ? d : "0" + d;
+
+  const month = addZero(new Date(timestamp).getMonth() + 1);
+  const day = addZero(new Date(timestamp).getDate());
+  const hour = addZero(new Date(timestamp).getHours());
+  const minute = addZero(new Date(timestamp).getMinutes());
+  const second = addZero(new Date(timestamp).getSeconds());
+  return `${day}-${month} ${hour}-${minute}-${second}`;
+};
+
+/***/ }),
+
 /***/ "2Lq3":
 /***/ (function(module, exports) {
 
@@ -227,144 +243,6 @@ var external_react_default = /*#__PURE__*/__webpack_require__.n(external_react_)
 // EXTERNAL MODULE: external "easy-peasy"
 var external_easy_peasy_ = __webpack_require__("SDXy");
 
-// EXTERNAL MODULE: external "zangodb"
-var external_zangodb_ = __webpack_require__("iYlg");
-var external_zangodb_default = /*#__PURE__*/__webpack_require__.n(external_zangodb_);
-
-// CONCATENATED MODULE: ./src/lib/helpers/processDb.js
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
- // TO DO: check if db exists before running scan
-// export const getDbs = async () =>{}
-// TO DO: if existing url has been selected, return metadata
-// export const checkMeta = async () =>{}
-
-const makeStoreData = (url, actions, meta) => async data => {
-  let v = 0;
-  const collName = meta ? "metadata" : new Date().getTime().toString(); // Check if DB for current URL exists
-
-  const dbCheck = await window.indexedDB.databases().then(dbs => Array.isArray(dbs) && dbs.find(db => db.name === url)); // If DB existis, increment version in order to add a new collection
-
-  if (typeof dbCheck != "undefined" && dbCheck.name === url && dbCheck.version > 0) v = dbCheck.version + 1; // Modify data when storing scan data. If storing metadata, ignore this block
-
-  if (!meta) {
-    // Get only results with valid DCC objects
-    data = data[url] && data[url].filter(item => Object.keys(item).length > 1);
-
-    if (typeof data === "undefined" || !data.length) {
-      actions.addInfoEvent("Scan data processed. No bvDCC data found.");
-      actions.setProcessInProgress(false);
-      return;
-    }
-  } // Define collections without indexes.
-
-
-  const db = new external_zangodb_default.a.Db(url, v, [collName]);
-  const collection = db.collection(collName);
-  const successMsg = meta ? `Metadata for ${url} successfully stored.` : `Scan data for ${url} successfully processed.`;
-  collection.insert(data).then(() => {
-    actions.addInfoEvent(successMsg); // Completes the check switch for the entire process from starting scan to the storing of data in db:
-
-    !meta && actions.setProcessInProgress(false);
-    db.close();
-  }).catch(error => {
-    actions.addErrorEvent("Error processing scanned data: " + error.message);
-    console.error(error); // Completes the check switch for the entire process from starting scan to the storing of data in db:
-
-    !meta && actions.setProcessInProgress(false);
-    db.close();
-  });
-  db.on("blocked", () => {
-    console.warn(`Database blocked event fired with details: ${meta ? "Metadata" : "Scan data"} store attempt for url ${url}`);
-    actions.addInfoEvent(`We are experiencing some issues with ${meta ? "Metadata" : "Scan data"} processing for ${url}.\nPlease expect some delays or reload the page and try again.`);
-    db.close();
-  });
-};
-const getDbNames = async () => window.indexedDB.databases().then(res => res.map(db => db.name));
-const getAllMeta = async () => {
-  try {
-    const dbNames = await getDbNames();
-    const meta = await Promise.all(dbNames.map(dbName => new Promise((resolve, reject) => {
-      const db = new external_zangodb_default.a.Db(dbName, ["metadata"]);
-      let col = db.collection("metadata");
-      col.findOne().then(res => resolve((() => {
-        db.close();
-        return _objectSpread({
-          dbName
-        }, res);
-      })())).catch(err => reject((() => {
-        db.close();
-        return err;
-      })()));
-    })));
-    return {
-      ok: true,
-      meta
-    };
-  } catch (error) {
-    console.warn("Error occurred while fetching scanned Metadata: ", error);
-    return {
-      ok: false
-    };
-  }
-};
-const getSingleMeta = async dbName => {
-  try {
-    const db = new external_zangodb_default.a.Db(dbName, ["metadata"]);
-    let col = db.collection("metadata");
-    const data = await col.findOne();
-    return {
-      ok: true,
-      data
-    };
-  } catch (error) {
-    console.warn("Error accessing data: ", error);
-    return {
-      ok: false,
-      data: error
-    };
-  }
-};
-const getStoresNames = dbName => {
-  const db = new external_zangodb_default.a.Db(dbName);
-  return new Promise((resolve, reject) => {
-    db.open(() => {
-      resolve(db._idb.objectStoreNames);
-      db.close();
-    });
-  });
-};
-const getStoreData = async (dbName, store) => {
-  try {
-    const db = new external_zangodb_default.a.Db(dbName, [store]);
-    let col = db.collection(store);
-    const data = await col.find().toArray();
-    return {
-      ok: true,
-      data
-    };
-  } catch (error) {
-    console.warn("Error accessing data: ", error);
-    return {
-      ok: false,
-      data: error
-    };
-  }
-};
-const dropDb = async dbName => {
-  try {
-    const db = new external_zangodb_default.a.Db(dbName);
-    db.drop();
-    return true;
-  } catch (error) {
-    console.warn("Error dropping db for: ", dbName, error);
-    return false;
-  }
-};
 // EXTERNAL MODULE: ./src/components/CurrentScan/CurrentScan.module.css
 var CurrentScan_module = __webpack_require__("tZ2U");
 var CurrentScan_module_default = /*#__PURE__*/__webpack_require__.n(CurrentScan_module);
@@ -434,7 +312,6 @@ const ScanLog = () => {
 
 
 
-
 const CurrentScan = () => {
   const {
     0: viewLog,
@@ -494,6 +371,242 @@ const CurrentScan = () => {
 // EXTERNAL MODULE: ./src/components/Scans/Scans.module.css
 var Scans_module = __webpack_require__("O1+1");
 var Scans_module_default = /*#__PURE__*/__webpack_require__.n(Scans_module);
+
+// EXTERNAL MODULE: ./src/components/DownloadIcons/DownloadIcons.module.css
+var DownloadIcons_module = __webpack_require__("mzHp");
+var DownloadIcons_module_default = /*#__PURE__*/__webpack_require__.n(DownloadIcons_module);
+
+// EXTERNAL MODULE: external "xlsx"
+var external_xlsx_ = __webpack_require__("X1wy");
+var external_xlsx_default = /*#__PURE__*/__webpack_require__.n(external_xlsx_);
+
+// EXTERNAL MODULE: ./src/lib/helpers/formatTimestamps.js
+var formatTimestamps = __webpack_require__("1Qhm");
+
+// EXTERNAL MODULE: ./src/lib/helpers/regex.js
+var regex = __webpack_require__("kHgJ");
+
+// CONCATENATED MODULE: ./src/components/DownloadIcons/DownloadIcons.helper.js
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+
+
+
+const handleDownloadXlsAll = async (db, scannedUrl) => {
+  const title = makeReportName(scannedUrl, "xlsx");
+
+  try {
+    // Fetch all data for one website from db
+    let websiteData = await db.col("dccdata").findAsArray({
+      url: scannedUrl
+    }, {
+      _id: 0,
+      url: 0
+    });
+    websiteData = websiteData // Where category field is an array of objects, extract only the "name" value
+    .map(item => {
+      if (Array.isArray(item.categoryPath)) item.categoryPath = item.categoryPath.reduce((acc, curr) => {
+        if (curr.Name) return acc = curr.Name;
+      }, "");
+      return item;
+    });
+    const tsSet = new Set(websiteData.map(d => d.timestamp));
+    const timestamps = Array.from(tsSet).reverse(); // Group data by timestamp
+
+    const workbookData = timestamps.map(tStamp => websiteData.filter(row => row.timestamp === tStamp));
+    const workbook = external_xlsx_default.a.utils.book_new();
+    workbookData.forEach((sheet, i) => {
+      sheet.forEach(row => delete row.timestamp);
+      const wsName = Object(formatTimestamps["formatTs"])(timestamps[i]);
+      const worksheet = external_xlsx_default.a.utils.json_to_sheet(sheet);
+      external_xlsx_default.a.utils.book_append_sheet(workbook, worksheet, wsName);
+    });
+    external_xlsx_default.a.writeFile(workbook, title);
+  } catch (error) {
+    console.warn("An error occurred while creating the report!", error);
+  }
+};
+const handleDownloadXls = async (scannedUrl, reportData) => {
+  // Remove timestamps
+  reportData = reportData.map(row => {
+    const {
+      timestamp
+    } = row,
+          remainingKeys = _objectWithoutProperties(row, ["timestamp"]);
+
+    return remainingKeys;
+  });
+  const title = makeReportName(scannedUrl, "xlsx");
+
+  try {
+    const workbook = external_xlsx_default.a.utils.book_new();
+    const wsName = Object(formatTimestamps["formatTs"])(new Date().getTime());
+    const worksheet = external_xlsx_default.a.utils.json_to_sheet(reportData);
+    external_xlsx_default.a.utils.book_append_sheet(workbook, worksheet, wsName);
+    external_xlsx_default.a.writeFile(workbook, title);
+  } catch (error) {
+    console.warn("An error occurred while creating the report!", error);
+  }
+};
+const handleDownloadCsvBlob = (scannedUrl, reportData) => {
+  // Remove timestamps
+  reportData = reportData.map(row => {
+    const {
+      timestamp
+    } = row,
+          remainingKeys = _objectWithoutProperties(row, ["timestamp"]);
+
+    return remainingKeys;
+  });
+  const reportTitle = makeReportName(scannedUrl, "csv");
+
+  try {
+    const worksheet = external_xlsx_default.a.utils.json_to_sheet(reportData);
+    const csv = external_xlsx_default.a.utils.sheet_to_csv(worksheet);
+    window.URL = window.URL || window.webkiURL;
+    const blob = new Blob([csv]);
+    const blobURL = window.URL.createObjectURL(blob);
+    return {
+      reportTitle,
+      blobURL
+    };
+  } catch (error) {
+    console.warn("An error occurred while creating the report!", error);
+  }
+};
+const handleDownloadJsonBlob = (scannedUrl, reportData) => {
+  // Remove timestamps
+  reportData = reportData.map(row => {
+    const {
+      timestamp
+    } = row,
+          remainingKeys = _objectWithoutProperties(row, ["timestamp"]);
+
+    return remainingKeys;
+  });
+  const reportTitle = makeReportName(scannedUrl, "json");
+
+  try {
+    window.URL = window.URL || window.webkiURL;
+    const blob = new Blob([JSON.stringify(reportData, null, 2)]);
+    const blobURL = window.URL.createObjectURL(blob);
+    return {
+      reportTitle,
+      blobURL
+    };
+  } catch (error) {
+    console.warn("An error occurred while creating the report!", error);
+  }
+};
+
+const makeReportName = (scannedUrl, extension) => {
+  let urlRN = scannedUrl.replace(/http(|s)\:\/\//, "").split(regex["localeRgx"])[0];
+  if (urlRN.slice(-1) === "/") urlRN = urlRN.slice(0, urlRN.length - 1);
+  return `bvDCC_extract_${urlRN}_${new Date().getTime()}.${extension}`;
+};
+// CONCATENATED MODULE: ./src/components/DownloadIcons/DownloadIcons.js
+
+
+
+
+
+const xlsx = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAFIUlEQVR4Xu2bS0hWQRTH51pBQiFFhAS5CVfpoo1EkBRILpIwgqiMyoVBq+hpkbQIIexhtQoysCItgkjCFqZUKIi0KdJWEkGLsOhBVLSwvHnED67XmTMz38x9fHfOt8wzM3f+v5nznzn35jH6JaqAl+joNDgjAAkvAgJAABJWIOHhaQcUOoAlR9f7Cc9Ba/jph2373T5ySqtRhMHGO6DQAICWaYLgJIA0QXAGwOHNO9i15w/nJJM07ARnALw+c5V1Dg+lDoJTAGD5pw2CcwDSBsFJAGmC4CyAtEBwGkAaIDgPIGkIBGD2ZpDU6YgABK5mSUAgAKFCW9wQCACn0hknBAIgKDXHBYEAILX+OCAQAMnLlqghEACFt11RQiAACgCivKwRAEUAIgi/2keMNDRqDA9VKO+E4YWMjV84HREAG6oa9EEADMSz0ZQA2FDRoA8CYCCejaYEwIaKBn0QAAPxbDTNDIDSkuVs/OwToSYtvZfmfdODCbitchPrOnCeGzL6cZxtuLzPhv4sMwBAjQv1R9ihjTu5wnz/85NVXdzFJn58UxJu+NgdVrmqnBtb3baXvfr8TqkfWVCmAMBkP7Q+ZcuKl3LnfX3oATvZc0WmCYPPEFvrjhv1IR1kNiBzALDUoboLRBBV26uKD3GZAwCTwtKHbBdgq7/h1mn2ePSFjr7S2EwCWLdyDRtsvqvtBWDkL0/c56aw3rFBtruzWSqobkAmAcgMWbQLRCYeRerJgcosAGw1w+TLz22dcyLCdo3uEVZnF2QWAIigc5q519jG6iqq52ln88zPA5NpADJDzu0CbPVHYbxBEJkHgB1Lc8YqOjVFZbxOAYDJitIL/A3yO+/SFaXxOgdAVifi5eYojdc5ALJjaRhA1MbrJACYNFYnCopis9gmO5Jm3oSDAmCGnIuTlSpkgur+3SkA2L2AAOguHc142c2YUpCmoLrh2FGUTFhXTc14Ue6Hsz78eC9w6BiqKbIoHEs9IPL7L1+F737DBTtLjzSnm8ybsCj1wOova9kyIwaVIqJYWtN9YsfOYIrB4qgYZwBHtLJ5N11RbNQ1ocymIOwTFd6qxkrS+VzOqipLlJbOs8Y+o0/8jRrDE0bx/wMwMbE6D3ZU1U1FTgPAvorAhMwXHG+pOwsAKzeovGDBUpfO3cBJALJyg0qV00YfsCPCABb0r1byhFxQf/dNpfSuFISNbNMDsByusvpzz4ntAtV+nAMgKzXr3Gplu0DFkJ0CIBMsn2Mk5iUqdwOnAGgl15iCCUBMQouGIQAEQE0Bm6cgtRHjiaIdEI/OwlEIAAFQU6DQUpBqiSE8eyduwmrIzaIIgJl+xq0JgLGEZh0QADP9jFuHAUx+WsEWvyk27jefDnzm9aSqGprPJHTb8HaArsHqjsmLB/EHuju2OwcAxEgaguexCW+hV9N3u+OtkwCg+lpW9m/ewoxrJxQt8ipAfHgAJwHAxHkQ4vCDIs872NfV0ZGj7ywAUSqKEkIu7we3ntMA4vQDnvhOp6DgKozalIOmGzYe53eAyA/g322ZctB0CYDgEB+VKYdNlwAgtyheKjIxZVHeJxPWhJBPKlIRn0xYAMLUlDHTpRSkUMgxvSljpmsdgMJ8MhNS29DUNOX7N7AJyUyXABguh5o9TY885tfzulHN+1ZN2HA+BdmcByEf8a2YcEEqaPjQtfub1vp//QHfZ6UzIgbKy7pdG9+EdQfMSjxAmJr0x2A+OqZLHmBxBYApQ3fB8rJu9/8B9g+8QHotYFcAAAAASUVORK5CYII=";
+const DownloadIcons_csv = "data:image/png;base64,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";
+const json = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAFQUlEQVR4Xu2cv2sUQRTH55JGIYhCAiagSIoEFRWtFGOXaGWRQhCDjRgL/wCx0EIUQf+AFCbYxATBIoKVJo0kop0YQdEiWF2EBJSQwiY58+AmzL17Mzt7b+529+Zto97tm9n5fub9mLeJJSVXpgqUMp1dJlcCIONNIAAEQMYKZDy9eEDRAXz+MVbJeA2ppq+o0pMzgy/upjJq4s1sDygaANAyTxCiBJAnCNEA6Nl/Sa39fVsTTPLgCdEAGDj8WP3ZeJ87CFEBgO2fNwjRAcgbhCgB5AlCtADyAiFqAHmAED2ArCEIgOrJIKvqSAAYR7MsIAgA1GhrNQQBQHQ6WwlBAFhaza2CIAAcvf5WQBAACS9bmg1BAHi87WomBAHgAaCZhzUB4AnABuH04AxLQ5YxPFRR3gnDC5kQFw5HAiCEqowxBABDvBCmAiCEiowxBABDvBCmAiCEiowxBABDvBCmAiCEiowxBABDvBCmAiCEiowxBABDvBCmhQEwObFcs97x2yfr1r++9k99XCqr36ubu98d7O1SR/r3qROnuq16uex6+7pUd8+eOts3cys185w930fOkfTcbQMAC4IVAxDnhvrqxPz6ZV19+lB2bmZKXDwfjH95tL9unCgA+IgIymCRfO3AFkOggFOgogCAF6nDzq+VjZowgYXEdiAghBy4cCiDz8ywRwGgvKDtAVC72BQKf69Fwp/7hBnzHlvIG70yUBPmogPguwuxgFRSt8EDb7ABwPO3PQCoYOZe/aypenAyhHvMC6oaU0BbAnWN7Ur6phe0PQAQlsoBVMVjQjBtbACosbWnUFWQLn/NUBUFAFs1o5MqVcebwthqeOwBZiKmzgFmOatBRQHAFZOp8hPvbN8Q5AIAYcesnDTUaACAOOAJVOmpIZhhKbQHAAC4dD7SUKMCoGO8CwQVGkJ5AE7u4AX4lI2rrbZpRdT1AKoegQWgQkNIAGY+gnHNvhQ+zMG/Cw8AFmxeuOlmq+V9qiDXIQ8nYVfpaT5fbj0g6WRqi6VJMdZWy/scxFwNNxcAV4+pMADMsJDmQIRLykZbEVQJ6mpFJLUgtBfkFoBtwdAcw40xUwhqt+n6f7W8WZcEXYck3cQDsagWtasZhwHYvCC3AJJqeb2DqISZpq1sCpXGLqkdjQFQG6oQSTjpxQpeqAaTZAf3USdeHwg+nVLquahnyrUHuOp4W7vArDCoV4taeNurRfge7CBcmYc4HY58X0lSAFytDP3chSlDqTq/HT4TABlTFAACoFj/bWVoXuIBoRW1jHfnwd5UM83PTnn9+pfXTa6Zi/I7YqnUI24WAFwFmfYCgCkg11wAcBVk2gsApoBccwHAVZBpLwCYAnLNBQBXQaa9AGAKyDUXAFwFmfYCgCkg11wAcBVk2gsApoBccwHAVdBiD+99F5ePN2l097AlVbov3dAdjdLu7iC0Sur7/MzUMQFQVbOlEHbEV1vbw/Mvn5cFQBUA/ATE04kDQTZ30iCVzo4LC9PPluA+AWCoBT9jNP36UJJ+rO8h7r+bnXykBxEASM5mJmUsvniAZS83JR9Uky6eUjygFRCMpCsAPCN4yKRsJl0B4AkAbguRlKm4bz6ChKAEIJyknCS+JGFPb2goKVuSroQgT9HxbakgOJKuAGgQQJqk7Eq6wQE0uJ5Cml28Nn6voioPXQ/vE/eDJuFCKsl4aBeEtOIHScKMtRTWdGTs5jdVUUdrFuCZdCUEBcA+cvVGn+rsWNiFkCLpCoAAAGCI4eu3hkpb24vw9zRJVwAEAgDDQD6AP832ctrh/wNiXwwt6bNvAgAAAABJRU5ErkJggg==";
+
+const DownloadXlsAll = ({
+  scannedUrl
+}) => {
+  const {
+    db
+  } = Object(external_easy_peasy_["useStoreState"])(state => state);
+  return /*#__PURE__*/Object(jsx_runtime_["jsx"])("img", {
+    className: DownloadIcons_module_default.a["download-icon"] + " u-pull-right",
+    src: xlsx,
+    alt: scannedUrl,
+    title: "Download as .xlsx",
+    onClick: async () => await handleDownloadXlsAll(db, scannedUrl)
+  });
+};
+
+const DownloadXls = ({
+  selectedWeb,
+  reportData
+}) => {
+  return /*#__PURE__*/Object(jsx_runtime_["jsx"])("img", {
+    className: DownloadIcons_module_default.a["download-icon"],
+    src: xlsx,
+    title: "Download current sheet as .xlsx",
+    onClick: () => handleDownloadXls(selectedWeb, reportData)
+  });
+};
+
+const DownloadCsv = ({
+  selectedWeb,
+  reportData
+}) => {
+  const {
+    0: title,
+    1: setTitle
+  } = Object(external_react_["useState"])("");
+  const {
+    0: url,
+    1: setUrl
+  } = Object(external_react_["useState"])("");
+  Object(external_react_["useEffect"])(() => {
+    const {
+      reportTitle,
+      blobURL
+    } = handleDownloadCsvBlob(selectedWeb, reportData);
+    setTitle(reportTitle);
+    setUrl(blobURL);
+    return () => window.URL.revokeObjectURL(blobURL);
+  }, [reportData]);
+  return /*#__PURE__*/Object(jsx_runtime_["jsx"])("a", {
+    title: "Download current sheet as .csv",
+    href: url,
+    download: title,
+    children: /*#__PURE__*/Object(jsx_runtime_["jsx"])("img", {
+      className: DownloadIcons_module_default.a["download-icon"],
+      src: DownloadIcons_csv
+    })
+  });
+};
+
+const DownloadJson = ({
+  selectedWeb,
+  reportData
+}) => {
+  const {
+    0: title,
+    1: setTitle
+  } = Object(external_react_["useState"])("");
+  const {
+    0: url,
+    1: setUrl
+  } = Object(external_react_["useState"])("");
+  Object(external_react_["useEffect"])(() => {
+    const {
+      reportTitle,
+      blobURL
+    } = handleDownloadJsonBlob(selectedWeb, reportData);
+    setTitle(reportTitle);
+    setUrl(blobURL);
+    return () => window.URL.revokeObjectURL(blobURL);
+  }, [reportData]);
+  return /*#__PURE__*/Object(jsx_runtime_["jsx"])("a", {
+    title: "Download current sheet as .json",
+    href: url,
+    download: title,
+    children: /*#__PURE__*/Object(jsx_runtime_["jsx"])("img", {
+      className: DownloadIcons_module_default.a["download-icon"],
+      src: json
+    })
+  });
+};
+
 
 // EXTERNAL MODULE: ./src/components/ScanThumb/ScanThumb.module.css
 var ScanThumb_module = __webpack_require__("ZRC5");
@@ -567,6 +680,8 @@ const ScanThumb = ({
           setsSlectedWeb(scannedUrl);
         },
         children: "View DCC data"
+      }), /*#__PURE__*/Object(jsx_runtime_["jsx"])(DownloadXlsAll, {
+        scannedUrl: scannedUrl
       })]
     })]
   });
@@ -644,11 +759,11 @@ var external_react_datasheet_default = /*#__PURE__*/__webpack_require__.n(extern
 // CONCATENATED MODULE: ./src/components/Worksheet/Worksheet.js
 
 
-function Worksheet_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-function Worksheet_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { Worksheet_ownKeys(Object(source), true).forEach(function (key) { Worksheet_defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { Worksheet_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-function Worksheet_defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 
 
@@ -684,7 +799,7 @@ class Worksheet_Worksheet extends external_react_default.a.Component {
           col,
           value
         }) => {
-          grid[row][col] = Worksheet_objectSpread(Worksheet_objectSpread({}, grid[row][col]), {}, {
+          grid[row][col] = _objectSpread(_objectSpread({}, grid[row][col]), {}, {
             value
           });
         });
@@ -699,6 +814,8 @@ class Worksheet_Worksheet extends external_react_default.a.Component {
 
 /* harmony default export */ var components_Worksheet_Worksheet = (Worksheet_Worksheet);
 // CONCATENATED MODULE: ./src/components/ScanData/ScanData.js
+
+
 
 
 
@@ -741,6 +858,10 @@ const ScanData = ({
     1: setSheetData
   } = Object(external_react_["useState"])([]);
   const {
+    0: reportData,
+    1: setReportData
+  } = Object(external_react_["useState"])([]);
+  const {
     db
   } = Object(external_easy_peasy_["useStoreState"])(state => state); // Get all dcc data for one website
 
@@ -775,21 +896,12 @@ const ScanData = ({
   Object(external_react_["useEffect"])(() => {
     // Find the index of selected timestamp dataset and send that data to react-datasheet
     let index = allTsGroupedData.length && allTsGroupedData.findIndex(ds => ds[0].timestamp === selectedTs);
-    index = index === -1 ? 0 : index;
-    allSheetData.length && setSheetData(allSheetData[index] || []);
+    index = index === -1 ? 0 : index; // Set data for display in react-worksheet
+
+    allSheetData.length && setSheetData(allSheetData[index] || []); // Set data for display in xlsx, csv and json reports
+
+    allSheetData.length && setReportData(allTsGroupedData[index] || []);
   }, [allTsGroupedData, selectedTs, allSheetData]);
-
-  const formatTs = timestamp => {
-    const addZero = d => d = d > 9 ? d : "0" + d;
-
-    const year = new Date(timestamp).getFullYear();
-    const month = addZero(new Date(timestamp).getMonth() + 1);
-    const day = addZero(new Date(timestamp).getDate());
-    const hour = addZero(new Date(timestamp).getHours());
-    const minute = addZero(new Date(timestamp).getMinutes());
-    return `${year}-${month}-${day} ${hour}:${minute}`;
-  };
-
   return /*#__PURE__*/Object(jsx_runtime_["jsxs"])(jsx_runtime_["Fragment"], {
     children: [/*#__PURE__*/Object(jsx_runtime_["jsxs"])("div", {
       className: "jsx-3655797331" + " " + "data-container",
@@ -806,7 +918,18 @@ const ScanData = ({
           }), !hasDccData && /*#__PURE__*/Object(jsx_runtime_["jsxs"])("span", {
             className: "jsx-3655797331",
             children: ["DCC data unavailable for ", selectedWeb]
-          }), /*#__PURE__*/Object(jsx_runtime_["jsx"])("svg", {
+          }), sheetData.length && hasDccData ? /*#__PURE__*/Object(jsx_runtime_["jsxs"])(jsx_runtime_["Fragment"], {
+            children: [/*#__PURE__*/Object(jsx_runtime_["jsx"])(DownloadXls, {
+              selectedWeb: selectedWeb,
+              reportData: reportData
+            }), /*#__PURE__*/Object(jsx_runtime_["jsx"])(DownloadCsv, {
+              selectedWeb: selectedWeb,
+              reportData: reportData
+            }), /*#__PURE__*/Object(jsx_runtime_["jsx"])(DownloadJson, {
+              selectedWeb: selectedWeb,
+              reportData: reportData
+            })]
+          }) : "", /*#__PURE__*/Object(jsx_runtime_["jsx"])("svg", {
             viewBox: "0 0 24 24",
             className: "jsx-3655797331" + " " + "data-close-icon",
             children: /*#__PURE__*/Object(jsx_runtime_["jsx"])("path", {
@@ -831,7 +954,7 @@ const ScanData = ({
             children: timestamps.map((timestamp, i) => /*#__PURE__*/Object(jsx_runtime_["jsx"])("div", {
               onClick: () => setSelectedTs(timestamp),
               className: "jsx-3655797331",
-              children: formatTs(timestamp)
+              children: Object(formatTimestamps["formatTs"])(timestamp)
             }, i))
           })
         })]
@@ -1148,9 +1271,6 @@ var NewScanModal_module_default = /*#__PURE__*/__webpack_require__.n(NewScanModa
 // EXTERNAL MODULE: ./src/lib/drivers/restDrivers.js
 var restDrivers = __webpack_require__("zgqH");
 
-// EXTERNAL MODULE: ./src/lib/helpers/regex.js
-var regex = __webpack_require__("kHgJ");
-
 // CONCATENATED MODULE: ./src/components/NewScanModal/NewScanModal.js
 
 
@@ -1423,16 +1543,6 @@ const getServerSideProps = async ctx => {
 
   const protocol = dev ? "http" : "https";
   const url = protocol + "://" + ctx.req.get("host");
-  console.log("protocol: ", protocol);
-  console.log('ctx.req.protocol === "http": ', ctx.req.protocol === "http");
-  console.log("url: ", url); // http -> https redirect for production
-  // if (!dev && ctx.req && ctx.req.protocol === "http") {
-  //   ctx.res.writeHead(302, {
-  //     Location: url
-  //   });
-  //   ctx.res.end();
-  //   return { props: { data: {} } };
-  // }
 
   try {
     // Check if user is authenticated
@@ -1470,6 +1580,13 @@ const getServerSideProps = async ctx => {
 /***/ (function(module, exports) {
 
 module.exports = require("easy-peasy");
+
+/***/ }),
+
+/***/ "X1wy":
+/***/ (function(module, exports) {
+
+module.exports = require("xlsx");
 
 /***/ }),
 
@@ -1520,13 +1637,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ "iYlg":
-/***/ (function(module, exports) {
-
-module.exports = require("zangodb");
-
-/***/ }),
-
 /***/ "kHgJ":
 /***/ (function(module, exports) {
 
@@ -1561,6 +1671,17 @@ module.exports = {
 	"buildStreamFooter": "ScanLog_buildStreamFooter__2EP3e",
 	"gray": "ScanLog_gray__1tH_j",
 	"red": "ScanLog_red__26k7i"
+};
+
+
+/***/ }),
+
+/***/ "mzHp":
+/***/ (function(module, exports) {
+
+// Exports
+module.exports = {
+	"download-icon": "DownloadIcons_download-icon__TPVcG"
 };
 
 
@@ -1605,7 +1726,6 @@ module.exports = require("next/head");
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return authDriver; });
-/* unused harmony export scanDriver */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return slugDriver; });
 const makeDriver = ({
   method,
@@ -1626,7 +1746,12 @@ const makeDriver = ({
       headers: {}
     };
     if (email) options.headers.Authorization = "Basic " + btoa(email);
-    if (body) options.body = JSON.stringify(body);
+
+    if (body) {
+      options.headers["Content-Type"] = "application/json";
+      options.body = JSON.stringify(body);
+    }
+
     let status;
     const result = await fetch(endpoint, options).then(res => {
       status = res.status;
@@ -1648,11 +1773,6 @@ const authDriver = makeDriver({
   method: "POST",
   endpoint: "/api/auth",
   format: "text"
-});
-const scanDriver = makeDriver({
-  method: "GET",
-  endpoint: "/api/scan",
-  format: "json"
 });
 const slugDriver = makeDriver({
   method: "GET",

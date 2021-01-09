@@ -1,4 +1,4 @@
-import { Model } from "../../helpers/processDb_new.js";
+import { Model } from "../../helpers/processDb.js";
 
 export const setScanUrl = (state, scanUrl) => {
   state.scanUrl = scanUrl;
