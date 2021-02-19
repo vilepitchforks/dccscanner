@@ -10,6 +10,7 @@ import css from "./NewScanModal.module.css";
 
 import { slugDriver } from "../../lib/drivers/restDrivers";
 import { urlRgx } from "../../lib/helpers/regex";
+import { withoutCreds } from "../../lib/helpers/withoutCreds.js";
 
 const NewScanModal = ({ isNew, setIsNew, setNewScan }) => {
   const [loading, setLoading] = useState(false);
@@ -54,7 +55,7 @@ const NewScanModal = ({ isNew, setIsNew, setNewScan }) => {
     // Website details are fetched and metadata exists
     if (isMetaAvailable) {
       meta = {
-        scannedUrl: url,
+        scannedUrl: withoutCreds(url),
         slugs: fetchedMeta.slugs,
         ...fetchedMeta.metadata
       };
@@ -63,7 +64,9 @@ const NewScanModal = ({ isNew, setIsNew, setNewScan }) => {
     if (isMetaAvailable) {
       // Store website metadata and slugs to local db
       await db.collection("metadata").insert(meta, () => {
-        actions.addInfoEvent(`Metadata for ${url} successfully stored.`);
+        actions.addInfoEvent(
+          `Metadata for ${withoutCreds(url)} successfully stored.`
+        );
         isMetaStored = true;
       });
     }
@@ -115,7 +118,7 @@ const NewScanModal = ({ isNew, setIsNew, setNewScan }) => {
     return;
   };
 
-  // Cleanup function, resets all url data each tome Modal component unmounts
+  // Cleanup function, resets all url data each time Modal component unmounts
   useEffect(() => () => setIsNew(true), []);
 
   return (

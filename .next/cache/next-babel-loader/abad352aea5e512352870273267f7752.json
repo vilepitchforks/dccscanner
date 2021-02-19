@@ -1,1 +1,0 @@
-{"ast":null,"code":"// eslint-disable-next-line\nexports.urlRgx = /^(ht|f)tp(s?)\\:\\/\\/[0-9a-zA-Z]([-.\\w]*[0-9a-zA-Z])*(:(0-9)*)*(\\/?)([a-zA-Z0-9\\-\\.\\?\\,\\'\\/\\\\\\+&amp;%\\$#_]*)?$/; // Matches \"en-us\" or \"en-us/\"\n\nexports.localeRgx = /[a-z][a-z]-[a-z][a-z]($|\\/$)/;","map":null,"metadata":{},"sourceType":"script"}

@@ -1,6 +1,6 @@
 //@ts-check
 const { Request, Response, NextFunction } = require("express");
-const { urlRgx, localeRgx } = require("../helpers/regex.js");
+const { urlRgx, localeRgx, authCreds } = require("../helpers/regex.js");
 
 /**
  * @param {Request | object} req
@@ -8,7 +8,19 @@ const { urlRgx, localeRgx } = require("../helpers/regex.js");
  * @param {NextFunction} next
  */
 exports.urlUtils = (req, res, next) => {
-  const inputURL = req.query.url;
+  const { url } = req.query;
+  // Check if creds are passed in the URL (https://username:password@www.website.com)
+  const hasCreds = authCreds.test(url);
+
+  // Extract creds from the URL and pass them as req.query.urlCreds = ["username","password"]
+  const creds = hasCreds && url.match(authCreds)[0].replace("@", "");
+  req.query.urlCreds = creds && creds.split(":");
+
+  // If creds are passed, remove them from the URL
+  const inputURL = creds ? url.replace(creds + "@", "") : url;
+
+  // Set the URL without credentials as req.query.url
+  req.query.url = inputURL;
 
   // Check if url query param exists.
   if (!inputURL) return next();
@@ -39,22 +51,17 @@ exports.urlUtils = (req, res, next) => {
   let urlXml = "";
 
   if (localeRgx.test(inputURL)) {
-    // Replace country code with sitemap
+    // Split URL by country code
     urlXml = inputURL.split(localeRgx)[0];
-
     urlXml = urlXml + "/" + sitemap;
-    // urlXml = inputURL.replace(localeRgx, sitemap);
-    console.log("urlXml 1: ", urlXml);
   } else if (inputURL.slice(-1) === "/") {
     // Handle trailing slash
     urlXml = inputURL + sitemap;
-    console.log("urlXml 2: ", urlXml);
   } else {
     urlXml = inputURL + "/" + sitemap;
-    console.log("urlXml 3: ", urlXml);
   }
   req.query.urlXml = urlXml;
-  console.log("req.query.urlXml", req.query.urlXml);
+
   // Make report name
   let urlRN = inputURL.replace(/http(|s)\:\/\//, "").split(localeRgx)[0];
   if (urlRN.slice(-1) === "/") urlRN = urlRN.slice(0, urlRN.length - 1);

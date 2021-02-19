@@ -44,6 +44,11 @@ exports.extractDCCs = async (urls, start, query) => {
       cache.emit("cacheEvent", "info", eventString1, query.scanId);
 
       // Open each url from urls array in a new created tab
+      query.urlCreds &&
+        (await page.authenticate({
+          username: query.urlCreds[0],
+          password: query.urlCreds[1]
+        }));
       // await page.setDefaultNavigationTimeout(600000);
       await page.goto(urls[i], {
         waitUntil: "networkidle2"

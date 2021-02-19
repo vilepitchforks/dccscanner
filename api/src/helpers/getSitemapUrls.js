@@ -1,4 +1,5 @@
 //@ts-check
+const { NextFunction } = require("express");
 
 const axios = require("axios").default;
 const xmlParser = require("xml2js").parseStringPromise;
@@ -6,6 +7,7 @@ const { getMetadata } = require("page-metadata-parser");
 const domino = require("domino");
 
 const { stream, cache } = require("../events/EventsLibrary");
+const { axiosWithAuth } = require("./axiosWithAuth.js");
 
 /**
  * Filters sitemap URLs for selected slugs and returns URLs for scanning.
@@ -22,7 +24,7 @@ exports.getURLsForScan = async (start, query) => {
     cache.emit("cacheEvent", "info", eventString, query.scanId);
 
     // Fetch XML Sitemap, type <?xml version="1.0" encoding="UTF-8"?>
-    const { data } = await axios(query.urlXml);
+    const { data } = await axiosWithAuth(query.urlXml, query.urlCreds);
 
     stream.emit("infoEvent", "info", "> XML Sitemap fetched.", start);
     cache.emit("cacheEvent", "info", "> XML Sitemap fetched.", query.scanId);
@@ -69,12 +71,14 @@ exports.getURLsForScan = async (start, query) => {
 
 /**
  * Fetches all Sitemap URLs for /slugs enpoint
- * @param {string} xmlUrl
+ * @param {Object} query Object containing req.query.
+ * @param {NextFunction} next Express JS next() function.
  * @returns {Promise<string[]>}
  */
-const getAllSitemapUrls = async xmlUrl => {
+const getAllSitemapUrls = async (query, next) => {
   try {
-    const { data } = await axios(xmlUrl);
+    // const { data } = await axios(xmlUrl);
+    const { data } = await axiosWithAuth(query.urlXml, query.urlCreds);
 
     // Parse XML to JSON, structure: urlset.url[0].loc[0] is https://herbalessences.com/en-us/
     const { urlset } = await xmlParser(data);
@@ -84,22 +88,23 @@ const getAllSitemapUrls = async xmlUrl => {
     return urls;
   } catch (error) {
     console.warn("Error fetching URLs: ", error.config);
-    return [];
+    next(error);
   }
 };
 
 /**
  * Creates slugs for /slugs endpoint
- * @param {string} xmlUrl
+ * @param {Object} query Object containing req.query.
+ * @param {NextFunction} next Express JS next() function.
  * @returns {Promise<string[]>}
  */
-exports.getSlugs = async xmlUrl => {
-  const urls = await getAllSitemapUrls(xmlUrl);
+exports.getSlugs = async (query, next) => {
+  const urls = await getAllSitemapUrls(query, next);
 
   if (!urls.length) return [];
 
   const slugChunks = urls.map(url => {
-    let link = xmlUrl.replace("/sitemap.xml", "");
+    let link = query.urlXml.replace("/sitemap.xml", "");
     url = url.replace(link, "");
     return url.split("/");
   });
@@ -113,25 +118,28 @@ exports.getSlugs = async xmlUrl => {
 
 /**
  * Fetches metadata from the website
- * @param {string} url
+ * @param {Object} query Object containing req.query.
  * @returns {Promise<Object>}
  */
-exports.getMeta = async url => {
-  const { data } = await axios(url);
+exports.getMeta = async query => {
+  // const { data } = await axios(url);
+  const { data } = await axiosWithAuth(query.url, query.urlCreds);
 
   const doc = domino.createWindow(data).document;
-  const metadata = getMetadata(doc, url);
+  const metadata = getMetadata(doc, query.url);
 
   return metadata;
 };
 
 /**
- * @param {string[]} urls
- * @returns {string[][]}
+ * Chunkifies the provided shallow array into array of arrays of the provided length
+ * @param {string[]} urls Shallow array
+ * @param {number} length Length of chunks
+ * @returns {string[][]} Array of arrays of the provided length
  */
-exports.chunkify = urls => {
-  return Array.from({ length: Math.ceil(urls.length / 10) }, (_, i) => {
-    const start = i * 10;
-    return urls.slice(start, start + 10);
+exports.chunkify = (urls, length) => {
+  return Array.from({ length: Math.ceil(urls.length / length) }, (_, i) => {
+    const start = i * length;
+    return urls.slice(start, start + length);
   });
 };

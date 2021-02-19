@@ -1,4 +1,5 @@
 // eslint-disable-next-line
-exports.urlRgx = /^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$/;
+exports.urlRgx = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/;
 // Matches "en-us" or "en-us/"
 exports.localeRgx = /[a-z][a-z]-[a-z][a-z]($|\/$)/;
+exports.authCreds = /(?:[:\w]+@)/;

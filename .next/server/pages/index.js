@@ -1225,6 +1225,7 @@ var NewScanInit_module_default = /*#__PURE__*/__webpack_require__.n(NewScanInit_
 // CONCATENATED MODULE: ./src/components/NewScanInit/NewScanInit.js
 
 
+
  // const NewScanInit = ({ setNewScan }) => {
 
 const NewScanInit = ({
@@ -1248,8 +1249,14 @@ const NewScanInit = ({
 
   const handleInitScan = () => {
     startStream(`url=${url}&categories=${scanCtgs}`); // Sets scanUrl in Redux store
+    // Check if creds are passed in the URL (https://username:password@www.website.com)
 
-    setScanUrl(url); // Removes url value from local state
+    const hasCreds = regex["authCreds"].test(url); // Extract creds from the URL in format username:password@
+
+    const creds = hasCreds && url.match(regex["authCreds"])[0]; // If creds are passed, remove them from the URL
+
+    const inputURL = creds ? url.replace(creds, "") : url;
+    setScanUrl(inputURL); // Removes url value from local state
 
     setUrl(""); // Removes the modal overlay
 
@@ -1271,6 +1278,9 @@ var NewScanModal_module_default = /*#__PURE__*/__webpack_require__.n(NewScanModa
 // EXTERNAL MODULE: ./src/lib/drivers/restDrivers.js
 var restDrivers = __webpack_require__("zgqH");
 
+// EXTERNAL MODULE: ./src/lib/helpers/withoutCreds.js
+var withoutCreds = __webpack_require__("Vt2K");
+
 // CONCATENATED MODULE: ./src/components/NewScanModal/NewScanModal.js
 
 
@@ -1280,6 +1290,7 @@ function NewScanModal_ownKeys(object, enumerableOnly) { var keys = Object.keys(o
 function NewScanModal_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { NewScanModal_ownKeys(Object(source), true).forEach(function (key) { NewScanModal_defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { NewScanModal_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 function NewScanModal_defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 
 
 
@@ -1350,7 +1361,7 @@ const NewScanModal = ({
 
     if (isMetaAvailable) {
       meta = NewScanModal_objectSpread({
-        scannedUrl: url,
+        scannedUrl: Object(withoutCreds["withoutCreds"])(url),
         slugs: fetchedMeta.slugs
       }, fetchedMeta.metadata);
     }
@@ -1358,7 +1369,7 @@ const NewScanModal = ({
     if (isMetaAvailable) {
       // Store website metadata and slugs to local db
       await db.collection("metadata").insert(meta, () => {
-        actions.addInfoEvent(`Metadata for ${url} successfully stored.`);
+        actions.addInfoEvent(`Metadata for ${Object(withoutCreds["withoutCreds"])(url)} successfully stored.`);
         isMetaStored = true;
       });
     }
@@ -1404,7 +1415,7 @@ const NewScanModal = ({
     }
 
     return;
-  }; // Cleanup function, resets all url data each tome Modal component unmounts
+  }; // Cleanup function, resets all url data each time Modal component unmounts
 
 
   Object(external_react_["useEffect"])(() => () => setIsNew(true), []);
@@ -1583,6 +1594,25 @@ module.exports = require("easy-peasy");
 
 /***/ }),
 
+/***/ "Vt2K":
+/***/ (function(module, exports, __webpack_require__) {
+
+const {
+  authCreds
+} = __webpack_require__("kHgJ");
+
+exports.withoutCreds = url => {
+  // Check if creds are passed in the URL (https://username:password@www.website.com)
+  const hasCreds = authCreds.test(url); // Extract creds from the URL in format username:password@
+
+  const creds = hasCreds && url.match(authCreds)[0].replace("@", ""); // If creds are passed, remove them from the URL
+
+  const inputURL = creds ? url.replace(creds + "@", "") : url;
+  return inputURL;
+};
+
+/***/ }),
+
 /***/ "X1wy":
 /***/ (function(module, exports) {
 
@@ -1641,9 +1671,10 @@ module.exports = {
 /***/ (function(module, exports) {
 
 // eslint-disable-next-line
-exports.urlRgx = /^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$/; // Matches "en-us" or "en-us/"
+exports.urlRgx = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/; // Matches "en-us" or "en-us/"
 
 exports.localeRgx = /[a-z][a-z]-[a-z][a-z]($|\/$)/;
+exports.authCreds = /(?:[:\w]+@)/;
 
 /***/ }),
 
