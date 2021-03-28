@@ -1,5 +1,6 @@
 //@ts-check
 const { Request, Response, NextFunction } = require("express");
+const { axiosWithAuth } = require("../helpers/axiosWithAuth.js");
 const { urlRgx, localeRgx, authCreds } = require("../helpers/regex.js");
 
 /**
@@ -7,7 +8,7 @@ const { urlRgx, localeRgx, authCreds } = require("../helpers/regex.js");
  * @param {Response} res
  * @param {NextFunction} next
  */
-exports.urlUtils = (req, res, next) => {
+exports.urlUtils = async (req, res, next) => {
   const { url } = req.query;
   // Check if creds are passed in the URL (https://username:password@www.website.com)
   const hasCreds = authCreds.test(url);
@@ -49,16 +50,32 @@ exports.urlUtils = (req, res, next) => {
   const sitemap = "sitemap.xml";
 
   let urlXml = "";
+  try {
+    // Fetches the XML Sitemap URL from robots.txt. Used because some sites have sitemap.xml file in non-root folder
+    let { data } = await axiosWithAuth(
+      "https://" + req.query.rootUrl + "/robots.txt",
+      req.query.urlCreds
+    );
 
-  if (localeRgx.test(inputURL)) {
-    // Split URL by country code
-    urlXml = inputURL.split(localeRgx)[0];
-    urlXml = urlXml + "/" + sitemap;
-  } else if (inputURL.slice(-1) === "/") {
-    // Handle trailing slash
-    urlXml = inputURL + sitemap;
-  } else {
-    urlXml = inputURL + "/" + sitemap;
+    urlXml =
+      data
+        .split(/sitemap:/i)[1]
+        .trim()
+        .split(".xml")[0] + ".xml";
+  } catch (error) {
+    console.warn("Error fetching robots.txt: ", error.message);
+
+    // If fetching robots.txt file is not successfull, manually create sitemap.xml URL
+    if (localeRgx.test(inputURL)) {
+      // Split URL by country code
+      urlXml = inputURL.split(localeRgx)[0];
+      urlXml = urlXml + "/" + sitemap;
+    } else if (inputURL.slice(-1) === "/") {
+      // Handle trailing slash
+      urlXml = inputURL + sitemap;
+    } else {
+      urlXml = inputURL + "/" + sitemap;
+    }
   }
   req.query.urlXml = urlXml;
 

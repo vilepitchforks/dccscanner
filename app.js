@@ -19,7 +19,6 @@ const server = express();
 
 // Express middlewares
 server.use(express.json());
-server.use(bodyParser.urlencoded({ extended: false }));
 server.use(cookieParser());
 if (dev) {
   const morgan = require("morgan");
