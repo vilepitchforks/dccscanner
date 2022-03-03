@@ -59,6 +59,16 @@ exports.extractDCCs = async (urls, start, query) => {
       stream.emit("infoEvent", "info", eventString2, start);
       cache.emit("cacheEvent", "info", eventString2, query.scanId);
 
+      try {
+        // await page.waitForFunction("window.bvDCC !== undefined", {
+        //   timeout: 5000
+        // });
+        // For pages with Cookie banner - click on accept. Certain sites cause "Site down page" to be displayed if banner is not accepted.
+        await page.click("#onetrust-accept-btn-handler");
+      } catch (error) {
+        console.warn(error.message);
+      }
+
       // Create window object handle for page
       const windowHandle = await page.evaluateHandle(() => window);
 
@@ -117,7 +127,7 @@ exports.extractDCCs = async (urls, start, query) => {
       bvDCCs.push(bvDCC);
     }
 
-    await browser.close();
+    // await browser.close();
 
     return bvDCCs;
   } catch (error) {
