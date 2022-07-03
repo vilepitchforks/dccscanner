@@ -25,9 +25,9 @@ WORKDIR /dccscanner
 COPY package*.json /dccscanner/
 
 # Install api and next js dependencies
-RUN npm install --production
+RUN npm install --omit=dev
 
 # Copy all files and .next, api and public folders
 COPY . /dccscanner
 
-ENTRYPOINT ["node", "app.js"]
+ENTRYPOINT ["node", "--optimize_for_size", "--max_old_space_size=460", "app.js"]
