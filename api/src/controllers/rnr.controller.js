@@ -9,7 +9,7 @@ class BVTester {
   constructor(browser) {
     this.browser = browser;
     this.results = [];
-    this.timer = 5000;
+    this.timer = 30000;
     this.setEventListeners = this.setEventListeners.bind(this);
     this.addToResult = this.addToResult.bind(this);
     this.addErrToResult = this.addErrToResult.bind(this);
