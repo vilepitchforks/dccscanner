@@ -1,4 +1,4 @@
-import xlsx from "xlsx";
+import * as xlsx from "xlsx";
 
 import { formatTs } from "../../lib/helpers/formatTimestamps.js";
 import { localeRgx } from "../../lib/helpers/regex.js";

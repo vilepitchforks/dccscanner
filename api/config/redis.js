@@ -1,7 +1,7 @@
-const redisClient = require("redis");
+const { createClient } = require("redis");
 const { promisify } = require("util");
 
-const redis = redisClient.createClient({
+const redis = createClient({
   url: process.env.REDIS_URL,
   password: process.env.REDIS_PWD
 });
@@ -21,6 +21,13 @@ redis.on("end", error => {
   console.log("Redis connection closed.");
 });
 
+redis
+  .connect()
+  .then(() => console.log("Redis started."))
+  .catch(err =>
+    console.warn("Error occurred while connecting to Redis: ", err)
+  );
+
 // process.on("SIGINT", () => {
 //   console.log("SIGINT event.");
 //   redis.quit((err, reply) => {
@@ -29,11 +36,11 @@ redis.on("end", error => {
 //   });
 // });
 
-redis.GET = promisify(redis.get).bind(redis);
-redis.SET = promisify(redis.set).bind(redis);
-redis.RPUSH = promisify(redis.rpush).bind(redis);
-redis.LLEN = promisify(redis.llen).bind(redis);
-redis.LRANGE = promisify(redis.lrange).bind(redis);
-redis.EXPIRE = promisify(redis.expire).bind(redis);
+redis.GET = redis.get;
+redis.SET = redis.set;
+redis.RPUSH = redis.rPush;
+redis.LLEN = redis.lLen;
+redis.LRANGE = redis.lRange;
+redis.EXPIRE = redis.expire;
 
 module.exports = redis;

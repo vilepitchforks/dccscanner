@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import css from "./Navbar.module.css";
 
 const Navbar = ({ user }) => {
@@ -5,7 +7,14 @@ const Navbar = ({ user }) => {
 
   return (
     <nav className={css.navbar}>
-      <img className={css.logo} src="/logo192.png" />
+      <div className="flex items-center">
+        <Link href="/">
+          <img className={css.logo + " cursor-pointer"} src="/logo192.png" />
+        </Link>
+        <Link href="/rnr">
+          <a className="text-white">R&R</a>
+        </Link>
+      </div>
       <div className={css.avatar}>{user}</div>
     </nav>
   );

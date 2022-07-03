@@ -11,7 +11,9 @@ const WebList = () => {
   const { initDb } = useStoreActions(actions => actions);
 
   // Initialize the database
-  useEffect(() => initDb(), []);
+  useEffect(() => {
+    initDb();
+  }, []);
 
   return (
     <div className="container">
