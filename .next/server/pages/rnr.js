@@ -34,30 +34,38 @@ const Rnr = ({ user , availableBrands  })=>{
     const { 0: selectedLocale , 1: setSelectedLocale  } = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)(null);
     const { 0: results , 1: setResults  } = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)([]);
     const { 0: loading , 1: setLoading  } = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)(false);
+    const { 0: errMsg , 1: setErrMsg  } = (0,react__WEBPACK_IMPORTED_MODULE_1__.useState)(null);
     const handleSubmit = async ()=>{
         setLoading(true);
+        setErrMsg(null);
         const endpoint = selectedLocale ? "/single" : "/multi";
-        const { data  } = await axios__WEBPACK_IMPORTED_MODULE_3___default()(`/api${endpoint}?brand=${selectedBrand}&locale=${selectedLocale}`);
-        setResults(data.map((result)=>{
-            const deets = result?.dccValidation?.details;
-            return {
-                Locale: result.locale,
-                "Wrong Locale": !deets.locale?.ok ? deets.locale?.fromSite : "",
-                "Has DCC": result?.dccValidation?.dccExists,
-                // keysOk: result.dccValidation.details.keys.ok,
-                "Invalid Keys": deets?.keys?.invalidKeys.join(", "),
-                "Missing Required Keys": deets?.keys?.missingRequiredKeys.join(", "),
-                // productPageURLOk: deets.keys.productPageURL.ok,
-                "Wrong PDP URL": !deets?.productPageURL?.ok ? deets?.productPageURL?.fromSite : "",
-                "Wrong Img URL": !deets?.productImageURL?.ok ? deets?.productImageURL?.productImageURL : "",
-                "Category Path": !deets?.categoryPath?.ok ? JSON.stringify(deets?.productImageURL?.categoryPath) : "",
-                "GTINs OK": deets?.GTINs?.ok,
-                "Auth Email": result?.postReviewsParams?.HostedAuthentication_AuthenticationEmail,
-                "Auth CB": result?.postReviewsParams?.HostedAuthentication_CallbackURL,
-                FP: result?.postReviewsParams?.fp
-            };
-        }));
-        setLoading(false);
+        try {
+            const { data  } = await axios__WEBPACK_IMPORTED_MODULE_3___default()(`/api${endpoint}?brand=${selectedBrand}&locale=${selectedLocale}`);
+            setResults(data.map((result)=>{
+                const deets = result?.dccValidation?.details;
+                return {
+                    Locale: result.locale,
+                    "Wrong Locale": !deets.locale?.ok ? deets.locale?.fromSite : "",
+                    "Has DCC": result?.dccValidation?.dccExists,
+                    // keysOk: result.dccValidation.details.keys.ok,
+                    "Invalid Keys": deets?.keys?.invalidKeys.join(", "),
+                    "Missing Required Keys": deets?.keys?.missingRequiredKeys.join(", "),
+                    // productPageURLOk: deets.keys.productPageURL.ok,
+                    "Wrong PDP URL": !deets?.productPageURL?.ok ? deets?.productPageURL?.fromSite : "",
+                    "Wrong Img URL": !deets?.productImageURL?.ok ? deets?.productImageURL?.productImageURL : "",
+                    "Category Path": !deets?.categoryPath?.ok ? JSON.stringify(deets?.productImageURL?.categoryPath) : "",
+                    "GTINs OK": deets?.GTINs?.ok,
+                    "Auth Email": result?.postReviewsParams?.HostedAuthentication_AuthenticationEmail,
+                    "Auth CB": result?.postReviewsParams?.HostedAuthentication_CallbackURL,
+                    FP: result?.postReviewsParams?.fp
+                };
+            }));
+            setLoading(false);
+        } catch (error) {
+            console.warn("Error occurred while scanning all locales.");
+            setLoading(false);
+            setErrMsg("Error occurred while scaning locales, please try again.", error.message);
+        }
     };
     return /*#__PURE__*/ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
         children: [
@@ -118,14 +126,20 @@ const Rnr = ({ user , availableBrands  })=>{
                                     }, locale)) : null
                             ]
                         }),
-                        /*#__PURE__*/ react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx("div", {
-                            className: "flex justify-center space-x-2",
-                            children: /*#__PURE__*/ react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx("button", {
-                                type: "button",
-                                className: "mt-10 inline-block rounded bg-green-600 px-6 py-2.5 text-xl font-medium uppercase leading-tight text-white shadow-md transition duration-150 ease-in-out hover:bg-green-700 hover:text-gray-100 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg",
-                                onClick: selectedBrand && handleSubmit,
-                                children: !loading ? "Go" : "Loading..."
-                            })
+                        /*#__PURE__*/ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)("div", {
+                            className: "flex flex-col justify-center space-x-2",
+                            children: [
+                                /*#__PURE__*/ react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx("button", {
+                                    type: "button",
+                                    className: "mt-10 inline-block rounded bg-green-600 px-6 py-2.5 text-xl font-medium uppercase leading-tight text-white shadow-md transition duration-150 ease-in-out hover:bg-green-700 hover:text-gray-100 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg",
+                                    onClick: selectedBrand && handleSubmit,
+                                    children: !loading ? "Go" : "Loading..."
+                                }),
+                                errMsg ? /*#__PURE__*/ react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsx("p", {
+                                    className: "text-red-500",
+                                    children: errMsg
+                                }) : null
+                            ]
                         })
                     ]
                 })
