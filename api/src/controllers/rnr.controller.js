@@ -9,7 +9,7 @@ class BVTester {
   constructor(browser) {
     this.browser = browser;
     this.results = [];
-    this.timer = 60000;
+    this.timer = 5000;
     this.setEventListeners = this.setEventListeners.bind(this);
     this.addToResult = this.addToResult.bind(this);
     this.addErrToResult = this.addErrToResult.bind(this);
@@ -346,22 +346,24 @@ class BVTester {
 
     try {
       await page.waitForResponse(
-        response => {
+        async response => {
           const resUrl = response.url();
 
           // Stores data from POST a review
           if (resUrl.includes("/submitreview.json")) {
             const params = {};
-            new URL(resUrl).searchParams.forEach((value, key) => {
-              this.postReviewsParams = {
-                ...this.postReviewsParams,
-                [key]: value
-              };
-              params[key] = value;
-            });
-            this.addToResult(locale, "reviewsParams", {
-              name: "postReviewsParams",
+            new URL(resUrl).searchParams.forEach(
+              (value, key) => (params[key] = value)
+            );
+            this.addToResult(locale, "submitReview", {
+              name: "submitReviewParams",
               body: params
+            });
+            const { Locale, Errors, FormErrors, Review, HasErrors } =
+              await response.json();
+            this.addToResult(locale, "submitReview", {
+              name: "submitReviewResponse",
+              body: { Locale, HasErrors, Errors, FormErrors, Review }
             });
             return true;
           }
@@ -384,16 +386,18 @@ class BVTester {
       // Stores data from GET all reviews
       if (resUrl.includes("/reviews.json")) {
         const params = {};
-        new URL(resUrl).searchParams.forEach((value, key) => {
-          this.getReviewsParams = {
-            ...this.getReviewsParams,
-            [key]: value
-          };
-          params[key] = value;
-        });
-        this.addToResult(locale, "reviewsParams", {
+        new URL(resUrl).searchParams.forEach(
+          (value, key) => (params[key] = value)
+        );
+        this.addToResult(locale, "getReviews", {
           name: "getReviewsParams",
           body: params
+        });
+        const { Locale, HasErrors, Errors, TotalResults } =
+          await response.json();
+        this.addToResult(locale, "getReviews", {
+          name: "getReviewsResponse",
+          body: { Locale, HasErrors, Errors, TotalResults }
         });
       }
     });
@@ -526,8 +530,8 @@ exports.handleSingle = async (req, res, next) => {
           },
           dcc: result.dccValidation.dcc
         },
-        getReviewsParams: result.reviewsParams?.getReviewsParams,
-        postReviewsParams: result.reviewsParams?.postReviewsParams
+        getReviews: result.getReviews,
+        submitReview: result.submitReview
       }
     ]);
   } catch (error) {
@@ -572,7 +576,7 @@ exports.handleMulti = async (req, res, next) => {
   const promises = locales.map(locale => tester.run(brandData.locales[locale]));
 
   await Promise.all(promises);
-  console.log("tester.results[0]", tester.results[0]);
+
   res.json(
     tester.results.map(result => ({
       hasErrors: !!result.errors.length,
@@ -599,8 +603,8 @@ exports.handleMulti = async (req, res, next) => {
         },
         dcc: result.dccValidation.dcc
       },
-      getReviewsParams: result.reviewsParams?.getReviewsParams,
-      postReviewsParams: result.reviewsParams?.postReviewsParams
+      getReviews: result.getReviews,
+      submitReview: result.submitReview
     }))
   );
 };

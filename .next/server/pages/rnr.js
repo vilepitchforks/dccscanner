@@ -43,6 +43,8 @@ const Rnr = ({ user , availableBrands  })=>{
             const { data  } = await axios__WEBPACK_IMPORTED_MODULE_3___default()(`/api${endpoint}?brand=${selectedBrand}&locale=${selectedLocale}`);
             setResults(data.map((result)=>{
                 const deets = result?.dccValidation?.details;
+                const getReviewsRes = result?.getReviews?.getReviewsResponse;
+                const submitReviewRes = result?.submitReview?.submitReviewResponse;
                 return {
                     Locale: result.locale,
                     "Wrong Locale": !deets.locale?.ok ? deets.locale?.fromSite : "",
@@ -53,11 +55,13 @@ const Rnr = ({ user , availableBrands  })=>{
                     // productPageURLOk: deets.keys.productPageURL.ok,
                     "Wrong PDP URL": !deets?.productPageURL?.ok ? deets?.productPageURL?.fromSite : "",
                     "Wrong Img URL": !deets?.productImageURL?.ok ? deets?.productImageURL?.productImageURL : "",
-                    "Category Path": !deets?.categoryPath?.ok ? JSON.stringify(deets?.productImageURL?.categoryPath) : "",
+                    "Category Path": !deets?.categoryPath?.ok ? JSON.stringify(deets?.categoryPath?.categoryPath) : "",
                     "GTINs OK": deets?.GTINs?.ok,
-                    "Auth Email": result?.postReviewsParams?.HostedAuthentication_AuthenticationEmail,
-                    "Auth CB": result?.postReviewsParams?.HostedAuthentication_CallbackURL,
-                    FP: result?.postReviewsParams?.fp
+                    "Get Reviews Errors": getReviewsRes?.hasErrors ? JSON.stringify(getReviewsRes?.Errors) : "",
+                    "Post Review Errors": submitReviewRes?.hasErrors ? JSON.stringify(submitReviewRes?.Errors) : "",
+                    "Auth Email": result?.submitReview?.submitReviewParams?.HostedAuthentication_AuthenticationEmail,
+                    "Auth CB": result?.submitReview?.submitReviewParams?.HostedAuthentication_CallbackURL,
+                    FP: result?.submitReview?.submitReviewParams?.fp
                 };
             }));
             setLoading(false);

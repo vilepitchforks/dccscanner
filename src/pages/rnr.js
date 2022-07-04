@@ -27,6 +27,8 @@ const Rnr = ({ user, availableBrands }) => {
       setResults(
         data.map(result => {
           const deets = result?.dccValidation?.details;
+          const getReviewsRes = result?.getReviews?.getReviewsResponse;
+          const submitReviewRes = result?.submitReview?.submitReviewResponse;
 
           return {
             Locale: result.locale,
@@ -44,15 +46,22 @@ const Rnr = ({ user, availableBrands }) => {
               ? deets?.productImageURL?.productImageURL
               : "",
             "Category Path": !deets?.categoryPath?.ok
-              ? JSON.stringify(deets?.productImageURL?.categoryPath)
+              ? JSON.stringify(deets?.categoryPath?.categoryPath)
               : "",
             "GTINs OK": deets?.GTINs?.ok,
+            "Get Reviews Errors": getReviewsRes?.hasErrors
+              ? JSON.stringify(getReviewsRes?.Errors)
+              : "",
+            "Post Review Errors": submitReviewRes?.hasErrors
+              ? JSON.stringify(submitReviewRes?.Errors)
+              : "",
             "Auth Email":
-              result?.postReviewsParams
+              result?.submitReview?.submitReviewParams
                 ?.HostedAuthentication_AuthenticationEmail,
             "Auth CB":
-              result?.postReviewsParams?.HostedAuthentication_CallbackURL,
-            FP: result?.postReviewsParams?.fp
+              result?.submitReview?.submitReviewParams
+                ?.HostedAuthentication_CallbackURL,
+            FP: result?.submitReview?.submitReviewParams?.fp
           };
         })
       );
