@@ -176,15 +176,17 @@ class BVTester {
 
       // Check if UPCs/EANs exist and that they have a correct number of chars
       const UPCs = dccObject.upcs;
+      const UPCsOk = Array.isArray(UPCs) && UPCs?.length;
       const EANs = dccObject.eans;
-      const message = [];
+      const EANsOk = Array.isArray(EANs) && EANs?.length;
       let GTINsOk = {
         UPCs,
         EANs,
-        ok: false
+        ok: false,
+        messages: []
       };
-      if (UPCs?.length || EANs?.length) GTINsOk.ok = true; // EANs or UPCs exist
-      if (UPCs?.length)
+      if (UPCsOk || EANsOk) GTINsOk.ok = true; // EANs or UPCs exist
+      if (UPCsOk)
         UPCs.forEach(upc => {
           // Check length of each UPC
           if (upc.length !== 12) {
@@ -194,20 +196,25 @@ class BVTester {
             GTINsOk.ok = false;
           }
         });
-      if (EANs?.length)
+      if (EANsOk)
         EANs.forEach(ean => {
           // Check length of each EAN
           if (ean.length !== 13) {
-            message.push(
+            GTINsOk.messages.push(
               `Incorrect length for EAN ${ean}: ${ean.length} vs 13.`
             );
             GTINsOk.ok = false;
           }
           // Check if EAN can be added to UPC
           if (ean[0] === "0" && !UPCs.includes(ean.slice(1)))
-            message.push(`EAN ${ean} can be added to UPCs as ${ean.slice(1)}.`);
+            GTINsOk.messages.push(
+              `EAN ${ean} can be added to UPCs as ${ean.slice(1)}.`
+            );
         });
-      if (message.length) GTINsOk.message = message;
+      if (!!UPCs && !Array.isArray(UPCs))
+        GTINsOk.messages.push("UPCs should be an array.");
+      if (!!EANs && !Array.isArray(EANs))
+        GTINsOk.messages.push("EANs should be an array.");
       this.addToResult(locale, "dccValidation", {
         name: "GTINsOk",
         body: GTINsOk

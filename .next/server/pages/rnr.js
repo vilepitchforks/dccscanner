@@ -47,18 +47,16 @@ const Rnr = ({ user , availableBrands  })=>{
                 const submitReviewRes = result?.submitReview?.submitReviewResponse;
                 return {
                     Locale: result.locale,
-                    "Wrong Locale": !deets.locale?.ok ? deets.locale?.fromSite : "",
                     "Has DCC": result?.dccValidation?.dccExists,
-                    // keysOk: result.dccValidation.details.keys.ok,
+                    "Wrong Locale": !deets.locale?.ok ? deets.locale?.fromSite : "",
                     "Invalid Keys": deets?.keys?.invalidKeys.join(", "),
                     "Missing Required Keys": deets?.keys?.missingRequiredKeys.join(", "),
-                    // productPageURLOk: deets.keys.productPageURL.ok,
                     "Wrong PDP URL": !deets?.productPageURL?.ok ? deets?.productPageURL?.fromSite : "",
                     "Wrong Img URL": !deets?.productImageURL?.ok ? deets?.productImageURL?.productImageURL : "",
                     "Category Path": !deets?.categoryPath?.ok ? JSON.stringify(deets?.categoryPath?.categoryPath) : "",
-                    "GTINs OK": deets?.GTINs?.ok,
-                    "Get Reviews Errors": getReviewsRes?.hasErrors ? JSON.stringify(getReviewsRes?.Errors) : "",
-                    "Post Review Errors": submitReviewRes?.hasErrors ? JSON.stringify(submitReviewRes?.Errors) : "",
+                    "GTIN Errors": deets?.GTINs?.messages.join(", "),
+                    "Get Reviews Errors": getReviewsRes?.HasErrors ? getReviewsRes?.Errors.map((error)=>error.Message).join(", ") : "",
+                    "Post Review Errors": submitReviewRes?.HasErrors ? submitReviewRes?.Errors.map((error)=>error.Message).join(", ") : "",
                     "Auth Email": result?.submitReview?.submitReviewParams?.HostedAuthentication_AuthenticationEmail,
                     "Auth CB": result?.submitReview?.submitReviewParams?.HostedAuthentication_CallbackURL,
                     FP: result?.submitReview?.submitReviewParams?.fp

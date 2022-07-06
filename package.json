@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "local": "NODE_ENV=development nodemon app.js",
+    "local": "docker-compose up & NODE_ENV=development nodemon app.js",
     "start": "NODE_ENV=production node app.js"
   },
   "keywords": [],
