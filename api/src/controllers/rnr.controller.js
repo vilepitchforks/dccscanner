@@ -6,8 +6,9 @@ const urlRgx =
   /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/;
 
 class BVTester {
-  constructor(browser) {
+  constructor(browser, page) {
     this.browser = browser;
+    this.page = page;
     this.results = [];
     this.timer = 5000;
     this.setEventListeners = this.setEventListeners.bind(this);
@@ -31,28 +32,30 @@ class BVTester {
       ]
     });
 
-    return new BVTester(browser);
+    const page = await browser.newPage();
+    await page.setViewport({
+      width: 1920,
+      height: 1080,
+      deviceScaleFactor: 1
+    });
+
+    return new BVTester(browser, page);
   }
 
   // Run all steps in sequence
   async run(localeData) {
     try {
-      const page = await this.browser.newPage();
-      await page.setViewport({
-        width: 1920,
-        height: 1080,
-        deviceScaleFactor: 1
-      });
+      // const page = await this.browser.newPage();
+      // await page.setViewport({
+      //   width: 1920,
+      //   height: 1080,
+      //   deviceScaleFactor: 1
+      // });
 
-      this.setEventListeners(localeData, page);
-      await this.getDcc(localeData, page);
-      await this.submitReview(localeData, page);
-      await this.reviewSubmitted(localeData, page);
-
-      // Close the browser after two minutes
-      // setTimeout(() => {
-      //   this.close();
-      // }, 30000);
+      this.setEventListeners(localeData, this.page);
+      await this.getDcc(localeData, this.page);
+      await this.submitReview(localeData, this.page);
+      await this.reviewSubmitted(localeData, this.page);
     } catch (error) {
       const locale = localeData.locale;
       console.warn("An error occurred in run method: ", error);
