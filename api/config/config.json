@@ -156,78 +156,6 @@
             "sortBy": ""
           }
         },
-        "es-es": {
-          "url": "https://www.gillettevenus.es/es-es/elige-tu-smooth/maquinilla-recargable/maquinilla-deluxe-smooth-sensitive/",
-          "locale": "es_ES",
-          "syndicationUrl": "",
-          "incentivizedUrl": "",
-          "brandResponseUrl": "",
-          "selectors": {
-            "ratingSummary": "",
-            "writeAReviewBtn": "",
-            "overallRating": "",
-            "value": "",
-            "quality": "",
-            "reviewSummary": "",
-            "yourReview": "",
-            "chooseANickname": "",
-            "yourLocation": "",
-            "month": "",
-            "year": "",
-            "email": "",
-            "tAndC": "",
-            "previewBtn": "",
-            "sortBy": ""
-          }
-        },
-        "pl-pl": {
-          "url": "https://www.gillettevenus.pl/pl-pl/wybierz-gladkie-golenie/maszynki-z-wymiennymi-wkladami/deluxe-smooth-sensitive-maszynka/",
-          "locale": "pl_PL",
-          "syndicationUrl": "",
-          "incentivizedUrl": "",
-          "brandResponseUrl": "",
-          "selectors": {
-            "ratingSummary": "",
-            "writeAReviewBtn": "",
-            "overallRating": "",
-            "value": "",
-            "quality": "",
-            "reviewSummary": "",
-            "yourReview": "",
-            "chooseANickname": "",
-            "yourLocation": "",
-            "month": "",
-            "year": "",
-            "email": "",
-            "tAndC": "",
-            "previewBtn": "",
-            "sortBy": ""
-          }
-        },
-        "tr-tr": {
-          "url": "https://www.gillettevenus.com.tr/tr-tr/smoothunuzu-secin/tiras-makineleri/comfortglide-ve-olay-hindistan%E2%80%93cevizli-tiras-makinesi/",
-          "locale": "tr_TR",
-          "syndicationUrl": "",
-          "incentivizedUrl": "",
-          "brandResponseUrl": "",
-          "selectors": {
-            "ratingSummary": "",
-            "writeAReviewBtn": "",
-            "overallRating": "",
-            "value": "",
-            "quality": "",
-            "reviewSummary": "",
-            "yourReview": "",
-            "chooseANickname": "",
-            "yourLocation": "",
-            "month": "",
-            "year": "",
-            "email": "",
-            "tAndC": "",
-            "previewBtn": "",
-            "sortBy": ""
-          }
-        },
         "es-mx": {
           "url": "https://www.gillettevenus.com.mx/es-mx/elige-tus-productos/rastrillos-recargables/venus-platinum-care/",
           "locale": "es_MX",
@@ -391,6 +319,78 @@
             "email": "#email",
             "tAndC": "#terms",
             "previewBtn": "#content-wrapper > div > div > div.information-section > div > div.buttons-wrapper > div.button.event_preview_review.blue",
+            "sortBy": ""
+          }
+        },
+        "es-es": {
+          "url": "https://www.gillettevenus.es/es-es/elige-tu-smooth/maquinilla-recargable/maquinilla-deluxe-smooth-sensitive/",
+          "locale": "es_ES",
+          "syndicationUrl": "",
+          "incentivizedUrl": "",
+          "brandResponseUrl": "",
+          "selectors": {
+            "ratingSummary": "",
+            "writeAReviewBtn": "",
+            "overallRating": "",
+            "value": "",
+            "quality": "",
+            "reviewSummary": "",
+            "yourReview": "",
+            "chooseANickname": "",
+            "yourLocation": "",
+            "month": "",
+            "year": "",
+            "email": "",
+            "tAndC": "",
+            "previewBtn": "",
+            "sortBy": ""
+          }
+        },
+        "pl-pl": {
+          "url": "https://www.gillettevenus.pl/pl-pl/wybierz-gladkie-golenie/maszynki-z-wymiennymi-wkladami/deluxe-smooth-sensitive-maszynka/",
+          "locale": "pl_PL",
+          "syndicationUrl": "",
+          "incentivizedUrl": "",
+          "brandResponseUrl": "",
+          "selectors": {
+            "ratingSummary": "",
+            "writeAReviewBtn": "",
+            "overallRating": "",
+            "value": "",
+            "quality": "",
+            "reviewSummary": "",
+            "yourReview": "",
+            "chooseANickname": "",
+            "yourLocation": "",
+            "month": "",
+            "year": "",
+            "email": "",
+            "tAndC": "",
+            "previewBtn": "",
+            "sortBy": ""
+          }
+        },
+        "tr-tr": {
+          "url": "https://www.gillettevenus.com.tr/tr-tr/smoothunuzu-secin/tiras-makineleri/comfortglide-ve-olay-hindistan%E2%80%93cevizli-tiras-makinesi/",
+          "locale": "tr_TR",
+          "syndicationUrl": "",
+          "incentivizedUrl": "",
+          "brandResponseUrl": "",
+          "selectors": {
+            "ratingSummary": "",
+            "writeAReviewBtn": "",
+            "overallRating": "",
+            "value": "",
+            "quality": "",
+            "reviewSummary": "",
+            "yourReview": "",
+            "chooseANickname": "",
+            "yourLocation": "",
+            "month": "",
+            "year": "",
+            "email": "",
+            "tAndC": "",
+            "previewBtn": "",
             "sortBy": ""
           }
         }

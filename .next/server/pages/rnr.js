@@ -59,11 +59,8 @@ const Rnr = ({ user , availableBrands  })=>{
     const handleSubmitSingle = async (locale)=>{
         setLoading(true);
         setErrMsg(null);
-        // const endpoint = selectedLocale ? "/single" : "/multi";
         try {
-            const { data  } = await axios__WEBPACK_IMPORTED_MODULE_3___default()(// `/api${endpoint}?brand=${selectedBrand}&locale=${locale}`
-            `/api/single?brand=${selectedBrand}&locale=${locale}`);
-            // setResults(prevRes => [...prevRes, ...mapRes(data)]);
+            const { data  } = await axios__WEBPACK_IMPORTED_MODULE_3___default()(`/api/single?brand=${selectedBrand}&locale=${locale}`);
             setResults(mapRes(data));
             setLoading(false);
         } catch (error) {
@@ -75,7 +72,6 @@ const Rnr = ({ user , availableBrands  })=>{
     const handleSubmitMulti = async ()=>{
         setLoading(true);
         setErrMsg(null);
-        // const endpoint = selectedLocale ? "/single" : "/multi";
         try {
             await axios__WEBPACK_IMPORTED_MODULE_3___default()(`/api/multi?brand=${selectedBrand}`);
             const intId = setInterval(async ()=>{

@@ -55,15 +55,11 @@ const Rnr = ({ user, availableBrands }) => {
     setLoading(true);
     setErrMsg(null);
 
-    // const endpoint = selectedLocale ? "/single" : "/multi";
-
     try {
       const { data } = await axios(
-        // `/api${endpoint}?brand=${selectedBrand}&locale=${locale}`
         `/api/single?brand=${selectedBrand}&locale=${locale}`
       );
 
-      // setResults(prevRes => [...prevRes, ...mapRes(data)]);
       setResults(mapRes(data));
       setLoading(false);
     } catch (error) {
@@ -76,8 +72,6 @@ const Rnr = ({ user, availableBrands }) => {
   const handleSubmitMulti = async () => {
     setLoading(true);
     setErrMsg(null);
-
-    // const endpoint = selectedLocale ? "/single" : "/multi";
 
     try {
       await axios(`/api/multi?brand=${selectedBrand}`);

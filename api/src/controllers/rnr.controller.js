@@ -45,13 +45,6 @@ class BVTester {
   // Run all steps in sequence
   async run(localeData) {
     try {
-      // const page = await this.browser.newPage();
-      // await page.setViewport({
-      //   width: 1920,
-      //   height: 1080,
-      //   deviceScaleFactor: 1
-      // });
-
       this.setEventListeners(localeData, this.page);
       await this.getDcc(localeData, this.page);
       await this.submitReview(localeData, this.page);
