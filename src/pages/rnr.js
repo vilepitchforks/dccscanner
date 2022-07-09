@@ -81,7 +81,7 @@ const Rnr = ({ user, availableBrands }) => {
 
     for await (const locale of locales) {
       console.log("Scanning locale: ", locale);
-      handleSubmitSingle(locale);
+      await handleSubmitSingle(locale);
     }
   };
 

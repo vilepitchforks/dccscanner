@@ -79,7 +79,7 @@ const Rnr = ({ user , availableBrands  })=>{
         const { locales  } = availableBrands.find(({ brand  })=>selectedBrand === brand);
         for await (const locale of locales){
             console.log("Scanning locale: ", locale);
-            handleSubmitSingle(locale);
+            await handleSubmitSingle(locale);
         }
     };
     return /*#__PURE__*/ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
