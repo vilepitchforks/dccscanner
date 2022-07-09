@@ -593,38 +593,38 @@ exports.handleMulti = async (req, res, next) => {
 
   for (const locale of locales) {
     await tester.run(brandData.locales[locale]);
+
+    multiRes.scanResult = tester.results.map(result => ({
+      hasErrors: !!result.errors.length,
+      errors: result.errors,
+      brand,
+      locale: result.locale.toLowerCase().split("_").join("-"),
+      dccValidation: {
+        dccExists: result.dccValidation.dccExists,
+        summary: {
+          isLocaleOk: result.dccValidation.localeOk?.ok,
+          areKeysOk: result.dccValidation.keysOk?.ok,
+          isPproductPageURLOk: result.dccValidation.productPageURLOk?.ok,
+          isProductImageURLOk: result.dccValidation.productImageURLOk?.ok,
+          areGTINsOk: result.dccValidation.GTINsOk?.ok,
+          isCategoryPathOk: result.dccValidation.categoryPathOk?.ok
+        },
+        details: {
+          locale: result.dccValidation.localeOk,
+          keys: result.dccValidation.keysOk,
+          productPageURL: result.dccValidation.productPageURLOk,
+          productImageURL: result.dccValidation.productImageURLOk,
+          GTINs: result.dccValidation.GTINsOk,
+          categoryPath: result.dccValidation.categoryPathOk
+        },
+        dcc: result.dccValidation.dcc
+      },
+      getReviews: result.getReviews,
+      submitReview: result.submitReview
+    }));
   }
 
   tester.close();
-
-  multiRes.scanResult = tester.results.map(result => ({
-    hasErrors: !!result.errors.length,
-    errors: result.errors,
-    brand,
-    locale: result.locale.toLowerCase().split("_").join("-"),
-    dccValidation: {
-      dccExists: result.dccValidation.dccExists,
-      summary: {
-        isLocaleOk: result.dccValidation.localeOk?.ok,
-        areKeysOk: result.dccValidation.keysOk?.ok,
-        isPproductPageURLOk: result.dccValidation.productPageURLOk?.ok,
-        isProductImageURLOk: result.dccValidation.productImageURLOk?.ok,
-        areGTINsOk: result.dccValidation.GTINsOk?.ok,
-        isCategoryPathOk: result.dccValidation.categoryPathOk?.ok
-      },
-      details: {
-        locale: result.dccValidation.localeOk,
-        keys: result.dccValidation.keysOk,
-        productPageURL: result.dccValidation.productPageURLOk,
-        productImageURL: result.dccValidation.productImageURLOk,
-        GTINs: result.dccValidation.GTINsOk,
-        categoryPath: result.dccValidation.categoryPathOk
-      },
-      dcc: result.dccValidation.dcc
-    },
-    getReviews: result.getReviews,
-    submitReview: result.submitReview
-  }));
 
   // Turn the scan flag on
   multiRes.scanInProgress = false;

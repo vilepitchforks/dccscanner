@@ -80,8 +80,8 @@ const Rnr = ({ user , availableBrands  })=>{
             await axios__WEBPACK_IMPORTED_MODULE_3___default()(`/api/multi?brand=${selectedBrand}`);
             const intId = setInterval(async ()=>{
                 const { data  } = await axios__WEBPACK_IMPORTED_MODULE_3___default()("/api/multi/result");
+                data.scanResult.length && setResults(mapRes(data.scanResult));
                 if (!data.scanInProgress) {
-                    setResults(mapRes(data.scanResult));
                     setLoading(false);
                     clearInterval(intId);
                 }
