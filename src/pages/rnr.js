@@ -63,7 +63,8 @@ const Rnr = ({ user, availableBrands }) => {
         `/api/single?brand=${selectedBrand}&locale=${locale}`
       );
 
-      setResults(prevRes => [...prevRes, ...mapRes(data)]);
+      // setResults(prevRes => [...prevRes, ...mapRes(data)]);
+      setResults(mapRes(data));
       setLoading(false);
     } catch (error) {
       console.warn("Error occurred while scanning all locales.", error.message);
@@ -73,15 +74,28 @@ const Rnr = ({ user, availableBrands }) => {
   };
 
   const handleSubmitMulti = async () => {
-    if (!selectedBrand) return;
+    setLoading(true);
+    setErrMsg(null);
 
-    const { locales } = availableBrands.find(
-      ({ brand }) => selectedBrand === brand
-    );
+    // const endpoint = selectedLocale ? "/single" : "/multi";
 
-    for await (const locale of locales) {
-      console.log("Scanning locale: ", locale);
-      await handleSubmitSingle(locale);
+    try {
+      await axios(`/api/multi?brand=${selectedBrand}`);
+
+      const intId = setInterval(async () => {
+        const { data } = await axios("/api/multi/result");
+
+        if (!data.scanInProgress) {
+          setResults(mapRes(data.scanResult));
+          setLoading(false);
+
+          clearInterval(intId);
+        }
+      }, 2000);
+    } catch (error) {
+      console.warn("Error occurred while scanning all locales.", error.message);
+      setLoading(false);
+      setErrMsg("Error occurred while scaning locales, please try again.");
     }
   };
 

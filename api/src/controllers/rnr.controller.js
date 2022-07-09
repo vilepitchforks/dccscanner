@@ -50,9 +50,9 @@ class BVTester {
       await this.reviewSubmitted(localeData, page);
 
       // Close the browser after two minutes
-      setTimeout(() => {
-        this.close();
-      }, 30000);
+      // setTimeout(() => {
+      //   this.close();
+      // }, 30000);
     } catch (error) {
       const locale = localeData.locale;
       console.warn("An error occurred in run method: ", error);
@@ -451,6 +451,9 @@ class BVTester {
   }
 }
 
+// Reslut buffer for multi scan
+let multiRes = { scanInProgress: false, scanResult: [] };
+
 exports.handleSingle = async (req, res, next) => {
   let { brand, locale, url, urlOverride, localeOverride } = req.query;
   const isOverride =
@@ -574,45 +577,62 @@ exports.handleMulti = async (req, res, next) => {
     });
   }
 
+  const scanId = new Date().getTime();
+
+  res.json("Scan started.");
+
   // Brand data from config
   const brandData = brandsConfig[brand];
 
   const locales = Object.keys(brandData.locales);
 
+  // Turn the scan flag on
+  multiRes.scanInProgress = true;
+
   const tester = await BVTester.build();
 
-  const promises = locales.map(locale => tester.run(brandData.locales[locale]));
+  for (const locale of locales) {
+    await tester.run(brandData.locales[locale]);
+  }
 
-  await Promise.all(promises);
+  tester.close();
 
-  res.json(
-    tester.results.map(result => ({
-      hasErrors: !!result.errors.length,
-      errors: result.errors,
-      brand,
-      locale: result.locale.toLowerCase().split("_").join("-"),
-      dccValidation: {
-        dccExists: result.dccValidation.dccExists,
-        summary: {
-          isLocaleOk: result.dccValidation.localeOk?.ok,
-          areKeysOk: result.dccValidation.keysOk?.ok,
-          isPproductPageURLOk: result.dccValidation.productPageURLOk?.ok,
-          isProductImageURLOk: result.dccValidation.productImageURLOk?.ok,
-          areGTINsOk: result.dccValidation.GTINsOk?.ok,
-          isCategoryPathOk: result.dccValidation.categoryPathOk?.ok
-        },
-        details: {
-          locale: result.dccValidation.localeOk,
-          keys: result.dccValidation.keysOk,
-          productPageURL: result.dccValidation.productPageURLOk,
-          productImageURL: result.dccValidation.productImageURLOk,
-          GTINs: result.dccValidation.GTINsOk,
-          categoryPath: result.dccValidation.categoryPathOk
-        },
-        dcc: result.dccValidation.dcc
+  multiRes.scanResult = tester.results.map(result => ({
+    hasErrors: !!result.errors.length,
+    errors: result.errors,
+    brand,
+    locale: result.locale.toLowerCase().split("_").join("-"),
+    dccValidation: {
+      dccExists: result.dccValidation.dccExists,
+      summary: {
+        isLocaleOk: result.dccValidation.localeOk?.ok,
+        areKeysOk: result.dccValidation.keysOk?.ok,
+        isPproductPageURLOk: result.dccValidation.productPageURLOk?.ok,
+        isProductImageURLOk: result.dccValidation.productImageURLOk?.ok,
+        areGTINsOk: result.dccValidation.GTINsOk?.ok,
+        isCategoryPathOk: result.dccValidation.categoryPathOk?.ok
       },
-      getReviews: result.getReviews,
-      submitReview: result.submitReview
-    }))
-  );
+      details: {
+        locale: result.dccValidation.localeOk,
+        keys: result.dccValidation.keysOk,
+        productPageURL: result.dccValidation.productPageURLOk,
+        productImageURL: result.dccValidation.productImageURLOk,
+        GTINs: result.dccValidation.GTINsOk,
+        categoryPath: result.dccValidation.categoryPathOk
+      },
+      dcc: result.dccValidation.dcc
+    },
+    getReviews: result.getReviews,
+    submitReview: result.submitReview
+  }));
+
+  // Turn the scan flag on
+  multiRes.scanInProgress = false;
+};
+
+exports.getMultiRes = async (req, res, next) => {
+  res.json(multiRes);
+
+  // Clear results from previous scan
+  if (multiRes.scanResult.length) multiRes.scanResult = [];
 };

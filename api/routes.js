@@ -4,7 +4,8 @@ const router = require("express").Router();
 const { auth } = require("./src/controllers/auth.controller.js");
 const {
   handleSingle,
-  handleMulti
+  handleMulti,
+  getMultiRes
 } = require("./src/controllers/rnr.controller.js");
 const { scanStreamer } = require("./src/controllers/scanner.controller.js");
 const { slug } = require("./src/controllers/slug.controller.js");
@@ -29,8 +30,12 @@ router.get("/slug", slug);
 // @route   GET /api/slug
 router.get("/single", handleSingle);
 
-// @desc    Scan RnR implementation for single website
+// @desc    Scan RnR implementation for multiple websites
 // @route   GET /api/multi
 router.get("/multi", handleMulti);
+
+// @desc    Get RnR scan results for multiple websites
+// @route   GET /api/multi
+router.get("/multi/result", getMultiRes);
 
 module.exports = router;

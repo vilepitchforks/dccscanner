@@ -63,10 +63,8 @@ const Rnr = ({ user , availableBrands  })=>{
         try {
             const { data  } = await axios__WEBPACK_IMPORTED_MODULE_3___default()(// `/api${endpoint}?brand=${selectedBrand}&locale=${locale}`
             `/api/single?brand=${selectedBrand}&locale=${locale}`);
-            setResults((prevRes)=>[
-                    ...prevRes,
-                    ...mapRes(data)
-                ]);
+            // setResults(prevRes => [...prevRes, ...mapRes(data)]);
+            setResults(mapRes(data));
             setLoading(false);
         } catch (error) {
             console.warn("Error occurred while scanning all locales.", error.message);
@@ -75,11 +73,23 @@ const Rnr = ({ user , availableBrands  })=>{
         }
     };
     const handleSubmitMulti = async ()=>{
-        if (!selectedBrand) return;
-        const { locales  } = availableBrands.find(({ brand  })=>selectedBrand === brand);
-        for await (const locale of locales){
-            console.log("Scanning locale: ", locale);
-            await handleSubmitSingle(locale);
+        setLoading(true);
+        setErrMsg(null);
+        // const endpoint = selectedLocale ? "/single" : "/multi";
+        try {
+            await axios__WEBPACK_IMPORTED_MODULE_3___default()(`/api/multi?brand=${selectedBrand}`);
+            const intId = setInterval(async ()=>{
+                const { data  } = await axios__WEBPACK_IMPORTED_MODULE_3___default()("/api/multi/result");
+                if (!data.scanInProgress) {
+                    setResults(mapRes(data.scanResult));
+                    setLoading(false);
+                    clearInterval(intId);
+                }
+            }, 2000);
+        } catch (error) {
+            console.warn("Error occurred while scanning all locales.", error.message);
+            setLoading(false);
+            setErrMsg("Error occurred while scaning locales, please try again.");
         }
     };
     return /*#__PURE__*/ (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
