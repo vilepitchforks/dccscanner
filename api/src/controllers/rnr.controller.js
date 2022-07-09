@@ -186,11 +186,12 @@ class BVTester {
         messages: []
       };
       if (UPCsOk || EANsOk) GTINsOk.ok = true; // EANs or UPCs exist
+      if (!UPCs && !EANs) GTINsOk.messages.push("UPCs or EANs missing.");
       if (UPCsOk)
         UPCs.forEach(upc => {
           // Check length of each UPC
           if (upc.length !== 12) {
-            message.push(
+            GTINsOk.messages.push(
               `Incorrect length for UPC ${upc}: ${upc.length} vs 12.`
             );
             GTINsOk.ok = false;
