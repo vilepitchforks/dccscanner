@@ -448,7 +448,7 @@ class BVTester {
 }
 
 // Reslut buffer for multi scan
-let multiRes = { scanInProgress: false, scanResult: [] };
+let multiRes = { scanInProgress: false, scannedBrand: "", scanResult: [] };
 
 exports.handleSingle = async (req, res, next) => {
   let { brand, locale, url, urlOverride, localeOverride } = req.query;
@@ -573,9 +573,14 @@ exports.handleMulti = async (req, res, next) => {
     });
   }
 
-  const scanId = new Date().getTime();
+  // Check if scan is already in progress
+  if (multiRes.scanInProgress) {
+    return res.json(multiRes);
+  }
 
-  res.json("Scan started.");
+  multiRes.scannedBrand = brand;
+
+  res.json(multiRes);
 
   // Brand data from config
   const brandData = brandsConfig[brand];
@@ -622,7 +627,7 @@ exports.handleMulti = async (req, res, next) => {
 
   tester.close();
 
-  // Turn the scan flag on
+  // Turn the scan flag off
   multiRes.scanInProgress = false;
 };
 
@@ -630,5 +635,8 @@ exports.getMultiRes = async (req, res, next) => {
   res.json(multiRes);
 
   // Clear results from previous scan
-  if (multiRes.scanResult.length) multiRes.scanResult = [];
+  if (!multiRes.scanInProgress) {
+    multiRes.scannedBrand = "";
+    multiRes.scanResult = [];
+  }
 };

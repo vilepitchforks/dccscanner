@@ -1,58 +1,65 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import axios from "axios";
 
 import Navbar from "../components/Navbar/Navbar";
 import { authHelper } from "../lib/helpers/auth";
 
-const Rnr = ({ user, availableBrands }) => {
-  const [selectedBrand, setSelectedBrand] = useState(null);
-  const [selectedLocale, setSelectedLocale] = useState(null);
-  const [results, setResults] = useState([]);
+const mapRes = data =>
+  data.map(result => {
+    const deets = result?.dccValidation?.details;
+    const getReviewsRes = result?.getReviews?.getReviewsResponse;
+    const submitReviewRes = result?.submitReview?.submitReviewResponse;
 
-  const [loading, setLoading] = useState(false);
+    return {
+      Locale: result.locale,
+      "Has DCC": result?.dccValidation?.dccExists,
+      "Wrong Locale": !deets.locale?.ok ? deets.locale?.fromSite : "",
+      "Invalid Keys": deets?.keys?.invalidKeys.join(", "),
+      "Missing Required Keys": deets?.keys?.missingRequiredKeys.join(", "),
+      "Wrong PDP URL": !deets?.productPageURL?.ok
+        ? deets?.productPageURL?.fromSite
+        : "",
+      "Wrong Img URL": !deets?.productImageURL?.ok
+        ? deets?.productImageURL?.productImageURL
+        : "",
+      "Category Path": !deets?.categoryPath?.ok
+        ? JSON.stringify(deets?.categoryPath?.categoryPath)
+        : "",
+      "GTIN Errors": deets?.GTINs?.messages.join(", "),
+      "Get Reviews Errors": getReviewsRes?.HasErrors
+        ? getReviewsRes?.Errors.map(error => error.Message).join(", ")
+        : "",
+      "Post Review Errors": submitReviewRes?.HasErrors
+        ? submitReviewRes?.Errors.map(error => error.Message).join(", ")
+        : "",
+      "Auth Email":
+        result?.submitReview?.submitReviewParams
+          ?.HostedAuthentication_AuthenticationEmail,
+      "Auth CB":
+        result?.submitReview?.submitReviewParams
+          ?.HostedAuthentication_CallbackURL,
+      FP: result?.submitReview?.submitReviewParams?.fp
+    };
+  });
+
+const Rnr = ({
+  user,
+  availableBrands,
+  scanInProgress,
+  scannedBrand,
+  scanResult
+}) => {
+  const [selectedBrand, setSelectedBrand] = useState(scannedBrand);
+  const [selectedLocale, setSelectedLocale] = useState("");
+  const [results, setResults] = useState(scanResult);
+
+  const [loadingSingle, setLoadingSingle] = useState(false);
+  const [loadingMulti, setLoadingMulti] = useState(scanInProgress);
   const [errMsg, setErrMsg] = useState(null);
 
-  const mapRes = data =>
-    data.map(result => {
-      const deets = result?.dccValidation?.details;
-      const getReviewsRes = result?.getReviews?.getReviewsResponse;
-      const submitReviewRes = result?.submitReview?.submitReviewResponse;
-
-      return {
-        Locale: result.locale,
-        "Has DCC": result?.dccValidation?.dccExists,
-        "Wrong Locale": !deets.locale?.ok ? deets.locale?.fromSite : "",
-        "Invalid Keys": deets?.keys?.invalidKeys.join(", "),
-        "Missing Required Keys": deets?.keys?.missingRequiredKeys.join(", "),
-        "Wrong PDP URL": !deets?.productPageURL?.ok
-          ? deets?.productPageURL?.fromSite
-          : "",
-        "Wrong Img URL": !deets?.productImageURL?.ok
-          ? deets?.productImageURL?.productImageURL
-          : "",
-        "Category Path": !deets?.categoryPath?.ok
-          ? JSON.stringify(deets?.categoryPath?.categoryPath)
-          : "",
-        "GTIN Errors": deets?.GTINs?.messages.join(", "),
-        "Get Reviews Errors": getReviewsRes?.HasErrors
-          ? getReviewsRes?.Errors.map(error => error.Message).join(", ")
-          : "",
-        "Post Review Errors": submitReviewRes?.HasErrors
-          ? submitReviewRes?.Errors.map(error => error.Message).join(", ")
-          : "",
-        "Auth Email":
-          result?.submitReview?.submitReviewParams
-            ?.HostedAuthentication_AuthenticationEmail,
-        "Auth CB":
-          result?.submitReview?.submitReviewParams
-            ?.HostedAuthentication_CallbackURL,
-        FP: result?.submitReview?.submitReviewParams?.fp
-      };
-    });
-
   const handleSubmitSingle = async locale => {
-    setLoading(true);
+    setLoadingSingle(true);
     setErrMsg(null);
 
     try {
@@ -61,38 +68,43 @@ const Rnr = ({ user, availableBrands }) => {
       );
 
       setResults(mapRes(data));
-      setLoading(false);
+      setLoadingSingle(false);
     } catch (error) {
       console.warn("Error occurred while scanning all locales.", error.message);
-      setLoading(false);
+      setLoadingSingle(false);
       setErrMsg("Error occurred while scaning locales, please try again.");
     }
   };
 
-  const handleSubmitMulti = async () => {
-    setLoading(true);
+  const handleSubmitMulti = async brand => {
+    setLoadingMulti(true);
     setErrMsg(null);
 
     try {
-      await axios(`/api/multi?brand=${selectedBrand}`);
+      const { data: initiScanStats } = await axios(`/api/multi?brand=${brand}`);
+
+      setResults(mapRes(initiScanStats.scanResult));
 
       const intId = setInterval(async () => {
-        const { data } = await axios("/api/multi/result");
+        const { data: scanStats } = await axios("/api/multi/result");
 
-        data.scanResult.length && setResults(mapRes(data.scanResult));
+        setResults(mapRes(scanStats.scanResult));
 
-        if (!data.scanInProgress) {
-          setLoading(false);
-
+        if (!scanStats.scanInProgress) {
+          setLoadingMulti(false);
           clearInterval(intId);
         }
       }, 2000);
     } catch (error) {
       console.warn("Error occurred while scanning all locales.", error.message);
-      setLoading(false);
+      setLoadingMulti(false);
       setErrMsg("Error occurred while scaning locales, please try again.");
     }
   };
+
+  useEffect(() => {
+    if (scanInProgress) handleSubmitMulti(selectedBrand);
+  }, []);
 
   return (
     <>
@@ -107,7 +119,7 @@ const Rnr = ({ user, availableBrands }) => {
           <select
             className="form-select m-0 block w-full appearance-none rounded border border-solid border-gray-300 bg-white bg-clip-padding bg-no-repeat px-3 py-1.5 text-xl font-normal text-gray-700 transition ease-in-out focus:border-blue-600 focus:bg-white focus:text-gray-700 focus:outline-none"
             aria-label="Default select example"
-            defaultValue="Open this select menu"
+            defaultValue={scannedBrand}
             onInput={e => setSelectedBrand(e.target.value)}
           >
             <option>--Select Brand--</option>
@@ -143,20 +155,28 @@ const Rnr = ({ user, availableBrands }) => {
             <div className="flex justify-between">
               <button
                 type="button"
-                className="mt-10 inline-block rounded bg-green-600 px-6 py-2.5 text-xl font-medium uppercase leading-tight text-white shadow-md transition duration-150 ease-in-out hover:bg-green-700 hover:text-gray-100 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg"
+                className="mt-10 inline-block rounded bg-green-600 px-6 py-2.5 text-xl font-medium uppercase leading-tight text-white shadow-md transition duration-150 ease-in-out hover:bg-green-700 hover:text-gray-100 hover:shadow-lg disabled:bg-gray-600 disabled:shadow-none"
                 onClick={() =>
                   selectedBrand && handleSubmitSingle(selectedLocale)
                 }
+                disabled={
+                  loadingSingle ||
+                  loadingMulti ||
+                  (selectedBrand.length && selectedLocale.length) === 0
+                }
               >
-                {!loading ? "Scan" : "Loading..."}
+                {!loadingSingle ? "Scan" : "Scanning..."}
               </button>
 
               <button
                 type="button"
-                className="mt-10 inline-block rounded bg-green-600 px-6 py-2.5 text-xl font-medium uppercase leading-tight text-white shadow-md transition duration-150 ease-in-out hover:bg-green-700 hover:text-gray-100 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg"
-                onClick={selectedBrand && handleSubmitMulti}
+                className="mt-10 inline-block rounded bg-green-600 px-6 py-2.5 text-xl font-medium uppercase leading-tight text-white shadow-md transition duration-150 ease-in-out hover:bg-green-700 hover:text-gray-100 hover:shadow-lg disabled:bg-gray-600 disabled:shadow-none"
+                onClick={() =>
+                  selectedBrand && handleSubmitMulti(selectedBrand)
+                }
+                disabled={loadingSingle || loadingMulti || !selectedBrand}
               >
-                Scan all
+                {!loadingMulti ? "Scan all" : "Scanning..."}
               </button>
             </div>
 
@@ -225,7 +245,9 @@ const Rnr = ({ user, availableBrands }) => {
 };
 
 export const getServerSideProps = async ctx => {
-  const userAuthProps = await authHelper(ctx);
+  const {
+    props: { user }
+  } = await authHelper(ctx);
 
   const dev = process.env.NODE_ENV === "development";
 
@@ -234,16 +256,27 @@ export const getServerSideProps = async ctx => {
   const url = protocol + "://" + ctx.req.get("host");
 
   try {
-    const { data } = await axios({
-      method: "get",
-      url: url + "/api/single",
-      headers: ctx.req.headers
-    });
+    const [brandsLocales, scanData] = await Promise.all([
+      axios({
+        url: url + "/api/single",
+        headers: ctx.req.headers
+      }),
+      axios({
+        url: url + "/api/multi/result",
+        headers: ctx.req.headers
+      })
+    ]);
+
+    const availableBrands = brandsLocales.data.availableBrands;
+    const { scanInProgress, scannedBrand, scanResult } = scanData.data;
 
     return {
       props: {
-        ...userAuthProps.props,
-        ...data
+        user,
+        availableBrands,
+        scanInProgress,
+        scannedBrand,
+        scanResult: mapRes(scanResult)
       }
     };
   } catch (error) {
