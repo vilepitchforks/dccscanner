@@ -45,6 +45,7 @@ const mapRes = (data)=>data.map((result)=>{
             "GTIN Errors": deets?.GTINs?.messages.join(", "),
             "Get Reviews Errors": getReviewsRes?.HasErrors ? getReviewsRes?.Errors.map((error)=>error.Message).join(", ") : "",
             "Post Review Errors": submitReviewRes?.HasErrors ? submitReviewRes?.Errors.map((error)=>error.Message).join(", ") : "",
+            Errors: result.hasErrors ? result.errors.join() : "",
             "Auth Email": result?.submitReview?.submitReviewParams?.HostedAuthentication_AuthenticationEmail,
             "Auth CB": result?.submitReview?.submitReviewParams?.HostedAuthentication_CallbackURL,
             FP: result?.submitReview?.submitReviewParams?.fp

@@ -33,6 +33,7 @@ const mapRes = data =>
       "Post Review Errors": submitReviewRes?.HasErrors
         ? submitReviewRes?.Errors.map(error => error.Message).join(", ")
         : "",
+      Errors: result.hasErrors ? result.errors.join() : "",
       "Auth Email":
         result?.submitReview?.submitReviewParams
           ?.HostedAuthentication_AuthenticationEmail,
