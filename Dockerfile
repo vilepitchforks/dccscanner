@@ -30,4 +30,6 @@ RUN npm install --omit=dev
 # Copy all files and .next, api and public folders
 COPY . /dccscanner
 
+EXPOSE 3000
+
 ENTRYPOINT ["node", "--optimize_for_size", "--max_old_space_size=460", "app.js"]
