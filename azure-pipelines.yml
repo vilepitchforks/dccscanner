@@ -19,7 +19,7 @@ variables:
   agent: 'Local builder'
 
 stages:
-- stage: Build
+- stage: BuildPush
   displayName: Build and push the image
   jobs:
   - job: Build
@@ -37,7 +37,7 @@ stages:
         tags: |
           $(tag)
 
-- stage: Release
+- stage: Prod
   displayName: Release the image
   jobs:
   - job: Release
@@ -45,6 +45,7 @@ stages:
     pool:
       name: $(agent)
     steps:
+    - checkout: none
     - task: AzureWebAppContainer@1
       inputs:
         azureSubscription: 'Main service connection'
