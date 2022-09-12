@@ -21,7 +21,6 @@ stages:
       name: 'Local builder'
     steps:
     - task: Docker@2
-#      displayName: Build and push an image
       inputs:
         containerRegistry: 'Docker Hub service connection'
         repository: 'markoangelovski/dcc-scanner'
@@ -29,3 +28,10 @@ stages:
         Dockerfile: '**/Dockerfile'
         tags: |
           $(tag)
+    - task: AzureWebAppContainer@1
+      inputs:
+        azureSubscription: 'Main service connection'
+        appName: 'DCC-Scanner'
+        containers: 'markoangelovski/dcc-scanner:$(tag)'
+        containerCommand: 'node app.js'
+
