@@ -1,0 +1,38 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build and push
+  displayName: Build and push an image
+  jobs:
+  - job: Build
+    displayName: Build an image
+    pool:
+      name: 'Local builder'
+    steps:
+#    - task: Docker@2
+#      displayName: Build an image
+#      inputs:
+#        command: build
+#        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+#        tags: |
+#          $(tag)
+    - task: Docker@2
+#      displayName: Build and push an image
+      inputs:
+        containerRegistry: 'Docker Hub service connection'
+        repository: 'markoangelovski/dcc-scanner'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(tag)
