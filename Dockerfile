@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine
 
 # https://github.com/puppeteer/puppeteer/blob/main/docs/troubleshooting.md#running-puppeteer-in-docker
 # Installs latest Chromium (85) package.
