@@ -27,6 +27,9 @@ COPY package*.json /dccscanner/
 # Install api and next js dependencies
 RUN npm install --omit=dev
 
+# Build the app
+RUN npm run build
+
 # Copy all files and .next, api and public folders
 COPY . /dccscanner
 

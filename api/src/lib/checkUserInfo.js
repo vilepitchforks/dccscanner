@@ -24,7 +24,7 @@ exports.authUser = (req, res, next) => {
       user = unScramble(req.cookies.dcc.split(" ")[1]);
     }
 
-    if (user && user.split("@")[1] === "convergent-usa.com") {
+    if (user && user.split("@")[1] === process.env.AUTH_ROOT) {
       req.user = user;
       next();
     } else {
