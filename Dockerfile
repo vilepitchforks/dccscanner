@@ -25,13 +25,16 @@ WORKDIR /dccscanner
 COPY package*.json /dccscanner/
 
 # Install api and next js dependencies
-RUN npm install --omit=dev
+RUN npm install
+
+# Copy all files and .next, api and public folders
+COPY . /dccscanner
 
 # Build the app
 RUN npm run build
 
-# Copy all files and .next, api and public folders
-COPY . /dccscanner
+# Clear dev dependencies
+RUN npm prune --production
 
 EXPOSE 3000
 
