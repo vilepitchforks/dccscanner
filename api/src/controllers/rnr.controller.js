@@ -356,9 +356,15 @@ class BVTester {
           // Stores data from POST a review
           if (resUrl.includes("/submitreview.json")) {
             const params = {};
-            new URL(resUrl).searchParams.forEach(
-              (value, key) => (params[key] = value)
-            );
+            new URL(resUrl).searchParams.forEach((value, key) => {
+              if (key.toLowerCase() === "passkey")
+                return (params[key] = "{{omitted}}");
+              if (key.toLowerCase() === "fp")
+                return (params[key] = `${value.slice(0, 5)}... - ${
+                  value.length
+                } characters total`);
+              params[key] = value;
+            });
             this.addToResult(locale, "submitReview", {
               name: "submitReviewParams",
               body: params
@@ -390,9 +396,11 @@ class BVTester {
       // Stores data from GET all reviews
       if (resUrl.includes("/reviews.json")) {
         const params = {};
-        new URL(resUrl).searchParams.forEach(
-          (value, key) => (params[key] = value)
-        );
+        new URL(resUrl).searchParams.forEach((value, key) => {
+          if (key.toLowerCase() === "passkey")
+            return (params[key] = "{{omitted}}");
+          params[key] = value;
+        });
         this.addToResult(locale, "getReviews", {
           name: "getReviewsParams",
           body: params

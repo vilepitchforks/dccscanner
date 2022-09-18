@@ -1,221 +1,131 @@
-"use strict";
+/*
+ * ATTENTION: An "eval-source-map" devtool has been used.
+ * This devtool is neither made for production nor for readable output files.
+ * It uses "eval()" calls to create a separate source file with attached SourceMaps in the browser devtools.
+ * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
+ * or disable the default devtool with "devtool: false".
+ * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
+ */
 (() => {
 var exports = {};
-exports.id = 888;
-exports.ids = [888];
+exports.id = "pages/_app";
+exports.ids = ["pages/_app"];
 exports.modules = {
 
-/***/ 6378:
+/***/ "./src/lib/helpers/processDb.js":
+/*!**************************************!*\
+  !*** ./src/lib/helpers/processDb.js ***!
+  \**************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-// ESM COMPAT FLAG
-__webpack_require__.r(__webpack_exports__);
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"Model\": () => (/* binding */ Model)\n/* harmony export */ });\n/* harmony import */ var zangodb__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! zangodb */ \"zangodb\");\n/* harmony import */ var zangodb__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(zangodb__WEBPACK_IMPORTED_MODULE_0__);\n\nclass Model {\n    constructor(){\n        const db = new (zangodb__WEBPACK_IMPORTED_MODULE_0___default().Db)(\"dcc\", {\n            // sets the schema, scannedUrl and url are the same url sent by the user\n            metadata: [\n                \"scannedUrl\"\n            ],\n            dccdata: [\n                \"url\",\n                \"timestamp\"\n            ]\n        });\n        db.open(); // creates the db and collections\n        db.on(\"blocked\", ()=>{\n            console.warn(\"database version cannot be upgraded\");\n        });\n        this.db = db;\n        this.colLabel = \"\";\n    }\n    col(collection) {\n        // Used in conjuction with methods that return Cursor and need extra processing, for example db.find()\n        this.colLabel = collection;\n        return this;\n    }\n    collection(collection) {\n        // Returns Collection on Model.db instance\n        return this.db.collection(collection);\n    }\n    async findAsArray(query, options) {\n        // Used in conjuction with db.col()\n        return await this.db.collection(this.colLabel).find(query, options).toArray();\n    }\n    async remove(url) {\n        return await Promise.all([\n            this.db.collection(\"metadata\").remove({\n                scannedUrl: url\n            }),\n            this.db.collection(\"dccdata\").remove({\n                url\n            })\n        ]);\n    }\n}\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi9zcmMvbGliL2hlbHBlcnMvcHJvY2Vzc0RiLmpzLmpzIiwibWFwcGluZ3MiOiI7Ozs7OztBQUE0QjtBQUVyQixNQUFNQyxLQUFLO0lBQ2hCQyxhQUFjO1FBQ1osTUFBTUMsRUFBRSxHQUFHLElBQUlILG1EQUFRLENBQUMsS0FBSyxFQUFFO1lBQzdCLHdFQUF3RTtZQUN4RUssUUFBUSxFQUFFO2dCQUFDLFlBQVk7YUFBQztZQUN4QkMsT0FBTyxFQUFFO2dCQUFDLEtBQUs7Z0JBQUUsV0FBVzthQUFDO1NBQzlCLENBQUM7UUFDRkgsRUFBRSxDQUFDSSxJQUFJLEVBQUUsQ0FBQyxDQUFDLGlDQUFpQztRQUM1Q0osRUFBRSxDQUFDSyxFQUFFLENBQUMsU0FBUyxFQUFFLElBQU07WUFDckJDLE9BQU8sQ0FBQ0MsSUFBSSxDQUFDLHFDQUFxQyxDQUFDLENBQUM7U0FDckQsQ0FBQyxDQUFDO1FBQ0gsSUFBSSxDQUFDUCxFQUFFLEdBQUdBLEVBQUUsQ0FBQztRQUNiLElBQUksQ0FBQ1EsUUFBUSxHQUFHLEVBQUUsQ0FBQztLQUNwQjtJQUVEQyxHQUFHLENBQUNDLFVBQVUsRUFBRTtRQUNkLHNHQUFzRztRQUN0RyxJQUFJLENBQUNGLFFBQVEsR0FBR0UsVUFBVSxDQUFDO1FBQzNCLE9BQU8sSUFBSSxDQUFDO0tBQ2I7SUFFREEsVUFBVSxDQUFDQSxVQUFVLEVBQUU7UUFDckIsMENBQTBDO1FBQzFDLE9BQU8sSUFBSSxDQUFDVixFQUFFLENBQUNVLFVBQVUsQ0FBQ0EsVUFBVSxDQUFDLENBQUM7S0FDdkM7SUFFRCxNQUFNQyxXQUFXLENBQUNDLEtBQUssRUFBRUMsT0FBTyxFQUFFO1FBQ2hDLG1DQUFtQztRQUNuQyxPQUFPLE1BQU0sSUFBSSxDQUFDYixFQUFFLENBQ2pCVSxVQUFVLENBQUMsSUFBSSxDQUFDRixRQUFRLENBQUMsQ0FDekJNLElBQUksQ0FBQ0YsS0FBSyxFQUFFQyxPQUFPLENBQUMsQ0FDcEJFLE9BQU8sRUFBRSxDQUFDO0tBQ2Q7SUFFRCxNQUFNQyxNQUFNLENBQUNDLEdBQUcsRUFBRTtRQUNoQixPQUFPLE1BQU1DLE9BQU8sQ0FBQ0MsR0FBRyxDQUFDO1lBQ3ZCLElBQUksQ0FBQ25CLEVBQUUsQ0FBQ1UsVUFBVSxDQUFDLFVBQVUsQ0FBQyxDQUFDTSxNQUFNLENBQUM7Z0JBQUVJLFVBQVUsRUFBRUgsR0FBRzthQUFFLENBQUM7WUFDMUQsSUFBSSxDQUFDakIsRUFBRSxDQUFDVSxVQUFVLENBQUMsU0FBUyxDQUFDLENBQUNNLE1BQU0sQ0FBQztnQkFBRUMsR0FBRzthQUFFLENBQUM7U0FDOUMsQ0FBQyxDQUFDO0tBQ0o7Q0FDRiIsInNvdXJjZXMiOlsid2VicGFjazovL2RjY3NjYW5uZXIvLi9zcmMvbGliL2hlbHBlcnMvcHJvY2Vzc0RiLmpzP2JkMTUiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHphbmdvIGZyb20gXCJ6YW5nb2RiXCI7XG5cbmV4cG9ydCBjbGFzcyBNb2RlbCB7XG4gIGNvbnN0cnVjdG9yKCkge1xuICAgIGNvbnN0IGRiID0gbmV3IHphbmdvLkRiKFwiZGNjXCIsIHtcbiAgICAgIC8vIHNldHMgdGhlIHNjaGVtYSwgc2Nhbm5lZFVybCBhbmQgdXJsIGFyZSB0aGUgc2FtZSB1cmwgc2VudCBieSB0aGUgdXNlclxuICAgICAgbWV0YWRhdGE6IFtcInNjYW5uZWRVcmxcIl0sXG4gICAgICBkY2NkYXRhOiBbXCJ1cmxcIiwgXCJ0aW1lc3RhbXBcIl1cbiAgICB9KTtcbiAgICBkYi5vcGVuKCk7IC8vIGNyZWF0ZXMgdGhlIGRiIGFuZCBjb2xsZWN0aW9uc1xuICAgIGRiLm9uKFwiYmxvY2tlZFwiLCAoKSA9PiB7XG4gICAgICBjb25zb2xlLndhcm4oXCJkYXRhYmFzZSB2ZXJzaW9uIGNhbm5vdCBiZSB1cGdyYWRlZFwiKTtcbiAgICB9KTtcbiAgICB0aGlzLmRiID0gZGI7XG4gICAgdGhpcy5jb2xMYWJlbCA9IFwiXCI7XG4gIH1cblxuICBjb2woY29sbGVjdGlvbikge1xuICAgIC8vIFVzZWQgaW4gY29uanVjdGlvbiB3aXRoIG1ldGhvZHMgdGhhdCByZXR1cm4gQ3Vyc29yIGFuZCBuZWVkIGV4dHJhIHByb2Nlc3NpbmcsIGZvciBleGFtcGxlIGRiLmZpbmQoKVxuICAgIHRoaXMuY29sTGFiZWwgPSBjb2xsZWN0aW9uO1xuICAgIHJldHVybiB0aGlzO1xuICB9XG5cbiAgY29sbGVjdGlvbihjb2xsZWN0aW9uKSB7XG4gICAgLy8gUmV0dXJucyBDb2xsZWN0aW9uIG9uIE1vZGVsLmRiIGluc3RhbmNlXG4gICAgcmV0dXJuIHRoaXMuZGIuY29sbGVjdGlvbihjb2xsZWN0aW9uKTtcbiAgfVxuXG4gIGFzeW5jIGZpbmRBc0FycmF5KHF1ZXJ5LCBvcHRpb25zKSB7XG4gICAgLy8gVXNlZCBpbiBjb25qdWN0aW9uIHdpdGggZGIuY29sKClcbiAgICByZXR1cm4gYXdhaXQgdGhpcy5kYlxuICAgICAgLmNvbGxlY3Rpb24odGhpcy5jb2xMYWJlbClcbiAgICAgIC5maW5kKHF1ZXJ5LCBvcHRpb25zKVxuICAgICAgLnRvQXJyYXkoKTtcbiAgfVxuXG4gIGFzeW5jIHJlbW92ZSh1cmwpIHtcbiAgICByZXR1cm4gYXdhaXQgUHJvbWlzZS5hbGwoW1xuICAgICAgdGhpcy5kYi5jb2xsZWN0aW9uKFwibWV0YWRhdGFcIikucmVtb3ZlKHsgc2Nhbm5lZFVybDogdXJsIH0pLFxuICAgICAgdGhpcy5kYi5jb2xsZWN0aW9uKFwiZGNjZGF0YVwiKS5yZW1vdmUoeyB1cmwgfSlcbiAgICBdKTtcbiAgfVxufVxuIl0sIm5hbWVzIjpbInphbmdvIiwiTW9kZWwiLCJjb25zdHJ1Y3RvciIsImRiIiwiRGIiLCJtZXRhZGF0YSIsImRjY2RhdGEiLCJvcGVuIiwib24iLCJjb25zb2xlIiwid2FybiIsImNvbExhYmVsIiwiY29sIiwiY29sbGVjdGlvbiIsImZpbmRBc0FycmF5IiwicXVlcnkiLCJvcHRpb25zIiwiZmluZCIsInRvQXJyYXkiLCJyZW1vdmUiLCJ1cmwiLCJQcm9taXNlIiwiYWxsIiwic2Nhbm5lZFVybCJdLCJzb3VyY2VSb290IjoiIn0=\n//# sourceURL=webpack-internal:///./src/lib/helpers/processDb.js\n");
 
-// EXPORTS
-__webpack_require__.d(__webpack_exports__, {
-  "default": () => (/* binding */ _app)
-});
+/***/ }),
 
-// EXTERNAL MODULE: external "react/jsx-runtime"
-var jsx_runtime_ = __webpack_require__(997);
-// EXTERNAL MODULE: external "easy-peasy"
-var external_easy_peasy_ = __webpack_require__(9905);
-;// CONCATENATED MODULE: external "zangodb"
-const external_zangodb_namespaceObject = require("zangodb");
-var external_zangodb_default = /*#__PURE__*/__webpack_require__.n(external_zangodb_namespaceObject);
-;// CONCATENATED MODULE: ./src/lib/helpers/processDb.js
+/***/ "./src/lib/state/eventHandlers/eventHandlers.js":
+/*!******************************************************!*\
+  !*** ./src/lib/state/eventHandlers/eventHandlers.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-class Model {
-    constructor(){
-        const db = new (external_zangodb_default()).Db("dcc", {
-            // sets the schema, scannedUrl and url are the same url sent by the user
-            metadata: [
-                "scannedUrl"
-            ],
-            dccdata: [
-                "url",
-                "timestamp"
-            ]
-        });
-        db.open(); // creates the db and collections
-        db.on("blocked", ()=>{
-            console.warn("database version cannot be upgraded");
-        });
-        this.db = db;
-        this.colLabel = "";
-    }
-    col(collection) {
-        // Used in conjuction with methods that return Cursor and need extra processing, for example db.find()
-        this.colLabel = collection;
-        return this;
-    }
-    collection(collection) {
-        // Returns Collection on Model.db instance
-        return this.db.collection(collection);
-    }
-    async findAsArray(query, options) {
-        // Used in conjuction with db.col()
-        return await this.db.collection(this.colLabel).find(query, options).toArray();
-    }
-    async remove(url) {
-        return await Promise.all([
-            this.db.collection("metadata").remove({
-                scannedUrl: url
-            }),
-            this.db.collection("dccdata").remove({
-                url
-            })
-        ]);
-    }
-}
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"addDataEvent\": () => (/* binding */ addDataEvent),\n/* harmony export */   \"addErrorEvent\": () => (/* binding */ addErrorEvent),\n/* harmony export */   \"addInfoEvent\": () => (/* binding */ addInfoEvent),\n/* harmony export */   \"initDb\": () => (/* binding */ initDb),\n/* harmony export */   \"reSetScanUrl\": () => (/* binding */ reSetScanUrl),\n/* harmony export */   \"setDb\": () => (/* binding */ setDb),\n/* harmony export */   \"setMetadata\": () => (/* binding */ setMetadata),\n/* harmony export */   \"setScanCtgs\": () => (/* binding */ setScanCtgs),\n/* harmony export */   \"setScanInProgress\": () => (/* binding */ setScanInProgress),\n/* harmony export */   \"setScanUrl\": () => (/* binding */ setScanUrl),\n/* harmony export */   \"startStream\": () => (/* binding */ startStream)\n/* harmony export */ });\n/* harmony import */ var _helpers_processDb_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../helpers/processDb.js */ \"./src/lib/helpers/processDb.js\");\n\nconst setScanUrl = (state, scanUrl)=>{\n    state.scanUrl = scanUrl;\n};\nconst setScanCtgs = (state, scanCtgs)=>{\n    state.scanCtgs = scanCtgs;\n};\nconst setScanInProgress = (state, check)=>{\n    state.scanInProgress = check;\n};\nconst setMetadata = (state, meta)=>{\n    state.metadata = meta;\n};\nconst reSetScanUrl = (state)=>{\n    state.scanUrl = \"\";\n    state.scanCtgs = \"\";\n    state.metadata = {};\n    state.infoEvents = [];\n    state.dataEvents = [];\n    state.errorEvents = [];\n};\nconst addInfoEvent = (state, event)=>{\n    state.infoEvents.push(event);\n};\nconst addDataEvent = (state, { url , data , timestamp  })=>{\n    // Store valid DCC objects, with more than just url, scannedUrl and timestamp.\n    if (Object.keys(data).length > 3) state.dataEvents.push({\n        url,\n        timestamp,\n        ...data\n    });\n};\nconst addErrorEvent = (state, event)=>{\n    state.errorEvents.push(event);\n};\nconst startStream = async (actions, query)=>{\n    const es = new EventSource(\"/api/stream?\" + query, {\n        withCredentials: true\n    });\n    const timestamp = new Date().getTime();\n    es.onopen = ()=>{\n        actions.addInfoEvent(\"Connection with server established.\");\n        actions.setScanInProgress(true);\n    };\n    es.addEventListener(\"info\", ({ data  })=>{\n        actions.addInfoEvent(JSON.parse(data));\n    });\n    es.addEventListener(\"data\", ({ lastEventId: url , data  })=>{\n        actions.addDataEvent({\n            url,\n            data: JSON.parse(data),\n            timestamp\n        });\n    });\n    es.addEventListener(\"close\", (e)=>{\n        actions.addInfoEvent(\"Connection with server closed.\");\n        actions.addInfoEvent(\"Processing scan data...\");\n        actions.setScanInProgress(false);\n        es.close();\n    });\n    es.addEventListener(\"servererror\", ({ lastEventId: url , data  })=>{\n        console.log(\"Servererror event lastEventId\", url);\n        console.log(\"Servererror event data\", data);\n        actions.addErrorEvent(\"An error occurred: \" + data);\n        actions.setScanInProgress(false);\n        es.close();\n    });\n    es.onerror = (err)=>{\n        console.warn(\"Actual error event\", err);\n        actions.addErrorEvent(\"An es.onerror occurred\");\n        actions.setScanInProgress(false);\n        es.close();\n    };\n};\nconst setDb = (state, db)=>{\n    state.db = db;\n};\nconst initDb = async (actions)=>{\n    const db = new _helpers_processDb_js__WEBPACK_IMPORTED_MODULE_0__.Model();\n    actions.setDb(db);\n};\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi9zcmMvbGliL3N0YXRlL2V2ZW50SGFuZGxlcnMvZXZlbnRIYW5kbGVycy5qcy5qcyIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7QUFBbUQ7QUFFNUMsTUFBTUMsVUFBVSxHQUFHLENBQUNDLEtBQUssRUFBRUMsT0FBTyxHQUFLO0lBQzVDRCxLQUFLLENBQUNDLE9BQU8sR0FBR0EsT0FBTyxDQUFDO0NBQ3pCLENBQUM7QUFFSyxNQUFNQyxXQUFXLEdBQUcsQ0FBQ0YsS0FBSyxFQUFFRyxRQUFRLEdBQUs7SUFDOUNILEtBQUssQ0FBQ0csUUFBUSxHQUFHQSxRQUFRLENBQUM7Q0FDM0IsQ0FBQztBQUVLLE1BQU1DLGlCQUFpQixHQUFHLENBQUNKLEtBQUssRUFBRUssS0FBSyxHQUFLO0lBQ2pETCxLQUFLLENBQUNNLGNBQWMsR0FBR0QsS0FBSyxDQUFDO0NBQzlCLENBQUM7QUFFSyxNQUFNRSxXQUFXLEdBQUcsQ0FBQ1AsS0FBSyxFQUFFUSxJQUFJLEdBQUs7SUFDMUNSLEtBQUssQ0FBQ1MsUUFBUSxHQUFHRCxJQUFJLENBQUM7Q0FDdkIsQ0FBQztBQUVLLE1BQU1FLFlBQVksR0FBR1YsQ0FBQUEsS0FBSyxHQUFJO0lBQ25DQSxLQUFLLENBQUNDLE9BQU8sR0FBRyxFQUFFLENBQUM7SUFDbkJELEtBQUssQ0FBQ0csUUFBUSxHQUFHLEVBQUUsQ0FBQztJQUNwQkgsS0FBSyxDQUFDUyxRQUFRLEdBQUcsRUFBRSxDQUFDO0lBQ3BCVCxLQUFLLENBQUNXLFVBQVUsR0FBRyxFQUFFLENBQUM7SUFDdEJYLEtBQUssQ0FBQ1ksVUFBVSxHQUFHLEVBQUUsQ0FBQztJQUN0QlosS0FBSyxDQUFDYSxXQUFXLEdBQUcsRUFBRSxDQUFDO0NBQ3hCLENBQUM7QUFFSyxNQUFNQyxZQUFZLEdBQUcsQ0FBQ2QsS0FBSyxFQUFFZSxLQUFLLEdBQUs7SUFDNUNmLEtBQUssQ0FBQ1csVUFBVSxDQUFDSyxJQUFJLENBQUNELEtBQUssQ0FBQyxDQUFDO0NBQzlCLENBQUM7QUFFSyxNQUFN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QUF3QixDQUFDLENBQUM7UUFDaERFLE9BQU8sQ0FBQ3RCLGlCQUFpQixDQUFDLEtBQUssQ0FBQyxDQUFDO1FBQ2pDd0IsRUFBRSxDQUFDVyxLQUFLLEVBQUUsQ0FBQztLQUNaLENBQUM7Q0FDSCxDQUFDO0FBRUssTUFBTU0sS0FBSyxHQUFHLENBQUM3QyxLQUFLLEVBQUU4QyxFQUFFLEdBQUs7SUFDbEM5QyxLQUFLLENBQUM4QyxFQUFFLEdBQUdBLEVBQUUsQ0FBQztDQUNmLENBQUM7QUFFSyxNQUFNQyxNQUFNLEdBQUcsT0FBTXJCLE9BQU8sR0FBSTtJQUNyQyxNQUFNb0IsRUFBRSxHQUFHLElBQUloRCx3REFBSyxFQUFFO0lBQ3RCNEIsT0FBTyxDQUFDbUIsS0FBSyxDQUFDQyxFQUFFLENBQUMsQ0FBQztDQUNuQixDQUFDIiwic291cmNlcyI6WyJ3ZWJwYWNrOi8vZGNjc2Nhbm5lci8uL3NyYy9saWIvc3RhdGUvZXZlbnRIYW5kbGVycy9ldmVudEhhbmRsZXJzLmpzPzQ1M2QiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgTW9kZWwgfSBmcm9tIFwiLi4vLi4vaGVscGVycy9wcm9jZXNzRGIuanNcIjtcblxuZXhwb3J0IGNvbnN0IHNldFNjYW5VcmwgPSAoc3RhdGUsIHNjYW5VcmwpID0+IHtcbiAgc3RhdGUuc2NhblVybCA9IHNjYW5Vcmw7XG59O1xuXG5leHBvcnQgY29uc3Qgc2V0U2NhbkN0Z3MgPSAoc3RhdGUsIHNjYW5DdGdzKSA9PiB7XG4gIHN0YXRlLnNjYW5DdGdzID0gc2NhbkN0Z3M7XG59O1xuXG5leHBvcnQgY29uc3Qgc2V0U2NhbkluUHJvZ3Jlc3MgPSAoc3RhdGUsIGNoZWNrKSA9PiB7XG4gIHN0YXRlLnNjYW5JblByb2dyZXNzID0gY2hlY2s7XG59O1xuXG5leHBvcnQgY29uc3Qgc2V0TWV0YWRhdGEgPSAoc3RhdGUsIG1ldGEpID0+IHtcbiAgc3RhdGUubWV0YWRhdGEgPSBtZXRhO1xufTtcblxuZXhwb3J0IGNvbnN0IHJlU2V0U2NhblVybCA9IHN0YXRlID0+IHtcbiAgc3RhdGUuc2NhblVybCA9IFwiXCI7XG4gIHN0YXRlLnNjYW5DdGdzID0gXCJcIjtcbiAgc3RhdGUubWV0YWRhdGEgPSB7fTtcbiAgc3RhdGUuaW5mb0V2ZW50cyA9IFtdO1xuICBzdGF0ZS5kYXRhRXZlbnRzID0gW107XG4gIHN0YXRlLmVycm9yRXZlbnRzID0gW107XG59O1xuXG5leHBvcnQgY29uc3QgYWRkSW5mb0V2ZW50ID0gKHN0YXRlLCBldmVudCkgPT4ge1xuICBzdGF0ZS5pbmZvRXZlbnRzLnB1c2goZXZlbnQpO1xufTtcblxuZXhwb3J0IGNvbnN0IGFkZERhdGFFdmVudCA9IChzdGF0ZSwgeyB1cmwsIGRhdGEsIHRpbWVzdGFtcCB9KSA9PiB7XG4gIC8vIFN0b3JlIHZhbGlkIERDQyBvYmplY3RzLCB3aXRoIG1vcmUgdGhhbiBqdXN0IHVybCwgc2Nhbm5lZFVybCBhbmQgdGltZXN0YW1wLlxuICBpZiAoT2JqZWN0LmtleXMoZGF0YSkubGVuZ3RoID4gMylcbiAgICBzdGF0ZS5kYXRhRXZlbnRzLnB1c2goeyB1cmwsIHRpbWVzdGFtcCwgLi4uZGF0YSB9KTtcbn07XG5cbmV4cG9ydCBjb25zdCBhZGRFcnJvckV2ZW50ID0gKHN0YXRlLCBldmVudCkgPT4ge1xuICBzdGF0ZS5lcnJvckV2ZW50cy5wdXNoKGV2ZW50KTtcbn07XG5cbmV4cG9ydCBjb25zdCBzdGFydFN0cmVhbSA9IGFzeW5jIChhY3Rpb25zLCBxdWVyeSkgPT4ge1xuICBjb25zdCBlcyA9IG5ldyBFdmVudFNvdXJjZShcIi9hcGkvc3RyZWFtP1wiICsgcXVlcnksIHtcbiAgICB3aXRoQ3JlZGVudGlhbHM6IHRydWVcbiAgfSk7XG5cbiAgY29uc3QgdGltZXN0YW1wID0gbmV3IERhdGUoKS5nZXRUaW1lKCk7XG5cbiAgZXMub25vcGVuID0gKCkgPT4ge1xuICAgIGFjdGlvbnMuYWRkSW5mb0V2ZW50KFwiQ29ubmVjdGlvbiB3aXRoIHNlcnZlciBlc3RhYmxpc2hlZC5cIik7XG4gICAgYWN0aW9ucy5zZXRTY2FuSW5Qcm9ncmVzcyh0cnVlKTtcbiAgfTtcbiAgZXMuYWRkRXZlbnRMaXN0ZW5lcihcImluZm9cIiwgKHsgZGF0YSB9KSA9PiB7XG4gICAgYWN0aW9ucy5hZGRJbmZvRXZlbnQoSlNPTi5wYXJzZShkYXRhKSk7XG4gIH0pO1xuICBlcy5hZGRFdmVudExpc3RlbmVyKFwiZGF0YVwiLCAoeyBsYXN0RXZlbnRJZDogdXJsLCBkYXRhIH0pID0+IHtcbiAgICBhY3Rpb25zLmFkZERhdGFFdmVudCh7IHVybCwgZGF0YTogSlNPTi5wYXJzZShkYXRhKSwgdGltZXN0YW1wIH0pO1xuICB9KTtcbiAgZXMuYWRkRXZlbnRMaXN0ZW5lcihcImNsb3NlXCIsIGUgPT4ge1xuICAgIGFjdGlvbnMuYWRkSW5mb0V2ZW50KFwiQ29ubmVjdGlvbiB3aXRoIHNlcnZlciBjbG9zZWQuXCIpO1xuICAgIGFjdGlvbnMuYWRkSW5mb0V2ZW50KFwiUHJvY2Vzc2luZyBzY2FuIGRhdGEuLi5cIik7XG4gICAgYWN0aW9ucy5zZXRTY2FuSW5Qcm9ncmVzcyhmYWxzZSk7XG4gICAgZXMuY2xvc2UoKTtcbiAgfSk7XG4gIGVzLmFkZEV2ZW50TGlzdGVuZXIoXCJzZXJ2ZXJlcnJvclwiLCAoeyBsYXN0RXZlbnRJZDogdXJsLCBkYXRhIH0pID0+IHtcbiAgICBjb25zb2xlLmxvZyhcIlNlcnZlcmVycm9yIGV2ZW50IGxhc3RFdmVudElkXCIsIHVybCk7XG4gICAgY29uc29sZS5sb2coXCJTZXJ2ZXJlcnJvciBldmVudCBkYXRhXCIsIGRhdGEpO1xuICAgIGFjdGlvbnMuYWRkRXJyb3JFdmVudChcIkFuIGVycm9yIG9jY3VycmVkOiBcIiArIGRhdGEpO1xuICAgIGFjdGlvbnMuc2V0U2NhbkluUHJvZ3Jlc3MoZmFsc2UpO1xuICAgIGVzLmNsb3NlKCk7XG4gIH0pO1xuICBlcy5vbmVycm9yID0gZXJyID0+IHtcbiAgICBjb25zb2xlLndhcm4oXCJBY3R1YWwgZXJyb3IgZXZlbnRcIiwgZXJyKTtcbiAgICBhY3Rpb25zLmFkZEVycm9yRXZlbnQoXCJBbiBlcy5vbmVycm9yIG9jY3VycmVkXCIpO1xuICAgIGFjdGlvbnMuc2V0U2NhbkluUHJvZ3Jlc3MoZmFsc2UpO1xuICAgIGVzLmNsb3NlKCk7XG4gIH07XG59O1xuXG5leHBvcnQgY29uc3Qgc2V0RGIgPSAoc3RhdGUsIGRiKSA9PiB7XG4gIHN0YXRlLmRiID0gZGI7XG59O1xuXG5leHBvcnQgY29uc3QgaW5pdERiID0gYXN5bmMgYWN0aW9ucyA9PiB7XG4gIGNvbnN0IGRiID0gbmV3IE1vZGVsKCk7XG4gIGFjdGlvbnMuc2V0RGIoZGIpO1xufTtcbiJdLCJuYW1lcyI6WyJNb2RlbCIsInNldFNjYW5VcmwiLCJzdGF0ZSIsInNjYW5VcmwiLCJzZXRTY2FuQ3RncyIsInNjYW5DdGdzIiwic2V0U2NhbkluUHJvZ3Jlc3MiLCJjaGVjayIsInNjYW5JblByb2dyZXNzIiwic2V0TWV0YWRhdGEiLCJtZXRhIiwibWV0YWRhdGEiLCJyZVNldFNjYW5VcmwiLCJpbmZvRXZlbnRzIiwiZGF0YUV2ZW50cyIsImVycm9yRXZlbnRzIiwiYWRkSW5mb0V2ZW50IiwiZXZlbnQiLCJwdXNoIiwiYWRkRGF0YUV2ZW50IiwidXJsIiwiZGF0YSIsInRpbWVzdGFtcCIsIk9iamVjdCIsImtleXMiLCJsZW5ndGgiLCJhZGRFcnJvckV2ZW50Iiwic3RhcnRTdHJlYW0iLCJhY3Rpb25zIiwicXVlcnkiLCJlcyIsIkV2ZW50U291cmNlIiwid2l0aENyZWRlbnRpYWxzIiwiRGF0ZSIsImdldFRpbWUiLCJvbm9wZW4iLCJhZGRFdmVudExpc3RlbmVyIiwiSlNPTiIsInBhcnNlIiwibGFzdEV2ZW50SWQiLCJlIiwiY2xvc2UiLCJjb25zb2xlIiwibG9nIiwib25lcnJvciIsImVyciIsIndhcm4iLCJzZXREYiIsImRiIiwiaW5pdERiIl0sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///./src/lib/state/eventHandlers/eventHandlers.js\n");
 
-;// CONCATENATED MODULE: ./src/lib/state/eventHandlers/eventHandlers.js
+/***/ }),
 
-const setScanUrl = (state, scanUrl)=>{
-    state.scanUrl = scanUrl;
-};
-const setScanCtgs = (state, scanCtgs)=>{
-    state.scanCtgs = scanCtgs;
-};
-const setScanInProgress = (state, check)=>{
-    state.scanInProgress = check;
-};
-const setMetadata = (state, meta)=>{
-    state.metadata = meta;
-};
-const reSetScanUrl = (state)=>{
-    state.scanUrl = "";
-    state.scanCtgs = "";
-    state.metadata = {};
-    state.infoEvents = [];
-    state.dataEvents = [];
-    state.errorEvents = [];
-};
-const addInfoEvent = (state, event)=>{
-    state.infoEvents.push(event);
-};
-const addDataEvent = (state, { url , data , timestamp  })=>{
-    // Store valid DCC objects, with more than just url, scannedUrl and timestamp.
-    if (Object.keys(data).length > 3) state.dataEvents.push({
-        url,
-        timestamp,
-        ...data
-    });
-};
-const addErrorEvent = (state, event)=>{
-    state.errorEvents.push(event);
-};
-const startStream = async (actions, query)=>{
-    const es = new EventSource("/api/stream?" + query, {
-        withCredentials: true
-    });
-    const timestamp = new Date().getTime();
-    es.onopen = ()=>{
-        actions.addInfoEvent("Connection with server established.");
-        actions.setScanInProgress(true);
-    };
-    es.addEventListener("info", ({ data  })=>{
-        actions.addInfoEvent(JSON.parse(data));
-    });
-    es.addEventListener("data", ({ lastEventId: url , data  })=>{
-        actions.addDataEvent({
-            url,
-            data: JSON.parse(data),
-            timestamp
-        });
-    });
-    es.addEventListener("close", (e)=>{
-        actions.addInfoEvent("Connection with server closed.");
-        actions.addInfoEvent("Processing scan data...");
-        actions.setScanInProgress(false);
-        es.close();
-    });
-    es.addEventListener("servererror", ({ lastEventId: url , data  })=>{
-        console.log("Servererror event lastEventId", url);
-        console.log("Servererror event data", data);
-        actions.addErrorEvent("An error occurred: " + data);
-        actions.setScanInProgress(false);
-        es.close();
-    });
-    es.onerror = (err)=>{
-        console.warn("Actual error event", err);
-        actions.addErrorEvent("An es.onerror occurred");
-        actions.setScanInProgress(false);
-        es.close();
-    };
-};
-const setDb = (state, db)=>{
-    state.db = db;
-};
-const initDb = async (actions)=>{
-    const db = new Model();
-    actions.setDb(db);
-};
+/***/ "./src/lib/state/store/Store.js":
+/*!**************************************!*\
+  !*** ./src/lib/state/store/Store.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-;// CONCATENATED MODULE: ./src/lib/state/store/Store.js
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var easy_peasy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! easy-peasy */ \"easy-peasy\");\n/* harmony import */ var easy_peasy__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(easy_peasy__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../eventHandlers/eventHandlers.js */ \"./src/lib/state/eventHandlers/eventHandlers.js\");\n\n\nconst Store = (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.createStore)({\n    scanUrl: \"\",\n    scanCtgs: \"\",\n    scanInProgress: false,\n    metadata: {},\n    infoEvents: [],\n    dataEvents: [],\n    errorEvents: [],\n    db: {},\n    setScanUrl: (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.action)((state, scanUrl)=>(0,_eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__.setScanUrl)(state, scanUrl)),\n    setScanCtgs: (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.action)((state, scanCtgs)=>(0,_eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__.setScanCtgs)(state, scanCtgs)),\n    setScanInProgress: (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.action)((state, check)=>(0,_eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__.setScanInProgress)(state, check)),\n    setMetadata: (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.action)((state, meta)=>(0,_eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__.setMetadata)(state, meta)),\n    reSetScanUrl: (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.action)((state)=>(0,_eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__.reSetScanUrl)(state)),\n    addInfoEvent: (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.action)((state, event)=>{\n        (0,_eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__.addInfoEvent)(state, event);\n    }),\n    addDataEvent: (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.action)((state, payload)=>{\n        (0,_eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__.addDataEvent)(state, payload);\n    }),\n    addErrorEvent: (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.action)((state, event)=>{\n        (0,_eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__.addErrorEvent)(state, event);\n    }),\n    startStream: (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.thunk)((actions, query)=>(0,_eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__.startStream)(actions, query)),\n    setDb: (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.action)((state, db)=>(0,_eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__.setDb)(state, db)),\n    initDb: (0,easy_peasy__WEBPACK_IMPORTED_MODULE_0__.thunk)((actions)=>(0,_eventHandlers_eventHandlers_js__WEBPACK_IMPORTED_MODULE_1__.initDb)(actions))\n});\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Store);\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi9zcmMvbGliL3N0YXRlL3N0b3JlL1N0b3JlLmpzLmpzIiwibWFwcGluZ3MiOiI7Ozs7Ozs7QUFBa0U7QUFjdkI7QUFFM0MsTUFBTWUsS0FBSyxHQUFHZix1REFBVyxDQUFDO0lBQ3hCZ0IsT0FBTyxFQUFFLEVBQUU7SUFDWEMsUUFBUSxFQUFFLEVBQUU7SUFDWkMsY0FBYyxFQUFFLEtBQUs7SUFDckJDLFFBQVEsRUFBRSxFQUFFO0lBQ1pDLFVBQVUsRUFBRSxFQUFFO0lBQ2RDLFVBQVUsRUFBRSxFQUFFO0lBQ2RDLFdBQVcsRUFBRSxFQUFFO0lBQ2ZDLEVBQUUsRUFBRSxFQUFFO0lBQ05uQixVQUFVLEVBQUVILGtEQUFNLENBQUMsQ0FBQ3VCLEtBQUssRUFBRVIsT0FBTyxHQUFLWiwyRUFBVSxDQUFDb0IsS0FBSyxFQUFFUixPQUFPLENBQUMsQ0FBQztJQUNsRVgsV0FBVyxFQUFFSixrREFBTSxDQUFDLENBQUN1QixLQUFLLEVBQUVQLFFBQVEsR0FBS1osNEVBQVcsQ0FBQ21CLEtBQUssRUFBRVAsUUFBUSxDQUFDLENBQUM7SUFDdEVYLGlCQUFpQixFQUFFTCxrREFBTSxDQUFDLENBQUN1QixLQUFLLEVBQUVDLEtBQUssR0FBS25CLGtGQUFpQixDQUFDa0IsS0FBSyxFQUFFQyxLQUFLLENBQUMsQ0FBQztJQUM1RWxCLFdBQVcsRUFBRU4sa0RBQU0sQ0FBQyxDQUFDdUIsS0FBSyxFQUFFRSxJQUFJLEdBQUtuQiw0RUFBVyxDQUFDaUIsS0FBSyxFQUFFRSxJQUFJLENBQUMsQ0FBQztJQUM5RGxCLFlBQVksRUFBRVAsa0RBQU0sQ0FBQ3VCLENBQUFBLEtBQUssR0FBSWhCLDZFQUFZLENBQUNnQixLQUFLLENBQUMsQ0FBQztJQUNsRGYsWUFBWSxFQUFFUixrREFBTSxDQUFDLENBQUN1QixLQUFLLEVBQUVHLEtBQUssR0FBSztRQUNyQ2xCLDZFQUFZLENBQUNlLEtBQUssRUFBRUcsS0FBSyxDQUFDLENBQUM7S0FDNUIsQ0FBQztJQUNGaEIsWUFBWSxFQUFFVixrREFBTSxDQUFDLENBQUN1QixLQUFLLEVBQUVJLE9BQU8sR0FBSztRQUN2Q2pCLDZFQUFZLENBQUNhLEtBQUssRUFBRUksT0FBTyxDQUFDLENBQUM7S0FDOUIsQ0FBQztJQUNGbEIsYUFBYSxFQUFFVCxrREFBTSxDQUFDLENBQUN1QixLQUFLLEVBQUVHLEtBQUssR0FBSztRQUN0Q2pCLDhFQUFhLENBQUNjLEtBQUssRUFBRUcsS0FBSyxDQUFDLENBQUM7S0FDN0IsQ0FBQztJQUNGZixXQUFXLEVBQUVULGlEQUFLLENBQUMsQ0FBQzBCLE9BQU8sRUFBRUMsS0FBSyxHQUFLbEIsNEVBQVcsQ0FBQ2lCLE9BQU8sRUFBRUMsS0FBSyxDQUFDLENBQUM7SUFDbkVqQixLQUFLLEVBQUVaLGtEQUFNLENBQUMsQ0FBQ3VCLEtBQUssRUFBRUQsRUFBRSxHQUFLVixzRUFBSyxDQUFDVyxLQUFLLEVBQUVELEVBQUUsQ0FBQyxDQUFDO0lBQzlDVCxNQUFNLEVBQUVYLGlEQUFLLENBQUMwQixDQUFBQSxPQUFPLEdBQUlmLHVFQUFNLENBQUNlLE9BQU8sQ0FBQyxDQUFDO0NBQzFDLENBQUM7QUFFRixpRUFBZWQsS0FBSyxFQUFDIiwic291cmNlcyI6WyJ3ZWJwYWNrOi8vZGNjc2Nhbm5lci8uL3NyYy9saWIvc3RhdGUvc3RvcmUvU3RvcmUuanM/NmM0MyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBjcmVhdGVTdG9yZSwgYWN0aW9uLCBjb21wdXRlZCwgdGh1bmsgfSBmcm9tIFwiZWFzeS1wZWFzeVwiO1xuXG5pbXBvcnQge1xuICBzZXRTY2FuVXJsLFxuICBzZXRTY2FuQ3RncyxcbiAgc2V0U2NhbkluUHJvZ3Jlc3MsXG4gIHNldE1ldGFkYXRhLFxuICByZVNldFNjYW5VcmwsXG4gIGFkZEluZm9FdmVudCxcbiAgYWRkRXJyb3JFdmVudCxcbiAgYWRkRGF0YUV2ZW50LFxuICBzdGFydFN0cmVhbSxcbiAgc2V0RGIsXG4gIGluaXREYlxufSBmcm9tIFwiLi4vZXZlbnRIYW5kbGVycy9ldmVudEhhbmRsZXJzLmpzXCI7XG5cbmNvbnN0IFN0b3JlID0gY3JlYXRlU3RvcmUoe1xuICBzY2FuVXJsOiBcIlwiLFxuICBzY2FuQ3RnczogXCJcIixcbiAgc2NhbkluUHJvZ3Jlc3M6IGZhbHNlLFxuICBtZXRhZGF0YToge30sXG4gIGluZm9FdmVudHM6IFtdLFxuICBkYXRhRXZlbnRzOiBbXSxcbiAgZXJyb3JFdmVudHM6IFtdLFxuICBkYjoge30sXG4gIHNldFNjYW5Vcmw6IGFjdGlvbigoc3RhdGUsIHNjYW5VcmwpID0+IHNldFNjYW5Vcmwoc3RhdGUsIHNjYW5VcmwpKSxcbiAgc2V0U2NhbkN0Z3M6IGFjdGlvbigoc3RhdGUsIHNjYW5DdGdzKSA9PiBzZXRTY2FuQ3RncyhzdGF0ZSwgc2NhbkN0Z3MpKSxcbiAgc2V0U2NhbkluUHJvZ3Jlc3M6IGFjdGlvbigoc3RhdGUsIGNoZWNrKSA9PiBzZXRTY2FuSW5Qcm9ncmVzcyhzdGF0ZSwgY2hlY2spKSxcbiAgc2V0TWV0YWRhdGE6IGFjdGlvbigoc3RhdGUsIG1ldGEpID0+IHNldE1ldGFkYXRhKHN0YXRlLCBtZXRhKSksXG4gIHJlU2V0U2NhblVybDogYWN0aW9uKHN0YXRlID0+IHJlU2V0U2NhblVybChzdGF0ZSkpLFxuICBhZGRJbmZvRXZlbnQ6IGFjdGlvbigoc3RhdGUsIGV2ZW50KSA9PiB7XG4gICAgYWRkSW5mb0V2ZW50KHN0YXRlLCBldmVudCk7XG4gIH0pLFxuICBhZGREYXRhRXZlbnQ6IGFjdGlvbigoc3RhdGUsIHBheWxvYWQpID0+IHtcbiAgICBhZGREYXRhRXZlbnQoc3RhdGUsIHBheWxvYWQpO1xuICB9KSxcbiAgYWRkRXJyb3JFdmVudDogYWN0aW9uKChzdGF0ZSwgZXZlbnQpID0+IHtcbiAgICBhZGRFcnJvckV2ZW50KHN0YXRlLCBldmVudCk7XG4gIH0pLFxuICBzdGFydFN0cmVhbTogdGh1bmsoKGFjdGlvbnMsIHF1ZXJ5KSA9PiBzdGFydFN0cmVhbShhY3Rpb25zLCBxdWVyeSkpLFxuICBzZXREYjogYWN0aW9uKChzdGF0ZSwgZGIpID0+IHNldERiKHN0YXRlLCBkYikpLFxuICBpbml0RGI6IHRodW5rKGFjdGlvbnMgPT4gaW5pdERiKGFjdGlvbnMpKVxufSk7XG5cbmV4cG9ydCBkZWZhdWx0IFN0b3JlO1xuIl0sIm5hbWVzIjpbImNyZWF0ZVN0b3JlIiwiYWN0aW9uIiwiY29tcHV0ZWQiLCJ0aHVuayIsInNldFNjYW5VcmwiLCJzZXRTY2FuQ3RncyIsInNldFNjYW5JblByb2dyZXNzIiwic2V0TWV0YWRhdGEiLCJyZVNldFNjYW5VcmwiLCJhZGRJbmZvRXZlbnQiLCJhZGRFcnJvckV2ZW50IiwiYWRkRGF0YUV2ZW50Iiwic3RhcnRTdHJlYW0iLCJzZXREYiIsImluaXREYiIsIlN0b3JlIiwic2NhblVybCIsInNjYW5DdGdzIiwic2NhbkluUHJvZ3Jlc3MiLCJtZXRhZGF0YSIsImluZm9FdmVudHMiLCJkYXRhRXZlbnRzIiwiZXJyb3JFdmVudHMiLCJkYiIsInN0YXRlIiwiY2hlY2siLCJtZXRhIiwiZXZlbnQiLCJwYXlsb2FkIiwiYWN0aW9ucyIsInF1ZXJ5Il0sInNvdXJjZVJvb3QiOiIifQ==\n//# sourceURL=webpack-internal:///./src/lib/state/store/Store.js\n");
 
+/***/ }),
 
-const Store = (0,external_easy_peasy_.createStore)({
-    scanUrl: "",
-    scanCtgs: "",
-    scanInProgress: false,
-    metadata: {},
-    infoEvents: [],
-    dataEvents: [],
-    errorEvents: [],
-    db: {},
-    setScanUrl: (0,external_easy_peasy_.action)((state, scanUrl)=>setScanUrl(state, scanUrl)),
-    setScanCtgs: (0,external_easy_peasy_.action)((state, scanCtgs)=>setScanCtgs(state, scanCtgs)),
-    setScanInProgress: (0,external_easy_peasy_.action)((state, check)=>setScanInProgress(state, check)),
-    setMetadata: (0,external_easy_peasy_.action)((state, meta)=>setMetadata(state, meta)),
-    reSetScanUrl: (0,external_easy_peasy_.action)((state)=>reSetScanUrl(state)),
-    addInfoEvent: (0,external_easy_peasy_.action)((state, event)=>{
-        addInfoEvent(state, event);
-    }),
-    addDataEvent: (0,external_easy_peasy_.action)((state, payload)=>{
-        addDataEvent(state, payload);
-    }),
-    addErrorEvent: (0,external_easy_peasy_.action)((state, event)=>{
-        addErrorEvent(state, event);
-    }),
-    startStream: (0,external_easy_peasy_.thunk)((actions, query)=>startStream(actions, query)),
-    setDb: (0,external_easy_peasy_.action)((state, db)=>setDb(state, db)),
-    initDb: (0,external_easy_peasy_.thunk)((actions)=>initDb(actions))
-});
-/* harmony default export */ const store_Store = (Store);
+/***/ "./src/pages/_app.js":
+/*!***************************!*\
+  !*** ./src/pages/_app.js ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-;// CONCATENATED MODULE: ./src/pages/_app.js
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react/jsx-dev-runtime */ \"react/jsx-dev-runtime\");\n/* harmony import */ var react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var easy_peasy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! easy-peasy */ \"easy-peasy\");\n/* harmony import */ var easy_peasy__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(easy_peasy__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _styles_normalize_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../styles/normalize.css */ \"./src/styles/normalize.css\");\n/* harmony import */ var _styles_normalize_css__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_styles_normalize_css__WEBPACK_IMPORTED_MODULE_2__);\n/* harmony import */ var _styles_skeleton_css__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../styles/skeleton.css */ \"./src/styles/skeleton.css\");\n/* harmony import */ var _styles_skeleton_css__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_styles_skeleton_css__WEBPACK_IMPORTED_MODULE_3__);\n/* harmony import */ var _styles_global_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../styles/global.css */ \"./src/styles/global.css\");\n/* harmony import */ var _styles_global_css__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_styles_global_css__WEBPACK_IMPORTED_MODULE_4__);\n/* harmony import */ var react_datasheet_lib_react_datasheet_css__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-datasheet/lib/react-datasheet.css */ \"./node_modules/react-datasheet/lib/react-datasheet.css\");\n/* harmony import */ var react_datasheet_lib_react_datasheet_css__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(react_datasheet_lib_react_datasheet_css__WEBPACK_IMPORTED_MODULE_5__);\n/* harmony import */ var _lib_state_store_Store_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../lib/state/store/Store.js */ \"./src/lib/state/store/Store.js\");\n\n\n\n\n\n\n\nfunction MyApp({ Component , pageProps  }) {\n    return /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(easy_peasy__WEBPACK_IMPORTED_MODULE_1__.StoreProvider, {\n        store: _lib_state_store_Store_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"],\n        children: /*#__PURE__*/ (0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_0__.jsxDEV)(Component, {\n            ...pageProps\n        }, void 0, false, {\n            fileName: \"/home/angelovski/Documents/Projects/dccscanner/web/src/pages/_app.js\",\n            lineNumber: 14,\n            columnNumber: 7\n        }, this)\n    }, void 0, false, {\n        fileName: \"/home/angelovski/Documents/Projects/dccscanner/web/src/pages/_app.js\",\n        lineNumber: 13,\n        columnNumber: 5\n    }, this);\n}\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (MyApp);\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiLi9zcmMvcGFnZXMvX2FwcC5qcy5qcyIsIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7OztBQUFBO0FBQTJDO0FBRVY7QUFDRDtBQUNGO0FBRW1CO0FBRUQ7QUFFaEQsU0FBU0UsS0FBSyxDQUFDLEVBQUVDLFNBQVMsR0FBRUMsU0FBUyxHQUFFLEVBQUU7SUFDdkMscUJBQ0UsOERBQUNKLHFEQUFhO1FBQUNLLEtBQUssRUFBRUosaUVBQUs7a0JBQ3pCLDRFQUFDRSxTQUFTO1lBQUUsR0FBR0MsU0FBUzs7Ozs7Z0JBQUk7Ozs7O1lBQ2QsQ0FDaEI7Q0FDSDtBQUVELGlFQUFlRixLQUFLLEVBQUMiLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly9kY2NzY2FubmVyLy4vc3JjL3BhZ2VzL19hcHAuanM/OGZkYSJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBTdG9yZVByb3ZpZGVyIH0gZnJvbSBcImVhc3ktcGVhc3lcIjtcblxuaW1wb3J0IFwiLi4vc3R5bGVzL25vcm1hbGl6ZS5jc3NcIjtcbmltcG9ydCBcIi4uL3N0eWxlcy9za2VsZXRvbi5jc3NcIjtcbmltcG9ydCBcIi4uL3N0eWxlcy9nbG9iYWwuY3NzXCI7XG5cbmltcG9ydCBcInJlYWN0LWRhdGFzaGVldC9saWIvcmVhY3QtZGF0YXNoZWV0LmNzc1wiO1xuXG5pbXBvcnQgU3RvcmUgZnJvbSBcIi4uL2xpYi9zdGF0ZS9zdG9yZS9TdG9yZS5qc1wiO1xuXG5mdW5jdGlvbiBNeUFwcCh7IENvbXBvbmVudCwgcGFnZVByb3BzIH0pIHtcbiAgcmV0dXJuIChcbiAgICA8U3RvcmVQcm92aWRlciBzdG9yZT17U3RvcmV9PlxuICAgICAgPENvbXBvbmVudCB7Li4ucGFnZVByb3BzfSAvPlxuICAgIDwvU3RvcmVQcm92aWRlcj5cbiAgKTtcbn1cblxuZXhwb3J0IGRlZmF1bHQgTXlBcHA7XG4iXSwibmFtZXMiOlsiU3RvcmVQcm92aWRlciIsIlN0b3JlIiwiTXlBcHAiLCJDb21wb25lbnQiLCJwYWdlUHJvcHMiLCJzdG9yZSJdLCJzb3VyY2VSb290IjoiIn0=\n//# sourceURL=webpack-internal:///./src/pages/_app.js\n");
 
+/***/ }),
 
+/***/ "./node_modules/react-datasheet/lib/react-datasheet.css":
+/*!**************************************************************!*\
+  !*** ./node_modules/react-datasheet/lib/react-datasheet.css ***!
+  \**************************************************************/
+/***/ (() => {
 
-
-
-
-
-function MyApp({ Component , pageProps  }) {
-    return /*#__PURE__*/ jsx_runtime_.jsx(external_easy_peasy_.StoreProvider, {
-        store: store_Store,
-        children: /*#__PURE__*/ jsx_runtime_.jsx(Component, {
-            ...pageProps
-        })
-    });
-}
-/* harmony default export */ const _app = (MyApp);
 
 
 /***/ }),
 
-/***/ 9905:
+/***/ "./src/styles/global.css":
+/*!*******************************!*\
+  !*** ./src/styles/global.css ***!
+  \*******************************/
+/***/ (() => {
+
+
+
+/***/ }),
+
+/***/ "./src/styles/normalize.css":
+/*!**********************************!*\
+  !*** ./src/styles/normalize.css ***!
+  \**********************************/
+/***/ (() => {
+
+
+
+/***/ }),
+
+/***/ "./src/styles/skeleton.css":
+/*!*********************************!*\
+  !*** ./src/styles/skeleton.css ***!
+  \*********************************/
+/***/ (() => {
+
+
+
+/***/ }),
+
+/***/ "easy-peasy":
+/*!*****************************!*\
+  !*** external "easy-peasy" ***!
+  \*****************************/
 /***/ ((module) => {
 
+"use strict";
 module.exports = require("easy-peasy");
 
 /***/ }),
 
-/***/ 997:
+/***/ "react/jsx-dev-runtime":
+/*!****************************************!*\
+  !*** external "react/jsx-dev-runtime" ***!
+  \****************************************/
 /***/ ((module) => {
 
-module.exports = require("react/jsx-runtime");
+"use strict";
+module.exports = require("react/jsx-dev-runtime");
+
+/***/ }),
+
+/***/ "zangodb":
+/*!**************************!*\
+  !*** external "zangodb" ***!
+  \**************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("zangodb");
 
 /***/ })
 
@@ -226,7 +136,7 @@ module.exports = require("react/jsx-runtime");
 var __webpack_require__ = require("../webpack-runtime.js");
 __webpack_require__.C(exports);
 var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-var __webpack_exports__ = (__webpack_exec__(6378));
+var __webpack_exports__ = (__webpack_exec__("./src/pages/_app.js"));
 module.exports = __webpack_exports__;
 
 })();
