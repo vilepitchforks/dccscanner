@@ -23,14 +23,7 @@ exports.authUser = (req, res, next) => {
     } else if (hasDccCookie !== -1) {
       user = unScramble(req.cookies.dcc.split(" ")[1]);
     }
-    console.log("process.env.AUTH_ROOT: ", process.env.AUTH_ROOT);
-    console.log("authHeader: ", authHeader);
-    console.log("user", user);
-    console.log("req.cookies", req.cookies);
-    console.log(
-      'user.split("@")[1] === process.env.AUTH_ROOT: ',
-      user.split("@")[1] === process.env.AUTH_ROOT
-    );
+
     if (user && user.split("@")[1] === process.env.AUTH_ROOT) {
       req.user = user;
       console.log("req.user: ", req.user);
