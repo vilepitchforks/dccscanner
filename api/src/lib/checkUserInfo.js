@@ -33,6 +33,7 @@ exports.authUser = (req, res, next) => {
     );
     if (user && user.split("@")[1] === process.env.AUTH_ROOT) {
       req.user = user;
+      console.log("req.user: ", req.user);
       next();
     } else {
       throw new Error("Unauthorized");
