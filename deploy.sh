@@ -10,4 +10,4 @@ git add .
 git commit -m "$commitmessage"
 git push -u github-test master
 git push -u github-dccscanner master
-git push -u azure-devops master
+# git push -u azure-devops master
